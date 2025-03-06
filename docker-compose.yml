@@ -14,14 +14,14 @@ services:
       - NODE_ENV=development
     command: npm start
 
-  # Backend service will be added later
-  # backend:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: ../docker/Dockerfile.backend
-  #   ports:
-  #     - "8000:8000"
-  #   volumes:
-  #     - ./backend:/app
-  #   environment:
-  #     - ENVIRONMENT=development
+  # Backend service
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - ENVIRONMENT=development

@@ -1,6 +1,67 @@
 # Current Task
 
 ## Current Objective
+Move frontend code to a `frontend` directory and adjust the code to work with the new structure
+
+## Context
+There is some asymmetry in the project structure. Backend is in the `backend` directory but frontend is at the top level. We need to move the frontend code to a `frontend` directory to make the project structure more consistent.
+
+## Planned Actions
+1. Create a new `frontend` directory
+2. Move all frontend-related files to the `frontend` directory:
+   - src/
+   - public/
+   - __mocks__/
+   - __tests__/ (if not already in src/__tests__)
+   - webpack.config.js
+   - tsconfig.json
+   - jest.config.js
+   - jest.setup.js
+   - package.json
+   - package-lock.json
+3. Update Docker configuration files:
+   - Update docker/Dockerfile.frontend to reference the new paths
+   - Update docker-compose.yml to reference the new paths
+   - Update docker-compose.test.yml to reference the new paths
+4. Test the new structure by running the application and tests
+
+## Previous Objective (Completed)
+Fix the backend import error and ensure the FastAPI backend runs correctly
+
+## Context
+After creating the FastAPI backend with stub endpoints, we encountered an import error when running the backend service. The error was related to the import path for the router modules in the main.py file.
+
+## Completed Actions
+1. ✅ Identified the issue: The import statement in main.py was using a relative import path that didn't match the Docker container's module structure
+2. ✅ Fixed the import statement in main.py to use the correct module path: `from app.routers import new_game, load_game, settings, exit_game`
+3. ✅ Tested the fix by running the backend service with Docker Compose
+
+## Next Steps
+1. Implement actual functionality for the endpoints
+2. Connect the frontend to the backend
+3. Implement data store for game state
+4. Create tests for the backend API
+
+## Previous Objective (Completed)
+Create a FastAPI backend with stub endpoints for the start menu options ✅
+
+## Context
+This task is part of the "Develop FastAPI backend for game logic" goal from projectRoadmap.md. We need to create a basic FastAPI backend that provides stub endpoints for the start menu options in the game.
+
+## Completed Actions
+1. ✅ Created the FastAPI application structure in the backend/app directory
+2. ✅ Implemented the main application file (main.py)
+3. ✅ Created routers for each endpoint:
+   - ✅ /new-game: Endpoint to start a new game
+   - ✅ /load-game: Endpoint to load an existing game
+   - ✅ /settings: Endpoint to manage game settings
+   - ✅ /exit: Endpoint to handle game exit
+4. ✅ Created requirements.txt file for Python dependencies
+5. ✅ Created Dockerfile.backend for containerizing the FastAPI application
+6. ✅ Updated docker-compose.yml to include the backend service
+7. ✅ Updated documentation to reflect the new backend structure
+
+## Previous Objective (Completed)
 Document and implement the rule to use docker-compose exclusively
 
 ## Context
@@ -103,8 +164,3 @@ This task is part of ensuring the quality and stability of the game. We need to 
 19. ✅ Implemented PlanetScene with planet details and management
 20. ✅ Added navigation between scenes
 21. ✅ Updated main game configuration to include all scenes
-
-## Next Steps
-1. Develop game scenes and states
-2. Set up the FastAPI backend
-3. Implement data store for game state

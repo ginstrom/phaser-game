@@ -5,7 +5,10 @@
 - [x] Set up Docker and docker-compose for development
 - [x] Implement basic game UI components
 - [x] Create tests for the basic Phaser skeleton and ensure all tests pass
-- [ ] Develop FastAPI backend for game logic
+- [~] Develop FastAPI backend for game logic
+  - [x] Create backend skeleton with stub endpoints for start menu options
+  - [ ] Implement actual functionality for the endpoints
+  - [ ] Connect frontend to backend
 - [ ] Implement data store for game state
 - [ ] Create basic game mechanics (movement, resources, etc.)
 - [ ] Implement turn-based system
@@ -35,3 +38,5 @@
 - [2025-03-06] Created tests for the basic Phaser skeleton
 - [2025-03-06] Fixed failing tests to ensure all tests pass
 - [2025-03-06] Created docker-compose.test.yml for running tests in Docker
+- [2025-03-06] Created FastAPI backend with stub endpoints for start menu options
+- [2025-03-06] Fixed backend import error to ensure the backend runs correctly

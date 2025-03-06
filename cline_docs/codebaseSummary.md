@@ -26,8 +26,15 @@ phaser-game/
 │   └── index.html      # HTML entry point
 ├── backend/
 │   ├── app/            # FastAPI application
+│   │   ├── main.py     # Main application entry point
+│   │   └── routers/    # API route handlers
+│   │       ├── new_game.py    # New game endpoint
+│   │       ├── load_game.py   # Load game endpoint
+│   │       ├── settings.py    # Settings endpoint
+│   │       └── exit_game.py   # Exit game endpoint
 │   ├── models/         # Data models
-│   └── services/       # Business logic services
+│   ├── services/       # Business logic services
+│   └── requirements.txt # Python dependencies
 ├── docker/             # Docker configuration files
 ├── __mocks__/          # Jest mock files
 ├── webpack.config.js   # Webpack configuration
@@ -62,6 +69,14 @@ phaser-game/
 - FastAPI for backend API
 - Docker for containerization
 
+## Backend API Endpoints
+- `/new-game`: Create a new game with specified parameters
+- `/saved-games`: List all saved games
+- `/load-game`: Load a saved game by ID
+- `/settings`: Get or update game settings
+- `/settings/reset`: Reset game settings to defaults
+- `/exit`: Handle game exit, optionally saving the game
+
 ## Recent Significant Changes
 - [2025-03-06] Initial project setup
 - [2025-03-06] Implemented basic game UI components and scenes
@@ -69,14 +84,19 @@ phaser-game/
 - [2025-03-06] Fixed failing tests by removing problematic test case in Panel.test.ts
 - [2025-03-06] Created docker-compose.test.yml for running tests in Docker
 - [2025-03-06] Established rule to use docker-compose exclusively for running the game and tests
+- [2025-03-06] Created FastAPI backend with stub endpoints for start menu options
+- [2025-03-06] Fixed backend import error by updating the import path in main.py
 
 ## Development Workflow
-1. Run `docker-compose up frontend` to start the development server
-2. Make changes to the code
-3. See changes reflected in the browser automatically
-4. Run `docker-compose -f docker-compose.test.yml run frontend` to run the test suite
-5. Use `docker-compose -f docker-compose.test.yml run frontend-watch` for watch mode
-6. Use `docker-compose -f docker-compose.test.yml run frontend-coverage` for test coverage
+1. Run `docker-compose up` to start both frontend and backend services
+2. Run `docker-compose up frontend` to start only the frontend development server
+3. Run `docker-compose up backend` to start only the backend API server
+4. Make changes to the code
+5. See changes reflected in the browser automatically
+6. Access the API documentation at http://localhost:8000/docs
+7. Run `docker-compose -f docker-compose.test.yml run frontend` to run the test suite
+8. Use `docker-compose -f docker-compose.test.yml run frontend-watch` for watch mode
+9. Use `docker-compose -f docker-compose.test.yml run frontend-coverage` for test coverage
 
 ## Important Rule
 **ONLY use docker-compose for running the game or tests. DO NOT run the game code or tests directly in the console.**
