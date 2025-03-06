@@ -1,30 +1,228 @@
 # Current Task
 
 ## Current Objective
-Make sure the frontend app and tests still run from docker-compose ✅
+Always display the system name even if it is not explored
 
 ## Context
-After restructuring the project by moving frontend code to a dedicated frontend directory, we need to verify that the frontend application and tests still run correctly using docker-compose.
+This task is part of improving the user experience and ensuring consistent behavior in the game UI. Currently, unexplored systems are displayed with "???" instead of their actual names. The requirement is to always display the system name, regardless of whether it has been explored or not, to provide better information to the player.
 
 ## Completed Actions
-1. ✅ Examined the current docker-compose.yml and docker-compose.test.yml files to understand the configuration
-2. ✅ Checked that the paths in the Docker configuration files are correctly updated to reference the new frontend directory structure
-3. ✅ Verified that the frontend package.json has the correct scripts for running the application and tests
-4. ✅ Confirmed that the webpack.config.js file is correctly configured for the new directory structure
-5. ✅ Verified that the jest.config.js and jest.setup.js files are correctly configured for the new directory structure
-6. ✅ Checked that the __mocks__ directory contains the necessary mock files
-7. ✅ Tested running the frontend application using docker-compose
-   - ✅ The frontend application runs successfully
-8. ✅ Tested running the frontend tests using docker-compose
-   - ✅ All frontend tests pass successfully
-9. ✅ Tested running the backend tests using docker-compose
-   - ✅ All backend tests pass successfully
+1. ✅ Examined the GalaxyScene.ts file to understand how system names are displayed
+2. ✅ Identified three locations where system names were conditionally displayed based on explored status:
+   - In the create method, where the text for each system is added
+   - In the onSystemHover method, where the tooltip text is displayed
+   - In the onSystemClick method, where the title of the info panel is set
+3. ✅ Modified all three locations to always display the system name, regardless of explored status
+4. ✅ Verified that the changes maintain the visual distinction between explored and unexplored systems (color difference)
 
 ## Results
+- System names are now always displayed, even for unexplored systems
+- This provides better information to the player, allowing them to identify systems by name before exploring them
+- The visual distinction between explored and unexplored systems is maintained through color differences
+- The game's UI is now more informative and user-friendly
+
+## Next Steps
+1. Implement functionality for the other endpoints (load game, settings, exit game)
+2. Connect the frontend to these endpoints
+3. Implement data store for game state
+
+## Previous Objective (Completed)
+Document the galaxy view appearance after starting a new game
+
+## Context
+This task is part of understanding the current state of the game's UI and functionality. We need to document what the galaxy view looks like after starting a new game, which will help us understand how the game state is being displayed and what improvements might be needed.
+
+## Observations
+Based on the provided screenshot of the galaxy view after starting a new game:
+
+1. **Player Information Panel**:
+   - Located in the top-left corner
+   - Shows player name (Player527)
+   - Displays player resources:
+     - Credits: 1000
+     - Minerals: 500
+     - Energy: 200
+
+2. **Galaxy View Title**:
+   - "Galaxy View" displayed at the top of the screen
+
+3. **Star Systems**:
+   - Multiple star systems displayed as gray circles throughout the galaxy
+   - Most systems are unexplored and labeled with "???"
+   - Two systems are labeled:
+     - "System 5" (appears to be explored)
+     - "System 1" (highlighted in yellow, indicating it's the player's starting system)
+
+4. **System Representation**:
+   - Different sized circles represent different star systems
+   - Gray circles indicate unexplored systems
+   - Yellow/highlighted circle indicates the player's current or starting system
+
+## Code Implementation
+The galaxy view is implemented in the GalaxyScene.ts file:
+
+1. **Player Resources Panel**:
+   - Created using the Panel class
+   - Resources are retrieved from the GameState singleton
+   - Fallback values are provided if resources are missing
+
+2. **Star Systems Generation**:
+   - Systems are generated based on the galaxy size from the game state
+   - Systems are positioned in a circular pattern around the center of the screen
+   - The first system (System 1) is marked as explored by default
+   - System sizes vary randomly
+
+3. **System Interaction**:
+   - Systems are interactive (clickable)
+   - Hovering over a system shows its name
+   - Clicking on a system shows an info panel
+   - Explored systems can be viewed in detail
+   - Unexplored systems can be explored
+
+## Next Steps
+1. Enhance the galaxy view with more visual elements:
+   - Add background stars or nebulae
+   - Improve the visual distinction between explored and unexplored systems
+   - Add visual indicators for system resources or threat levels
+
+2. Implement functionality for the other endpoints:
+   - Load game
+   - Settings
+   - Exit game
+
+3. Implement data store for game state
+
+## Previous Objective (Completed)
+Fix issue with new game data not correctly initializing on the front end ✅
+
+## Context
+This task is part of the "Connect frontend to backend" goal from projectRoadmap.md. We identified an issue where the new game data was not correctly initializing on the front end after connecting the frontend to the backend's new game endpoint.
+
+## Completed Actions
+1. ✅ Verified the backend response structure to ensure it matches the expected `NewGameResponse` interface:
+   - Examined the backend code in `new_game.py` and `game_service.py`
+   - Confirmed that the response structure matches the expected interface
+2. ✅ Added robust error handling and validation in the `GameState` class:
+   - Added validation for the response structure
+   - Added fallback values for all game state properties
+   - Added error handling to prevent partial initialization
+3. ✅ Enhanced error handling in the `StartupScene`:
+   - Added validation for the API response
+   - Added nested try-catch blocks to handle errors at different stages
+   - Improved error messages for better debugging
+4. ✅ Added additional checks in the `GalaxyScene`:
+   - Added fallback values for resources
+   - Added error handling for missing resources
+   - Added more logging to track the game state
+5. ✅ Tested the changes to ensure they fixed the issue:
+   - Started the game using Docker Compose
+   - Created a new game and verified that the game state was correctly initialized
+   - Confirmed that the Galaxy Scene displayed the correct resources and star systems
+
+## Results
+- The game now correctly initializes the game state from the backend response
+- The Galaxy Scene displays the correct player resources and star systems
+- Error handling has been improved to prevent issues with missing or incomplete data
+- Logging has been added to help identify any future issues
+
+## Next Steps
+1. Implement functionality for the other endpoints (load game, settings, exit game)
+2. Connect the frontend to these endpoints
+3. Implement data store for game state
+
+## Previous Objective (Completed)
+Hook up the new game endpoint on the backend to the frontend ✅
+
+## Context
+This task is part of the "Connect frontend to backend" goal from projectRoadmap.md. We needed to connect the frontend to the backend's new game endpoint, which had already been implemented and was functional.
+
+## Completed Actions
+1. ✅ Examined the current StartupScene.ts file to understand how the "New Game" button was implemented
+2. ✅ Created an API utility (api.ts) in the frontend to handle API calls to the backend:
+   - Implemented the createNewGame function to call the new game endpoint
+   - Created a GameState singleton to store the game state
+   - Defined TypeScript interfaces for API requests and responses
+3. ✅ Modified the StartupScene.ts file to call the new game endpoint when the "New Game" button is clicked:
+   - Added a dialog to get the player name, difficulty, and galaxy size
+   - Called the createNewGame function with the player's input
+   - Stored the game state in the GameState singleton
+   - Added error handling for API calls
+4. ✅ Updated the GalaxyScene.ts file to use the game state from the API:
+   - Displayed player resources from the game state
+   - Generated star systems based on the game state
+   - Added system information panels with real data
+   - Implemented system exploration functionality
+5. ✅ Added the setEnabled method to the Button class to provide visual feedback when a button is disabled
+6. ✅ Tested the integration to ensure it works correctly:
+   - Verified that the frontend can call the backend's new game endpoint
+   - Confirmed that the game state is stored and displayed correctly
+   - Tested navigation between scenes with the game state
+
+## Results
+- The frontend now communicates with the backend to create a new game
+- The game state is stored in the frontend and used to display game information
+- The player can create a new game with a custom name, difficulty, and galaxy size
+- The Galaxy Scene displays the game state information, including player resources and star systems
+- The integration is working correctly and provides a seamless experience for the player
+
+## Next Steps
+1. Implement functionality for the other endpoints (load game, settings, exit game)
+2. Connect the frontend to these endpoints
+3. Implement data store for game state
+
+## Previous Objective (Completed)
+Implement the new game functionality on the back end ✅
+
+## Context
+This task is part of the "Implement actual functionality for the endpoints" goal from projectRoadmap.md. We needed to implement the actual functionality for the new game endpoint, which previously only had a stub implementation.
+
+## Completed Actions
+1. ✅ Created game models to represent the game state:
+   - Created PlanetResources model for planet resources (organic, mineral, energy, exotics)
+   - Created PlayerResources model for player resources
+   - Created Player model for player information
+   - Created Planet model for planet information
+   - Created StarSystem model for star system information
+   - Created Galaxy model for galaxy information
+   - Created GameState model for the complete game state
+2. ✅ Implemented a game service to handle game creation and management:
+   - Created functions to generate random planet names and types
+   - Created functions to generate random star system names
+   - Implemented galaxy generation with random star systems
+   - Implemented in-memory storage for games
+3. ✅ Updated the new_game.py router to use the game service
+4. ✅ Restructured the backend code to use app/models and app/services directories
+5. ✅ Ensured all tests pass with the new implementation
+
+## Results
+- The new game endpoint now creates a fully functional game state with random galaxy generation
+- The game state includes a player with resources, a galaxy with star systems, and planets with resources
+- All tests are passing, confirming that the implementation works as expected
+- The code is structured in a way that makes it easy to extend with additional functionality
+
+## Next Steps
+1. Implement functionality for the other endpoints (load game, settings, exit game)
+2. Connect the frontend to the backend
+3. Implement data store for game state
+
+## Previous Objective (Completed)
+Fix Docker build issue with frontend tests
+
+## Context
+After restructuring the project by moving frontend code to a dedicated frontend directory, we encountered an issue with the Docker build for the frontend tests. The build was failing with an ENOENT error when trying to run `npm install` in the Docker container.
+
+## Completed Actions
+1. ✅ Identified the issue: In docker-compose.test.yml, the build context for frontend services was set to the root directory (`.`), but the Dockerfile.frontend was expecting to find package.json in the current directory
+2. ✅ Fixed the issue by updating the docker-compose.test.yml file to use the correct context for the frontend services:
+   - Changed the context from `.` to `./frontend` for all frontend services
+   - Updated the dockerfile path from `docker/Dockerfile.frontend` to `../docker/Dockerfile.frontend` to account for the new context
+3. ✅ Tested the fix by running the frontend tests using docker-compose
+
+## Results
+- The Docker build for the frontend tests now works correctly
 - The frontend application runs correctly from docker-compose
 - All frontend tests pass successfully
 - All backend tests pass successfully
-- No issues were found with the restructured project
 
 ## Next Steps
 1. Implement actual functionality for the backend endpoints

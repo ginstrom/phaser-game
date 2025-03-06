@@ -7,8 +7,12 @@
 - [x] Create tests for the basic Phaser skeleton and ensure all tests pass
 - [~] Develop FastAPI backend for game logic
   - [x] Create backend skeleton with stub endpoints for start menu options
-  - [ ] Implement actual functionality for the endpoints
-  - [ ] Connect frontend to backend
+  - [~] Implement actual functionality for the endpoints
+    - [x] Implement new game endpoint
+    - [ ] Implement load game endpoint
+    - [ ] Implement settings endpoint
+    - [ ] Implement exit game endpoint
+  - [x] Connect frontend to backend
 - [ ] Implement data store for game state
 - [ ] Create basic game mechanics (movement, resources, etc.)
 - [ ] Implement turn-based system
@@ -43,3 +47,10 @@
 - [2025-03-06] Restructured project by moving frontend code to a dedicated frontend directory
 - [2025-03-06] Created basic unit tests for the backend API endpoints
 - [2025-03-06] Verified that the frontend app and tests still run correctly from docker-compose after restructuring
+- [2025-03-06] Implemented actual functionality for the new game endpoint
+- [2025-03-06] Created game models for representing game state
+- [2025-03-06] Implemented game service for game creation and management
+- [2025-03-06] Restructured backend code to use app/models and app/services directories
+- [2025-03-06] Connected frontend to backend's new game endpoint
+- [2025-03-06] Fixed issue with game data not correctly initializing on the front end
+- [2025-03-06] Documented the galaxy view appearance after starting a new game

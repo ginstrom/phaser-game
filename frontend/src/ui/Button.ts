@@ -19,6 +19,7 @@ export default class Button extends Phaser.GameObjects.Container {
     private background: Phaser.GameObjects.Rectangle;
     private text: Phaser.GameObjects.Text;
     private callback: (() => void) | undefined;
+    private enabled: boolean = true;
 
     constructor(config: ButtonConfig) {
         super(config.scene, config.x, config.y);
@@ -88,7 +89,7 @@ export default class Button extends Phaser.GameObjects.Container {
 
     private onPointerUp(): void {
         this.background.setAlpha(0.8);
-        if (this.callback) {
+        if (this.callback && this.enabled) {
             this.callback();
         }
     }
@@ -108,5 +109,31 @@ export default class Button extends Phaser.GameObjects.Container {
         this.setSize(width, height);
         
         return this;
+    }
+
+    /**
+     * Enable or disable the button
+     * @param enabled Whether the button should be enabled
+     */
+    public setEnabled(enabled: boolean): this {
+        this.enabled = enabled;
+        
+        // Visual feedback for disabled state
+        if (enabled) {
+            this.background.setAlpha(1);
+            this.text.setAlpha(1);
+        } else {
+            this.background.setAlpha(0.5);
+            this.text.setAlpha(0.5);
+        }
+        
+        return this;
+    }
+
+    /**
+     * Check if the button is enabled
+     */
+    public isEnabled(): boolean {
+        return this.enabled;
     }
 }

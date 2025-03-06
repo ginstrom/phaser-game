@@ -34,13 +34,15 @@ phaser-game/
 ├── backend/
 │   ├── app/            # FastAPI application
 │   │   ├── main.py     # Main application entry point
+│   │   ├── models/     # Data models
+│   │   │   └── game.py # Game state models
+│   │   ├── services/   # Business logic services
+│   │   │   └── game_service.py # Game creation and management
 │   │   └── routers/    # API route handlers
 │   │       ├── new_game.py    # New game endpoint
 │   │       ├── load_game.py   # Load game endpoint
 │   │       ├── settings.py    # Settings endpoint
 │   │       └── exit_game.py   # Exit game endpoint
-│   ├── models/         # Data models
-│   ├── services/       # Business logic services
 │   └── requirements.txt # Python dependencies
 ├── docker/             # Docker configuration files
 ├── docker-compose.yml  # Docker Compose configuration for development
@@ -90,6 +92,21 @@ phaser-game/
 - [2025-03-06] Restructured project by moving frontend code to a dedicated frontend directory
 - [2025-03-06] Created basic unit tests for the backend API endpoints
 - [2025-03-06] Verified that the frontend app and tests still run correctly from docker-compose after restructuring
+- [2025-03-06] Fixed Docker build issue with frontend tests by updating the build context in docker-compose.test.yml
+- [2025-03-06] Implemented actual functionality for the new game endpoint
+- [2025-03-06] Created game models and services for game state management
+- [2025-03-06] Restructured backend code to use app/models and app/services directories
+- [2025-03-06] Connected frontend to backend's new game endpoint
+- [2025-03-06] Created API utility for making requests to the backend
+- [2025-03-06] Added game state management in the frontend
+- [2025-03-06] Updated StartupScene to call the new game endpoint
+- [2025-03-06] Updated GalaxyScene to display game state information
+- [2025-03-06] Fixed issue with game data not correctly initializing on the front end
+- [2025-03-06] Added robust error handling and validation in the GameState class
+- [2025-03-06] Enhanced error handling in the StartupScene
+- [2025-03-06] Added additional checks in the GalaxyScene for missing resources
+- [2025-03-06] Documented the galaxy view appearance after starting a new game, including player information, star systems representation, and system interaction
+- [2025-03-06] Fixed issue with system names in tooltips by making unexplored systems consistently show "???" in both tooltips and labels
 
 ## Development Workflow
 1. Run `docker-compose up` to start both frontend and backend services
