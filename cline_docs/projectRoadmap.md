@@ -40,3 +40,4 @@
 - [2025-03-06] Created docker-compose.test.yml for running tests in Docker
 - [2025-03-06] Created FastAPI backend with stub endpoints for start menu options
 - [2025-03-06] Fixed backend import error to ensure the backend runs correctly
+- [2025-03-06] Restructured project by moving frontend code to a dedicated frontend directory

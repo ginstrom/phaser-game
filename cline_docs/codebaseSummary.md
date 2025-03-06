@@ -3,27 +3,34 @@
 ## Project Structure
 ```
 phaser-game/
-├── src/
-│   ├── assets/         # Game assets (images, audio, etc.)
-│   ├── scenes/         # Phaser scene files
-│   │   ├── MainScene.ts       # Main game scene
-│   │   ├── StartupScene.ts    # Main menu scene
-│   │   ├── GalaxyScene.ts     # Galaxy view scene
-│   │   ├── SystemScene.ts     # System view scene
-│   │   └── PlanetScene.ts     # Planet view scene
-│   ├── ui/             # UI components
-│   │   ├── Button.ts          # Reusable button component
-│   │   ├── Panel.ts           # Reusable panel component
-│   │   └── TextStyles.ts      # Text style definitions
-│   ├── objects/        # Game object classes
-│   ├── utils/          # Utility functions
-│   ├── __tests__/      # Test files
-│   │   ├── index.test.ts      # Game initialization tests
-│   │   ├── scenes/            # Scene tests
-│   │   └── ui/                # UI component tests
-│   └── index.ts        # Main entry point for the game
-├── public/
-│   └── index.html      # HTML entry point
+├── frontend/
+│   ├── src/
+│   │   ├── assets/         # Game assets (images, audio, etc.)
+│   │   ├── scenes/         # Phaser scene files
+│   │   │   ├── MainScene.ts       # Main game scene
+│   │   │   ├── StartupScene.ts    # Main menu scene
+│   │   │   ├── GalaxyScene.ts     # Galaxy view scene
+│   │   │   ├── SystemScene.ts     # System view scene
+│   │   │   └── PlanetScene.ts     # Planet view scene
+│   │   ├── ui/             # UI components
+│   │   │   ├── Button.ts          # Reusable button component
+│   │   │   ├── Panel.ts           # Reusable panel component
+│   │   │   └── TextStyles.ts      # Text style definitions
+│   │   ├── objects/        # Game object classes
+│   │   ├── utils/          # Utility functions
+│   │   ├── __tests__/      # Test files
+│   │   │   ├── index.test.ts      # Game initialization tests
+│   │   │   ├── scenes/            # Scene tests
+│   │   │   └── ui/                # UI component tests
+│   │   └── index.ts        # Main entry point for the game
+│   ├── public/
+│   │   └── index.html      # HTML entry point
+│   ├── __mocks__/          # Jest mock files
+│   ├── webpack.config.js   # Webpack configuration
+│   ├── tsconfig.json       # TypeScript configuration
+│   ├── jest.config.js      # Jest configuration
+│   ├── jest.setup.js       # Jest setup file
+│   └── package.json        # NPM dependencies and scripts
 ├── backend/
 │   ├── app/            # FastAPI application
 │   │   ├── main.py     # Main application entry point
@@ -36,12 +43,6 @@ phaser-game/
 │   ├── services/       # Business logic services
 │   └── requirements.txt # Python dependencies
 ├── docker/             # Docker configuration files
-├── __mocks__/          # Jest mock files
-├── webpack.config.js   # Webpack configuration
-├── tsconfig.json       # TypeScript configuration
-├── jest.config.js      # Jest configuration
-├── jest.setup.js       # Jest setup file
-├── package.json        # NPM dependencies and scripts
 ├── docker-compose.yml  # Docker Compose configuration for development
 └── docker-compose.test.yml  # Docker Compose configuration for tests
 ```
@@ -86,6 +87,7 @@ phaser-game/
 - [2025-03-06] Established rule to use docker-compose exclusively for running the game and tests
 - [2025-03-06] Created FastAPI backend with stub endpoints for start menu options
 - [2025-03-06] Fixed backend import error by updating the import path in main.py
+- [2025-03-06] Restructured project by moving frontend code to a dedicated frontend directory
 
 ## Development Workflow
 1. Run `docker-compose up` to start both frontend and backend services
