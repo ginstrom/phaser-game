@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+    command: npm test
+
+  frontend-watch:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+    command: npm run test:watch
+
+  frontend-coverage:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+    command: npm run test:coverage
+
+  # Backend tests will be added later
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: ../docker/Dockerfile.backend
+  #   volumes:
+  #     - ./backend:/app
+  #   environment:
+  #     - ENVIRONMENT=test
+  #   command: pytest
