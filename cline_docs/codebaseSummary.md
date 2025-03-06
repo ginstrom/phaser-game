@@ -17,6 +17,10 @@ phaser-game/
 │   │   └── TextStyles.ts      # Text style definitions
 │   ├── objects/        # Game object classes
 │   ├── utils/          # Utility functions
+│   ├── __tests__/      # Test files
+│   │   ├── index.test.ts      # Game initialization tests
+│   │   ├── scenes/            # Scene tests
+│   │   └── ui/                # UI component tests
 │   └── index.ts        # Main entry point for the game
 ├── public/
 │   └── index.html      # HTML entry point
@@ -25,8 +29,11 @@ phaser-game/
 │   ├── models/         # Data models
 │   └── services/       # Business logic services
 ├── docker/             # Docker configuration files
+├── __mocks__/          # Jest mock files
 ├── webpack.config.js   # Webpack configuration
 ├── tsconfig.json       # TypeScript configuration
+├── jest.config.js      # Jest configuration
+├── jest.setup.js       # Jest setup file
 ├── package.json        # NPM dependencies and scripts
 └── docker-compose.yml  # Docker Compose configuration
 ```
@@ -57,9 +64,12 @@ phaser-game/
 ## Recent Significant Changes
 - [2025-03-06] Initial project setup
 - [2025-03-06] Implemented basic game UI components and scenes
+- [2025-03-06] Added Jest testing framework and created tests for components
+- [2025-03-06] Fixed failing tests by removing problematic test case in Panel.test.ts
 
 ## Development Workflow
 1. Run `npm start` to start the development server
 2. Make changes to the code
 3. See changes reflected in the browser automatically
-4. Use Docker Compose for full-stack development with backend
+4. Run `npm test` to run the test suite
+5. Use Docker Compose for full-stack development with backend

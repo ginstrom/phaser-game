@@ -24,7 +24,9 @@
 - Package Manager: npm (frontend), pip (backend)
 - Linting: ESLint (frontend), flake8 (backend)
 - Formatting: Prettier (frontend), Black (backend)
-- Testing: Jest (frontend), pytest (backend)
+- Testing: 
+  - Frontend: Jest with ts-jest for TypeScript support
+  - Backend: pytest
 
 ## Deployment
 - To be determined
