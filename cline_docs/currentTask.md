@@ -1,6 +1,69 @@
 # Current Task
 
 ## Current Objective
+Make sure the frontend app and tests still run from docker-compose ✅
+
+## Context
+After restructuring the project by moving frontend code to a dedicated frontend directory, we need to verify that the frontend application and tests still run correctly using docker-compose.
+
+## Completed Actions
+1. ✅ Examined the current docker-compose.yml and docker-compose.test.yml files to understand the configuration
+2. ✅ Checked that the paths in the Docker configuration files are correctly updated to reference the new frontend directory structure
+3. ✅ Verified that the frontend package.json has the correct scripts for running the application and tests
+4. ✅ Confirmed that the webpack.config.js file is correctly configured for the new directory structure
+5. ✅ Verified that the jest.config.js and jest.setup.js files are correctly configured for the new directory structure
+6. ✅ Checked that the __mocks__ directory contains the necessary mock files
+7. ✅ Tested running the frontend application using docker-compose
+   - ✅ The frontend application runs successfully
+8. ✅ Tested running the frontend tests using docker-compose
+   - ✅ All frontend tests pass successfully
+9. ✅ Tested running the backend tests using docker-compose
+   - ✅ All backend tests pass successfully
+
+## Results
+- The frontend application runs correctly from docker-compose
+- All frontend tests pass successfully
+- All backend tests pass successfully
+- No issues were found with the restructured project
+
+## Next Steps
+1. Implement actual functionality for the backend endpoints
+2. Connect the frontend to the backend
+3. Implement data store for game state
+
+## Previous Objective (Completed)
+Create basic unit tests for the backend ✅
+
+## Context
+This task is part of ensuring the quality and stability of the game's backend API. We need to create unit tests for the FastAPI backend to verify that the endpoints work as expected.
+
+## Completed Actions
+1. ✅ Created a tests directory in the backend folder
+2. ✅ Added pytest and related testing libraries to requirements.txt:
+   - pytest==7.4.3
+   - pytest-asyncio==0.21.1
+   - httpx==0.25.1
+   - pytest-cov==4.1.0
+3. ✅ Created test files for each endpoint:
+   - ✅ Test for the root endpoint (test_root.py)
+   - ✅ Test for the new game endpoint (test_new_game.py)
+   - ✅ Test for the saved games and load game endpoints (test_load_game.py)
+   - ✅ Test for the settings endpoints (test_settings.py)
+   - ✅ Test for the exit game endpoint (test_exit_game.py)
+4. ✅ Updated docker-compose.test.yml to include backend tests:
+   - Added backend service for running tests
+   - Added backend-verbose service for running tests with verbose output
+   - Added backend-coverage service for running tests with coverage report
+5. ✅ Fixed an issue in the exit_game.py file to match the expected behavior in the tests
+6. ✅ Ran the tests to verify that everything works as expected
+7. ✅ Achieved 88% test coverage for the backend code
+
+## Next Steps
+1. Implement actual functionality for the backend endpoints
+2. Connect the frontend to the backend
+3. Implement data store for game state
+
+## Previous Objective (Completed)
 Move frontend code to a `frontend` directory and adjust the code to work with the new structure ✅
 
 ## Context

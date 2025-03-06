@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Union
 
 router = APIRouter()
 
@@ -8,10 +8,17 @@ class ExitGameRequest(BaseModel):
     save_before_exit: bool = True
     save_name: Optional[str] = None
 
-class ExitGameResponse(BaseModel):
+class ExitGameSavedResponse(BaseModel):
     message: str
-    saved: bool
-    save_id: Optional[str] = None
+    saved: bool = True
+    save_id: str
+
+class ExitGameNotSavedResponse(BaseModel):
+    message: str
+    saved: bool = False
+
+# Union type for the response
+ExitGameResponse = Union[ExitGameSavedResponse, ExitGameNotSavedResponse]
 
 @router.post("/exit", response_model=ExitGameResponse)
 async def exit_game(request: ExitGameRequest):

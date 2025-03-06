@@ -88,6 +88,8 @@ phaser-game/
 - [2025-03-06] Created FastAPI backend with stub endpoints for start menu options
 - [2025-03-06] Fixed backend import error by updating the import path in main.py
 - [2025-03-06] Restructured project by moving frontend code to a dedicated frontend directory
+- [2025-03-06] Created basic unit tests for the backend API endpoints
+- [2025-03-06] Verified that the frontend app and tests still run correctly from docker-compose after restructuring
 
 ## Development Workflow
 1. Run `docker-compose up` to start both frontend and backend services
@@ -96,9 +98,12 @@ phaser-game/
 4. Make changes to the code
 5. See changes reflected in the browser automatically
 6. Access the API documentation at http://localhost:8000/docs
-7. Run `docker-compose -f docker-compose.test.yml run frontend` to run the test suite
+7. Run `docker-compose -f docker-compose.test.yml run frontend` to run the frontend test suite
 8. Use `docker-compose -f docker-compose.test.yml run frontend-watch` for watch mode
 9. Use `docker-compose -f docker-compose.test.yml run frontend-coverage` for test coverage
+10. Run `docker-compose -f docker-compose.test.yml run backend` to run the backend test suite
+11. Use `docker-compose -f docker-compose.test.yml run backend-verbose` for verbose output
+12. Use `docker-compose -f docker-compose.test.yml run backend-coverage` for test coverage
 
 ## Important Rule
 **ONLY use docker-compose for running the game or tests. DO NOT run the game code or tests directly in the console.**

@@ -41,3 +41,5 @@
 - [2025-03-06] Created FastAPI backend with stub endpoints for start menu options
 - [2025-03-06] Fixed backend import error to ensure the backend runs correctly
 - [2025-03-06] Restructured project by moving frontend code to a dedicated frontend directory
+- [2025-03-06] Created basic unit tests for the backend API endpoints
+- [2025-03-06] Verified that the frontend app and tests still run correctly from docker-compose after restructuring

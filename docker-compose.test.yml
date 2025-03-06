@@ -15,7 +15,7 @@ services:
   frontend-watch:
     build:
       context: ./frontend
-      dockerfile: ../docker/Dockerfile.frontend
+      dockerfile: docker/Dockerfile.frontend
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -26,7 +26,7 @@ services:
   frontend-coverage:
     build:
       context: ./frontend
-      dockerfile: ../docker/Dockerfile.frontend
+      dockerfile: docker/Dockerfile.frontend
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -34,13 +34,33 @@ services:
       - NODE_ENV=test
     command: npm run test:coverage
 
-  # Backend tests will be added later
-  # backend:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: ../docker/Dockerfile.backend
-  #   volumes:
-  #     - ./backend:/app
-  #   environment:
-  #     - ENVIRONMENT=test
-  #   command: pytest
+  # Backend tests
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    volumes:
+      - ./backend:/app
+    environment:
+      - ENVIRONMENT=test
+    command: python -m pytest
+
+  backend-verbose:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    volumes:
+      - ./backend:/app
+    environment:
+      - ENVIRONMENT=test
+    command: python -m pytest -v
+
+  backend-coverage:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    volumes:
+      - ./backend:/app
+    environment:
+      - ENVIRONMENT=test
+    command: python -m pytest --cov=app --cov-report=term-missing
