@@ -34,3 +34,4 @@
 - [2025-03-06] Implemented basic game UI components
 - [2025-03-06] Created tests for the basic Phaser skeleton
 - [2025-03-06] Fixed failing tests to ensure all tests pass
+- [2025-03-06] Created docker-compose.test.yml for running tests in Docker

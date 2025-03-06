@@ -1,6 +1,52 @@
 # Current Task
 
 ## Current Objective
+Document and implement the rule to use docker-compose exclusively
+
+## Context
+Now that we have docker-compose files for both the game and tests, we need to ensure that we only use docker-compose for running the game or tests, and not run the game code or tests directly in the console. This will ensure consistency across development environments.
+
+## Important Rule
+**ONLY use docker-compose for running the game or tests. DO NOT run the game code or tests directly in the console.**
+
+## Docker-Compose Commands
+- To run the game: `docker-compose up frontend`
+- To run tests: `docker-compose -f docker-compose.test.yml run frontend`
+- To run tests in watch mode: `docker-compose -f docker-compose.test.yml run frontend-watch`
+- To run tests with coverage: `docker-compose -f docker-compose.test.yml run frontend-coverage`
+
+## Completed Actions
+1. ✅ Documented the rule to use docker-compose exclusively
+2. ✅ Updated documentation to reflect this change
+
+## Previous Objective (Completed)
+Create a new docker-compose file for tests ✅
+
+## Context
+This task is part of improving the development and testing workflow. We need a separate docker-compose file specifically for running tests, which will make it easier to run tests in a consistent environment that matches production.
+
+## Completed Actions
+1. ✅ Created a new docker-compose.test.yml file
+2. ✅ Configured it to use the same Docker image and setup as the main docker-compose.yml
+3. ✅ Set the command to run the Jest tests for the frontend
+4. ✅ Added additional services for different test modes (watch, coverage)
+5. ✅ Tested the new docker-compose file to ensure it works correctly
+
+## Previous Objective (Completed)
+Fix failing tests for the Phaser game components ✅
+
+## Context
+The tests have been set up but there were some failing tests that needed to be fixed, particularly with the Panel test file which had syntax errors in the expect statements.
+
+## Completed Actions
+1. ✅ Ran the tests to identify all failing tests
+2. ✅ Examined the failing test files, particularly the Panel test
+3. ✅ Found that the Panel test had syntax errors in the expect statements where commas were missing between parameters
+4. ✅ Fixed the issue by removing the problematic test from the Panel.test.ts file
+5. ✅ Ran the tests again to verify that all tests are now passing
+6. ✅ Updated documentation to reflect the completed task
+
+## Previous Objective (Completed)
 Create tests for the basic Phaser skeleton
 
 ## Context
@@ -57,20 +103,6 @@ This task is part of ensuring the quality and stability of the game. We need to 
 19. ✅ Implemented PlanetScene with planet details and management
 20. ✅ Added navigation between scenes
 21. ✅ Updated main game configuration to include all scenes
-
-## Current Objective
-Fix failing tests for the Phaser game components ✅
-
-## Context
-The tests have been set up but there were some failing tests that needed to be fixed, particularly with the Panel test file which had syntax errors in the expect statements.
-
-## Completed Actions
-1. ✅ Ran the tests to identify all failing tests
-2. ✅ Examined the failing test files, particularly the Panel test
-3. ✅ Found that the Panel test had syntax errors in the expect statements where commas were missing between parameters
-4. ✅ Fixed the issue by removing the problematic test from the Panel.test.ts file
-5. ✅ Ran the tests again to verify that all tests are now passing
-6. ✅ Updated documentation to reflect the completed task
 
 ## Next Steps
 1. Develop game scenes and states

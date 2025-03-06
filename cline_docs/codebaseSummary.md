@@ -35,7 +35,8 @@ phaser-game/
 ├── jest.config.js      # Jest configuration
 ├── jest.setup.js       # Jest setup file
 ├── package.json        # NPM dependencies and scripts
-└── docker-compose.yml  # Docker Compose configuration
+├── docker-compose.yml  # Docker Compose configuration for development
+└── docker-compose.test.yml  # Docker Compose configuration for tests
 ```
 
 ## Key Components
@@ -66,10 +67,18 @@ phaser-game/
 - [2025-03-06] Implemented basic game UI components and scenes
 - [2025-03-06] Added Jest testing framework and created tests for components
 - [2025-03-06] Fixed failing tests by removing problematic test case in Panel.test.ts
+- [2025-03-06] Created docker-compose.test.yml for running tests in Docker
+- [2025-03-06] Established rule to use docker-compose exclusively for running the game and tests
 
 ## Development Workflow
-1. Run `npm start` to start the development server
+1. Run `docker-compose up frontend` to start the development server
 2. Make changes to the code
 3. See changes reflected in the browser automatically
-4. Run `npm test` to run the test suite
-5. Use Docker Compose for full-stack development with backend
+4. Run `docker-compose -f docker-compose.test.yml run frontend` to run the test suite
+5. Use `docker-compose -f docker-compose.test.yml run frontend-watch` for watch mode
+6. Use `docker-compose -f docker-compose.test.yml run frontend-coverage` for test coverage
+
+## Important Rule
+**ONLY use docker-compose for running the game or tests. DO NOT run the game code or tests directly in the console.**
+
+This rule ensures consistency across development environments and simplifies the development workflow.

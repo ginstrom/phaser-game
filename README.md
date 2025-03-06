@@ -24,27 +24,7 @@ Turn-based 4X space empire game written using Phaser 3 with TypeScript.
 
 ## Getting Started
 
-### Local Development
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/phaser-game.git
-cd phaser-game
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start the development server:
-```bash
-npm start
-```
-
-4. Open your browser and navigate to `http://localhost:8080`
-
-### Using Docker
+### Development Setup
 
 1. Clone the repository:
 ```bash
@@ -58,6 +38,29 @@ docker-compose up
 ```
 
 3. Open your browser and navigate to `http://localhost:8080`
+
+### Running Tests
+
+Run the tests using docker-compose:
+```bash
+docker-compose -f docker-compose.test.yml run frontend
+```
+
+Run tests in watch mode:
+```bash
+docker-compose -f docker-compose.test.yml run frontend-watch
+```
+
+Run tests with coverage:
+```bash
+docker-compose -f docker-compose.test.yml run frontend-coverage
+```
+
+### Important Rule
+
+**ONLY use docker-compose for running the game or tests. DO NOT run the game code or tests directly in the console.**
+
+This rule ensures consistency across development environments and simplifies the development workflow.
 
 ## Project Status
 This project is in the early stages of development. Currently, only a basic skeleton with a blank screen is implemented.
