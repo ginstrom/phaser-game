@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm start
+
+  # Backend service will be added later
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: ../docker/Dockerfile.backend
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./backend:/app
+  #   environment:
+  #     - ENVIRONMENT=development
