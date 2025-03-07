@@ -1,40 +1,46 @@
 # Current Task
 
 ## Current Objective
-Convert string values in the backend to enums using a shared JSON configuration file.
+Use enums.json config file for enum values in the frontend.
 
 ## Context
-The backend currently uses string literals for various game elements like planet types, galaxy sizes, and difficulty levels. Converting these to enums will improve type safety, reduce errors, and make the codebase more maintainable. Using a shared JSON file will allow these enums to be synchronized between the Python backend and TypeScript frontend in the future.
+The backend already uses the shared enums.json configuration file for enum values, but the frontend still uses hardcoded values. Using the shared configuration file in the frontend will ensure consistency between the backend and frontend, making the codebase more maintainable and reducing the risk of errors.
 
 ## Plan
-1. **Create a config directory** at the project root to house shared configuration files
-2. **Create an enums.json file** with definitions for:
-   - PlanetType (rocky, terrestrial, oceanic, etc.)
-   - GalaxySize (small, medium, large)
-   - Difficulty (easy, normal, hard)
-3. **Create a config.py file** in the backend to load and use these enums
-4. **Update backend models** to use the new enum types
-5. **Update backend services** to use the enum values
-6. **Test the changes** to ensure everything works correctly
+1. **Update docker-compose.yml and docker-compose.test.yml** to mount the config directory in the frontend containers
+2. **Create a utility file** in the frontend to load and use the enums from the config file
+3. **Update the StartupScene.ts** file to use the enums from the utility file instead of hardcoding them
+4. **Test the changes** to ensure everything works correctly
 
 ## Completed Actions
-1. ✅ Created a config directory at the project root to house shared configuration files
-2. ✅ Created an enums.json file with definitions for:
-   - PlanetType (rocky, terrestrial, oceanic, etc.)
-   - GalaxySize (small, medium, large)
-   - Difficulty (easy, normal, hard)
-3. ✅ Created a config.py file in the backend to load and use these enums
-4. ✅ Updated backend models to use the new enum types:
-   - Updated Planet.type to use PlanetType enum
-   - Updated Galaxy.size to use GalaxySize enum
-   - Updated GameState.difficulty to use Difficulty enum
-5. ✅ Updated backend services to use the enum values:
-   - Updated generate_planet function to use PlanetType enum
-   - Updated generate_galaxy function to use GalaxySize enum
-   - Updated create_new_game function to use Difficulty and GalaxySize enums
-6. ✅ Updated docker-compose.yml and docker-compose.test.yml to mount the config directory in the backend containers
-7. ✅ Updated config.py to look for the enums.json file in both local and Docker environments
-8. ✅ Ran the backend tests to verify all tests pass with the new enum implementation
+1. ✅ Updated docker-compose.yml to mount the config directory in the frontend container:
+   - Added volume mapping: `./config:/app/config`
+2. ✅ Updated docker-compose.test.yml to mount the config directory in the frontend test containers:
+   - Added volume mapping: `./config:/app/config` to all frontend services
+3. ✅ Created a utility file in the frontend to load and use the enums from the config file:
+   - Created `frontend/src/utils/enums.ts` with functions to load and use enums
+   - Created a local copy of enums.json in the frontend/src/utils directory
+   - Implemented direct import of the JSON file instead of fetching it
+   - Created helper functions for working with enums in UI components
+4. ✅ Updated the StartupScene.ts file to use the enums from the utility file:
+   - Imported the utility functions
+   - Modified the startNewGame method to load enums and use them for select fields
+   - Used getSelectOptions and getDefaultValue functions to populate the select fields
+5. ✅ Updated webpack.config.js to copy the config directory to the dist directory:
+   - Added a new pattern to the CopyWebpackPlugin configuration
+6. ✅ Verified that the frontend is now using the enum values from the config file:
+   - Tested the New Game dialog and confirmed that the dropdowns are populated with the correct values
+
+## Previous Task (Completed)
+### Objective
+Convert string values in the backend to enums using a shared JSON configuration file.
+
+### Results
+- Created a config directory with enums.json file
+- Created a config.py file in the backend to load and use these enums
+- Updated backend models and services to use the enum values
+- Updated docker-compose.yml and docker-compose.test.yml to mount the config directory in the backend containers
+- Ran the backend tests to verify all tests pass with the new enum implementation
 
 ## Previous Task (Completed)
 ### Objective

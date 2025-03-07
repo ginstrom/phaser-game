@@ -1,0 +1,23 @@
+{
+  "PlanetType": [
+    "rocky",
+    "terrestrial",
+    "oceanic",
+    "desert",
+    "jungle",
+    "arctic",
+    "gas_giant",
+    "ice_giant",
+    "volcanic"
+  ],
+  "GalaxySize": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "Difficulty": [
+    "easy",
+    "normal",
+    "hard"
+  ]
+}

@@ -3,6 +3,7 @@ import Button from '../ui/Button';
 import { TextStyles } from '../ui/TextStyles';
 import Panel from '../ui/Panel';
 import api from '../utils/api';
+import { loadEnums, getSelectOptions, getDefaultValue } from '../utils/enums';
 
 export default class StartupScene extends Phaser.Scene {
     constructor() {
@@ -91,7 +92,10 @@ export default class StartupScene extends Phaser.Scene {
         
         // Import the required components
         import('../ui/InputField').then(({ default: InputField }) => {
-            import('../ui/SelectField').then(({ default: SelectField }) => {
+            import('../ui/SelectField').then(async ({ default: SelectField }) => {
+                // Load enums from config file
+                const enums = await loadEnums();
+                
                 // Create a panel for the new game dialog
                 const { width, height } = this.cameras.main;
                 const panel = new Panel({
@@ -129,17 +133,13 @@ export default class StartupScene extends Phaser.Scene {
                 formElements.push(playerNameField);
                 
                 // Difficulty selection
-                let difficulty = 'normal';
+                let difficulty = getDefaultValue('Difficulty', enums);
                 const difficultyField = new SelectField({
                     scene: this,
                     x: 0,
                     y: -40,
                     label: 'Difficulty:',
-                    options: [
-                        { value: 'easy', label: 'Easy' },
-                        { value: 'normal', label: 'Normal' },
-                        { value: 'hard', label: 'Hard' }
-                    ],
+                    options: getSelectOptions('Difficulty', enums),
                     initialValue: difficulty,
                     width: 300,
                     labelStyle: TextStyles.normal,
@@ -151,17 +151,13 @@ export default class StartupScene extends Phaser.Scene {
                 formElements.push(difficultyField);
                 
                 // Galaxy size selection
-                let galaxySize = 'medium';
+                let galaxySize = getDefaultValue('GalaxySize', enums);
                 const galaxySizeField = new SelectField({
                     scene: this,
                     x: 0,
                     y: 40,
                     label: 'Galaxy Size:',
-                    options: [
-                        { value: 'small', label: 'Small' },
-                        { value: 'medium', label: 'Medium' },
-                        { value: 'large', label: 'Large' }
-                    ],
+                    options: getSelectOptions('GalaxySize', enums),
                     initialValue: galaxySize,
                     width: 300,
                     labelStyle: TextStyles.normal,

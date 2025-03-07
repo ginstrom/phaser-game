@@ -36,6 +36,11 @@ module.exports = {
           to: 'assets',
           noErrorOnMissing: true,
         },
+        {
+          from: '../config',
+          to: 'config',
+          noErrorOnMissing: true,
+        },
       ],
     }),
   ],

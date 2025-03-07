@@ -8,6 +8,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - ./config:/app/config
     environment:
       - NODE_ENV=test
     command: npm test
@@ -19,6 +20,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - ./config:/app/config
     environment:
       - NODE_ENV=test
     command: npm run test:watch
@@ -30,6 +32,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - ./config:/app/config
     environment:
       - NODE_ENV=test
     command: npm run test:coverage

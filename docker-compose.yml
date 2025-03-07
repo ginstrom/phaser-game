@@ -10,6 +10,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - ./config:/app/config
     environment:
       - NODE_ENV=development
     command: npm start
