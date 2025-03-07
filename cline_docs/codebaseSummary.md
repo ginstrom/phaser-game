@@ -14,7 +14,9 @@ phaser-game/
 │   │   │   └── PlanetScene.ts     # Planet view scene
 │   │   ├── ui/             # UI components
 │   │   │   ├── Button.ts          # Reusable button component
+│   │   │   ├── InputField.ts      # Input field component for forms
 │   │   │   ├── Panel.ts           # Reusable panel component
+│   │   │   ├── SelectField.ts     # Dropdown select component for forms
 │   │   │   └── TextStyles.ts      # Text style definitions
 │   │   ├── objects/        # Game object classes
 │   │   ├── utils/          # Utility functions
@@ -45,6 +47,7 @@ phaser-game/
 │   │       └── exit_game.py   # Exit game endpoint
 │   └── requirements.txt # Python dependencies
 ├── docker/             # Docker configuration files
+├── test.sh             # Script for running tests with various options
 ├── docker-compose.yml  # Docker Compose configuration for development
 └── docker-compose.test.yml  # Docker Compose configuration for tests
 ```
@@ -81,6 +84,15 @@ phaser-game/
 - `/exit`: Handle game exit, optionally saving the game
 
 ## Recent Significant Changes
+- [2025-03-07] Fixed failing unit tests by correcting the Graphics object creation in InputField.ts and updating the Phaser mock
+- [2025-03-07] Created test.sh script to simplify running tests with support for frontend, backend, and various options
+- [2025-03-07] Enhanced the new game window with a proper form interface, including input fields and dropdown selects
+- [2025-03-07] Created new UI components: InputField for text input and SelectField for dropdown selection
+- [2025-03-07] Improved the layout and styling of the new game form with clear cancel/start buttons
+- [2025-03-07] Implemented system discovery levels (visible light, scanning levels 1-5, visited) and enhanced exploration mechanics
+- [2025-03-07] Added ability to view unexplored systems with varying levels of detail based on discovery level
+- [2025-03-07] Updated system visuals to reflect discovery levels with different colors
+- [2025-03-07] Modified SystemScene to show appropriate details based on discovery level
 - [2025-03-06] Initial project setup
 - [2025-03-06] Implemented basic game UI components and scenes
 - [2025-03-06] Added Jest testing framework and created tests for components
@@ -115,12 +127,22 @@ phaser-game/
 4. Make changes to the code
 5. See changes reflected in the browser automatically
 6. Access the API documentation at http://localhost:8000/docs
-7. Run `docker-compose -f docker-compose.test.yml run frontend` to run the frontend test suite
-8. Use `docker-compose -f docker-compose.test.yml run frontend-watch` for watch mode
-9. Use `docker-compose -f docker-compose.test.yml run frontend-coverage` for test coverage
-10. Run `docker-compose -f docker-compose.test.yml run backend` to run the backend test suite
-11. Use `docker-compose -f docker-compose.test.yml run backend-verbose` for verbose output
-12. Use `docker-compose -f docker-compose.test.yml run backend-coverage` for test coverage
+7. Run tests using the `test.sh` script:
+   - `./test.sh frontend` to run frontend tests
+   - `./test.sh backend` to run backend tests
+   - `./test.sh all` to run both frontend and backend tests
+   - Add `--watch` for frontend watch mode
+   - Add `--coverage` for test coverage reports
+   - Add `--verbose` for verbose backend test output
+   - Run `./test.sh --help` for more information
+
+   Alternatively, you can still use the docker-compose commands directly:
+   - Run `docker-compose -f docker-compose.test.yml run frontend` to run the frontend test suite
+   - Use `docker-compose -f docker-compose.test.yml run frontend-watch` for watch mode
+   - Use `docker-compose -f docker-compose.test.yml run frontend-coverage` for test coverage
+   - Run `docker-compose -f docker-compose.test.yml run backend` to run the backend test suite
+   - Use `docker-compose -f docker-compose.test.yml run backend-verbose` for verbose output
+   - Use `docker-compose -f docker-compose.test.yml run backend-coverage` for test coverage
 
 ## Important Rule
 **ONLY use docker-compose for running the game or tests. DO NOT run the game code or tests directly in the console.**

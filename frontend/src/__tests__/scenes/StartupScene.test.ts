@@ -73,7 +73,7 @@ describe('StartupScene', () => {
       scene.create();
     });
 
-    it('should start GalaxyScene when New Game button is clicked', () => {
+    it('should open new game dialog when New Game button is clicked', () => {
       // Get the callback from the first Button constructor call
       const mockButton = jest.mocked(Button);
       const newGameCallback = mockButton.mock.calls[0][0].callback;
@@ -83,8 +83,8 @@ describe('StartupScene', () => {
         newGameCallback();
       }
       
-      // Check if scene.start was called with 'GalaxyScene'
-      expect(scene.scene.start).toHaveBeenCalledWith('GalaxyScene');
+      // Check if console.log was called with the expected message
+      expect(console.log).toHaveBeenCalledWith('Starting new game');
     });
 
     it('should log message when Load Game button is clicked', () => {

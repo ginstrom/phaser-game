@@ -13,6 +13,7 @@ interface StarSystem {
     color: number;
     explored: boolean;
     planets: number;
+    discoveryLevel: number; // 0: visible light, 1-5: scanning levels, 6: visited
 }
 
 export default class GalaxyScene extends Phaser.Scene {
@@ -104,8 +105,16 @@ export default class GalaxyScene extends Phaser.Scene {
 
         // Create star systems
         this.systems.forEach(system => {
-            // Use different colors for explored vs unexplored systems
-            const color = system.explored ? 0xffff00 : 0x888888;
+            // Use different colors based on discovery level
+            let color = 0x444444; // Default for visible light only
+            
+            if (system.discoveryLevel === 6) {
+                color = 0xffff00; // Visited systems are bright yellow
+            } else if (system.discoveryLevel >= 1 && system.discoveryLevel <= 5) {
+                // Scanning levels 1-5 have progressively brighter colors
+                const brightness = 0x444444 + (0x111111 * system.discoveryLevel);
+                color = brightness;
+            }
             
             const star = this.add.circle(system.x, system.y, system.size, color);
             star.setInteractive({ useHandCursor: true })
@@ -166,6 +175,15 @@ export default class GalaxyScene extends Phaser.Scene {
             
             // Generate systems
             for (let i = 0; i < 15; i++) {
+                // Determine discovery level: 0 for all systems (visible light), 
+                // higher levels for some systems
+                let discoveryLevel = 0; // Default: visible light
+                if (i < 3) {
+                    discoveryLevel = 6; // Visited
+                } else if (i < 6) {
+                    discoveryLevel = Phaser.Math.Between(1, 5); // Scanning levels 1-5
+                }
+                
                 const system: StarSystem = {
                     id: `dummy-${i}`,
                     name: `System ${i + 1}`,
@@ -174,7 +192,8 @@ export default class GalaxyScene extends Phaser.Scene {
                     size: Phaser.Math.Between(3, 8),
                     color: colors[Phaser.Math.Between(0, colors.length - 1)],
                     explored: i < 3, // First 3 systems are explored
-                    planets: Phaser.Math.Between(1, 8)
+                    planets: Phaser.Math.Between(1, 8),
+                    discoveryLevel: discoveryLevel
                 };
                 
                 this.systems.push(system);
@@ -194,6 +213,14 @@ export default class GalaxyScene extends Phaser.Scene {
             const x = width / 2 + radius * Math.cos(angle);
             const y = height / 2 + radius * Math.sin(angle);
             
+            // Determine discovery level
+            let discoveryLevel = 0; // Default: visible light
+            if (i === 0) {
+                discoveryLevel = 6; // First system is visited
+            } else if (i < 3) {
+                discoveryLevel = Phaser.Math.Between(1, 5); // Some systems have scanning data
+            }
+            
             const system: StarSystem = {
                 id: `system-${i}`,
                 name: `System ${i + 1}`,
@@ -202,7 +229,8 @@ export default class GalaxyScene extends Phaser.Scene {
                 size: Phaser.Math.Between(3, 8),
                 color: 0xffff00, // Will be overridden based on explored status
                 explored: i === 0, // Only the first system is explored initially
-                planets: Phaser.Math.Between(1, 8)
+                planets: Phaser.Math.Between(1, 8),
+                discoveryLevel: discoveryLevel
             };
             
             this.systems.push(system);
@@ -251,60 +279,78 @@ export default class GalaxyScene extends Phaser.Scene {
             draggable: true
         });
         
-        // Add content to panel
-        if (system.explored) {
-            // Add view button for explored systems
-            const viewButton = new Button({
-                scene: this,
-                x: 0,
-                y: 50,
-                text: 'View System',
-                textStyle: TextStyles.button,
-                callback: () => this.viewSystem(system)
-            });
+        // Always add a View System button
+        const viewButton = new Button({
+            scene: this,
+            x: 0,
+            y: 50,
+            text: 'View System',
+            textStyle: TextStyles.button,
+            callback: () => this.viewSystem(system)
+        });
+        
+        this.infoPanel.addContent(viewButton);
+        
+        // Add system info based on discovery level
+        let infoText = '';
+        
+        if (system.discoveryLevel === 0) {
+            infoText = 'Status: Visible Light Only\nNo detailed data available';
+        } else if (system.discoveryLevel >= 1 && system.discoveryLevel <= 5) {
+            infoText = `Status: Scan Level ${system.discoveryLevel}\nPlanets: ${system.planets}`;
             
-            this.infoPanel.addContent(viewButton);
-            
-            // Add system info
-            const info = this.add.text(
-                0,
-                -50,
-                `Status: Explored\nPlanets: ${system.planets}\nResources: ${this.getResourceLevel()}\nThreat Level: ${this.getThreatLevel()}`,
-                TextStyles.normal
-            ).setOrigin(0.5, 0);
-            
-            this.infoPanel.addContent(info);
-        } else {
-            // Add explore button for unexplored systems
+            // Add more details as scan level increases
+            if (system.discoveryLevel >= 3) {
+                infoText += `\nStar Type: ${this.getStarType(system)}`;
+            }
+            if (system.discoveryLevel >= 4) {
+                infoText += `\nResources: ${this.getResourceLevel()}`;
+            }
+            if (system.discoveryLevel >= 5) {
+                infoText += `\nThreat Level: ${this.getThreatLevel()}`;
+            }
+        } else if (system.discoveryLevel === 6) {
+            infoText = `Status: Visited\nPlanets: ${system.planets}\nStar Type: ${this.getStarType(system)}\nResources: ${this.getResourceLevel()}\nThreat Level: ${this.getThreatLevel()}`;
+        }
+        
+        const info = this.add.text(
+            0,
+            -50,
+            infoText,
+            TextStyles.normal
+        ).setOrigin(0.5, 0);
+        
+        this.infoPanel.addContent(info);
+        
+        // Add explore button for unexplored systems
+        if (!system.explored) {
             const exploreButton = new Button({
                 scene: this,
                 x: 0,
-                y: 0,
+                y: 100,
                 text: 'Explore System',
                 textStyle: TextStyles.button,
                 callback: () => this.exploreSystem(system)
             });
             
             this.infoPanel.addContent(exploreButton);
-            
-            // Add unknown info
-            const info = this.add.text(
-                0,
-                -50,
-                'Status: Unexplored\nNo data available',
-                TextStyles.normal
-            ).setOrigin(0.5, 0);
-            
-            this.infoPanel.addContent(info);
         }
+    }
+    
+    private getStarType(system: StarSystem): string {
+        // Determine star type based on system ID for consistency
+        const types = ['G-class', 'K-class', 'M-class', 'F-class', 'A-class', 'B-class', 'O-class'];
+        const typeIndex = parseInt(system.id.split('-')[1]) % types.length;
+        return types[typeIndex];
     }
     
     private exploreSystem(system: StarSystem): void {
         console.log(`Exploring system ${system.id}`);
         
         // In a real implementation, we would call the backend to explore the system
-        // For now, we'll just mark it as explored
+        // For now, we'll just mark it as explored and increase discovery level
         system.explored = true;
+        system.discoveryLevel = 6; // Set to visited (highest level)
         
         // Refresh the scene to update the display
         this.scene.restart();
@@ -321,8 +367,11 @@ export default class GalaxyScene extends Phaser.Scene {
     }
 
     private viewSystem(system: StarSystem): void {
-        console.log(`Viewing system ${system.name}`);
-        this.scene.start('SystemScene', { systemId: system.id });
+        console.log(`Viewing system ${system.name} with discovery level ${system.discoveryLevel}`);
+        this.scene.start('SystemScene', { 
+            systemId: system.id,
+            discoveryLevel: system.discoveryLevel
+        });
     }
 
     private backToMenu(): void {

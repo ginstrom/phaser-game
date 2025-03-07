@@ -14,12 +14,29 @@ class MockScene {
     text: jest.fn().mockReturnValue({
       setOrigin: jest.fn().mockReturnThis(),
     }),
+    graphics: jest.fn().mockReturnValue({
+      clear: jest.fn().mockReturnThis(),
+      lineStyle: jest.fn().mockReturnThis(),
+      lineBetween: jest.fn().mockReturnThis(),
+    }),
   };
   cameras = {
     main: {
       width: 1024,
       height: 768,
     },
+  };
+  input = {
+    keyboard: {
+      on: jest.fn(),
+      off: jest.fn(),
+    },
+    on: jest.fn(),
+  };
+  time = {
+    addEvent: jest.fn().mockReturnValue({
+      destroy: jest.fn(),
+    }),
   };
 }
 
@@ -55,6 +72,11 @@ const Phaser = {
       setSize = jest.fn().mockReturnThis();
       setOrigin = jest.fn().mockReturnThis();
       setStrokeStyle = jest.fn().mockReturnThis();
+      setInteractive = jest.fn().mockReturnThis();
+      on = jest.fn().mockReturnThis();
+      getBounds = jest.fn().mockReturnValue({
+        contains: jest.fn().mockReturnValue(false)
+      });
     },
     Text: class {
       constructor(scene, x, y, text, style) {
@@ -73,6 +95,14 @@ const Phaser = {
       constructor(scene) {
         this.scene = scene;
       }
+    },
+    Graphics: class {
+      constructor(scene) {
+        this.scene = scene;
+      }
+      clear = jest.fn().mockReturnThis();
+      lineStyle = jest.fn().mockReturnThis();
+      lineBetween = jest.fn().mockReturnThis();
     },
   },
   Types: {
@@ -108,5 +138,6 @@ const Phaser = {
 Phaser.GameObjects.Container.prototype = Object.create(Phaser.GameObjects.GameObject.prototype);
 Phaser.GameObjects.Rectangle.prototype = Object.create(Phaser.GameObjects.GameObject.prototype);
 Phaser.GameObjects.Text.prototype = Object.create(Phaser.GameObjects.GameObject.prototype);
+Phaser.GameObjects.Graphics.prototype = Object.create(Phaser.GameObjects.GameObject.prototype);
 
 module.exports = Phaser;

@@ -35,6 +35,7 @@
 - Stable multiplayer functionality
 
 ## Completed Tasks
+- [2025-03-07] Created test.sh script for running unit tests with support for frontend, backend, and various options
 - [2025-03-06] Project initialization
 - [2025-03-06] Created basic project skeleton with Phaser and TypeScript
 - [2025-03-06] Created game structure documentation
