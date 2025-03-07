@@ -1,12 +1,30 @@
 # Current Task
 
 ## Current Objective
-Enable automatic reloading for the frontend in Docker Compose when code changes are made.
+Configure docker-compose to run PostgreSQL for the data store.
 
 ## Context
-Currently, when changes are made to the frontend code, the Docker container does not automatically detect these changes and reload the application. This makes development slower as it requires manual restarts of the container or the application. Enabling automatic reloading will improve the development workflow by instantly reflecting code changes in the browser.
+The project needs a persistent data store for game state. PostgreSQL has been chosen as the database solution for the production environment, while SQLite will be used for testing.
 
 ## Completed Actions
+1. ✅ **Updated docker-compose.yml** to include a PostgreSQL database service:
+   - Added a `db` service using the `postgres:13-alpine` image
+   - Configured environment variables for database name, username, and password
+   - Added a volume for persistent data storage
+   - Updated the backend service to connect to the database with the `DATABASE_URL` environment variable
+   - Added a dependency from the backend to the database service
+
+## Next Steps
+1. Update the backend code to use the database connection
+2. Create database models for game state
+3. Implement database migrations
+4. Update the game service to store and retrieve game state from the database
+
+## Previous Task (Completed)
+### Objective
+Enable automatic reloading for the frontend in Docker Compose when code changes are made.
+
+### Results
 1. ✅ **Modify webpack.config.js** to enable polling for file watching in Docker environment:
    - Initially added `watchOptions: { poll: true }` to the devServer configuration
    - Updated to use `watchFiles: { paths: ['src/**/*'], options: { poll: true } }` to match the current webpack-dev-server API

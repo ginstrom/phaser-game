@@ -62,6 +62,7 @@ phaser-game/
 - **Game Views**: Different views for game hierarchy (Startup, Galaxy, System, Planet)
 - **API Integration**: Communication with FastAPI backend for game state
 - **Asset Loading**: Phaser's loader for game assets
+- **Database**: PostgreSQL for persistent game state storage
 
 ## Data Flow
 1. User interacts with the Phaser game UI
@@ -76,6 +77,7 @@ phaser-game/
 - TypeScript for type-safe JavaScript
 - Webpack for bundling
 - FastAPI for backend API
+- PostgreSQL for data storage
 - Docker for containerization
 
 ## Backend API Endpoints
@@ -87,6 +89,10 @@ phaser-game/
 - `/exit`: Handle game exit, optionally saving the game
 
 ## Recent Significant Changes
+- [2025-03-07] Configured PostgreSQL database in docker-compose for the data store
+- [2025-03-07] Added a PostgreSQL service to docker-compose.yml with persistent volume
+- [2025-03-07] Updated the backend service to connect to the database
+- [2025-03-07] Decided to use SQLite for testing environment
 - [2025-03-07] Enabled automatic reloading for the frontend in Docker Compose when code changes are made
 - [2025-03-07] Updated webpack.config.js to use file watching with polling for better Docker compatibility
 - [2025-03-07] Implemented enum-based type system for game entities using a shared JSON configuration for both backend and frontend

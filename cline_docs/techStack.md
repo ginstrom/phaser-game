@@ -12,8 +12,9 @@
 - API Documentation: Swagger UI (via FastAPI)
 
 ## Data Store
-- To be determined based on requirements
-- Potential options: PostgreSQL, MongoDB, Redis
+- Production: PostgreSQL 13
+- Testing: SQLite (in-memory)
+- ORM: To be determined (likely SQLAlchemy)
 
 ## DevOps
 - Containerization: Docker

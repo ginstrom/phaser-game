@@ -13,7 +13,11 @@
     - [ ] Implement settings endpoint
     - [ ] Implement exit game endpoint
   - [x] Connect frontend to backend
-- [ ] Implement data store for game state
+- [~] Implement data store for game state
+  - [x] Configure PostgreSQL database in docker-compose
+  - [ ] Create database models and schema
+  - [ ] Implement database migrations
+  - [ ] Update services to use the database
 - [ ] Create basic game mechanics (movement, resources, etc.)
 - [ ] Implement turn-based system
 - [ ] Add multiplayer capabilities
@@ -35,6 +39,7 @@
 - Stable multiplayer functionality
 
 ## Completed Tasks
+- [2025-03-07] Configured PostgreSQL database in docker-compose for the data store
 - [2025-03-07] Enabled automatic reloading for the frontend in Docker Compose when code changes are made
 - [2025-03-07] Implemented enum-based type system for game entities using a shared JSON configuration for both backend and frontend
 - [2025-03-07] Created test.sh script for running unit tests with support for frontend, backend, and various options
