@@ -1,44 +1,46 @@
 # Current Task
 
 ## Current Objective
-Fix the failing unit test in the frontend related to the InputField component.
+Convert string values in the backend to enums using a shared JSON configuration file.
 
 ## Context
-There's an error in the InputField.ts file at line 2315, where the code is trying to create a new Graphics object using `phaser_1.default.GameObjects.Graphics` as a constructor, but it's not being recognized as a constructor. This is causing tests to fail with the error:
-
-```
-TypeError: phaser_1.default.GameObjects.Graphics is not a constructor
-    at new InputField (/app/src/ui/InputField.ts:2315:27)
-    at /app/src/scenes/StartupScene.ts:3250:36
-```
+The backend currently uses string literals for various game elements like planet types, galaxy sizes, and difficulty levels. Converting these to enums will improve type safety, reduce errors, and make the codebase more maintainable. Using a shared JSON file will allow these enums to be synchronized between the Python backend and TypeScript frontend in the future.
 
 ## Plan
-1. **Examine the InputField.ts file** to understand how the Graphics object is being created
-2. **Check the Phaser documentation** to understand the correct way to create a Graphics object
-3. **Fix the constructor call** in InputField.ts to use the correct syntax
-4. **Run the tests** to verify the fix works
-5. **Update documentation** if necessary
+1. **Create a config directory** at the project root to house shared configuration files
+2. **Create an enums.json file** with definitions for:
+   - PlanetType (rocky, terrestrial, oceanic, etc.)
+   - GalaxySize (small, medium, large)
+   - Difficulty (easy, normal, hard)
+3. **Create a config.py file** in the backend to load and use these enums
+4. **Update backend models** to use the new enum types
+5. **Update backend services** to use the enum values
+6. **Test the changes** to ensure everything works correctly
 
 ## Completed Actions
-1. ✅ Examined the InputField.ts file and found the issue with the Graphics object creation
-2. ✅ Found an example in SystemScene.ts showing the correct way to create a Graphics object using scene.add.graphics()
-3. ✅ Fixed the InputField.ts file by changing:
-   ```typescript
-   this.cursorGraphics = new Phaser.GameObjects.Graphics(config.scene);
-   ```
-   to:
-   ```typescript
-   this.cursorGraphics = config.scene.add.graphics();
-   ```
-4. ✅ Updated the phaserMock.js file to include:
-   - Added a graphics method to the scene.add object
-   - Added a Graphics class to the Phaser.GameObjects namespace
-   - Added setInteractive, on, and getBounds methods to the Rectangle class
-   - Added input and time properties to the MockScene class
-5. ✅ Fixed a failing test in StartupScene.test.ts by updating it to match the actual implementation
-6. ✅ Ran the tests to verify all tests now pass
+1. ✅ Created a config directory at the project root to house shared configuration files
+2. ✅ Created an enums.json file with definitions for:
+   - PlanetType (rocky, terrestrial, oceanic, etc.)
+   - GalaxySize (small, medium, large)
+   - Difficulty (easy, normal, hard)
+3. ✅ Created a config.py file in the backend to load and use these enums
+4. ✅ Updated backend models to use the new enum types:
+   - Updated Planet.type to use PlanetType enum
+   - Updated Galaxy.size to use GalaxySize enum
+   - Updated GameState.difficulty to use Difficulty enum
+5. ✅ Updated backend services to use the enum values:
+   - Updated generate_planet function to use PlanetType enum
+   - Updated generate_galaxy function to use GalaxySize enum
+   - Updated create_new_game function to use Difficulty and GalaxySize enums
+6. ✅ Updated docker-compose.yml and docker-compose.test.yml to mount the config directory in the backend containers
+7. ✅ Updated config.py to look for the enums.json file in both local and Docker environments
+8. ✅ Ran the backend tests to verify all tests pass with the new enum implementation
 
-## Results
+## Previous Task (Completed)
+### Objective
+Fix the failing unit test in the frontend related to the InputField component.
+
+### Results
 - Fixed the issue with the InputField component by using the correct method to create a Graphics object
 - Updated the Phaser mock to better support the InputField component
 - All tests are now passing

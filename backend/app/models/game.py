@@ -3,6 +3,9 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime
 import uuid
 import random
+from enum import Enum
+
+from app.config import PlanetType, GalaxySize, Difficulty
 
 
 class PlanetResources(BaseModel):
@@ -34,7 +37,7 @@ class Planet(BaseModel):
     """Model representing a planet in the game."""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    type: str  # e.g., "terrestrial", "gas giant", "ice", etc.
+    type: PlanetType  # Planet type enum
     size: int  # 1-10 scale
     resources: PlanetResources = Field(default_factory=PlanetResources)
     colonized: bool = False
@@ -52,7 +55,7 @@ class StarSystem(BaseModel):
 
 class Galaxy(BaseModel):
     """Model representing the galaxy in the game."""
-    size: str  # "small", "medium", "large"
+    size: GalaxySize  # Galaxy size enum
     systems: List[StarSystem] = []
     explored_count: int = 0
 
@@ -69,7 +72,7 @@ class GameState(BaseModel):
     player: Player
     galaxy: Galaxy
     turn: int = 1
-    difficulty: str  # "easy", "normal", "hard"
+    difficulty: Difficulty  # Difficulty enum
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert the game state to a dictionary for API responses."""
@@ -87,7 +90,7 @@ class GameState(BaseModel):
                 }
             },
             "galaxy": {
-                "size": self.galaxy.size,
+                "size": self.galaxy.size.value,
                 "systems": self.galaxy.total_systems,
                 "explored": self.galaxy.explored_count
             },

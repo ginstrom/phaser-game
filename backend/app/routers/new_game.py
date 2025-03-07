@@ -2,14 +2,15 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any
 
+from app.config import Difficulty, GalaxySize
 from app.services.game_service import create_new_game
 
 router = APIRouter()
 
 class NewGameRequest(BaseModel):
     player_name: str
-    difficulty: str = "normal"
-    galaxy_size: str = "medium"
+    difficulty: str = "normal"  # Kept as string for API compatibility
+    galaxy_size: str = "medium"  # Kept as string for API compatibility
     
 class NewGameResponse(BaseModel):
     game_id: str

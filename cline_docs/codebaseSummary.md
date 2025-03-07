@@ -3,6 +3,8 @@
 ## Project Structure
 ```
 phaser-game/
+├── config/             # Shared configuration files
+│   └── enums.json      # Shared enum definitions for backend and frontend
 ├── frontend/
 │   ├── src/
 │   │   ├── assets/         # Game assets (images, audio, etc.)
@@ -36,6 +38,7 @@ phaser-game/
 ├── backend/
 │   ├── app/            # FastAPI application
 │   │   ├── main.py     # Main application entry point
+│   │   ├── config.py   # Configuration loader for enums
 │   │   ├── models/     # Data models
 │   │   │   └── game.py # Game state models
 │   │   ├── services/   # Business logic services
@@ -84,6 +87,10 @@ phaser-game/
 - `/exit`: Handle game exit, optionally saving the game
 
 ## Recent Significant Changes
+- [2025-03-07] Implemented enum-based type system for game entities using a shared JSON configuration
+- [2025-03-07] Created a shared config directory with enums.json for synchronizing enums between backend and frontend
+- [2025-03-07] Updated backend models and services to use enum types for planet types, galaxy sizes, and difficulty levels
+- [2025-03-07] Modified Docker configuration to mount the config directory in containers
 - [2025-03-07] Fixed failing unit tests by correcting the Graphics object creation in InputField.ts and updating the Phaser mock
 - [2025-03-07] Created test.sh script to simplify running tests with support for frontend, backend, and various options
 - [2025-03-07] Enhanced the new game window with a proper form interface, including input fields and dropdown selects

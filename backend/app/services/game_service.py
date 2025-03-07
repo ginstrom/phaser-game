@@ -3,6 +3,7 @@ import string
 from typing import Dict, List, Any, Optional
 import math
 
+from app.config import PlanetType, GalaxySize, Difficulty
 from app.models.game import (
     GameState,
     Player,
@@ -15,11 +16,18 @@ from app.models.game import (
 # In-memory storage for games (would be replaced with a database in production)
 games: Dict[str, GameState] = {}
 
-# Planet type probabilities based on distance from star
-PLANET_TYPES = [
-    "rocky", "terrestrial", "oceanic", "desert", "jungle", 
-    "arctic", "gas giant", "ice giant", "volcanic"
-]
+# Map string planet types to enum values for backward compatibility
+PLANET_TYPE_MAP = {
+    "rocky": PlanetType.ROCKY,
+    "terrestrial": PlanetType.TERRESTRIAL,
+    "oceanic": PlanetType.OCEANIC,
+    "desert": PlanetType.DESERT,
+    "jungle": PlanetType.JUNGLE,
+    "arctic": PlanetType.ARCTIC,
+    "gas giant": PlanetType.GAS_GIANT,
+    "ice giant": PlanetType.ICE_GIANT,
+    "volcanic": PlanetType.VOLCANIC
+}
 
 # Star system name components for random generation
 STAR_NAME_PREFIXES = [
@@ -73,21 +81,22 @@ def generate_planet(position_in_system: int) -> Planet:
     """Generate a random planet based on its position in the star system."""
     # Planet type probabilities based on position
     if position_in_system <= 2:  # Inner planets
-        planet_types = ["rocky", "terrestrial", "volcanic"]
+        planet_types = [PlanetType.ROCKY, PlanetType.TERRESTRIAL, PlanetType.VOLCANIC]
         weights = [0.5, 0.3, 0.2]
     elif position_in_system <= 4:  # Middle planets
-        planet_types = ["terrestrial", "oceanic", "desert", "jungle", "arctic"]
+        planet_types = [PlanetType.TERRESTRIAL, PlanetType.OCEANIC, PlanetType.DESERT, 
+                        PlanetType.JUNGLE, PlanetType.ARCTIC]
         weights = [0.3, 0.2, 0.2, 0.15, 0.15]
     else:  # Outer planets
-        planet_types = ["gas giant", "ice giant", "arctic"]
+        planet_types = [PlanetType.GAS_GIANT, PlanetType.ICE_GIANT, PlanetType.ARCTIC]
         weights = [0.5, 0.4, 0.1]
     
     planet_type = random.choices(planet_types, weights=weights, k=1)[0]
     
     # Planet size based on type
-    if planet_type in ["gas giant", "ice giant"]:
+    if planet_type in [PlanetType.GAS_GIANT, PlanetType.ICE_GIANT]:
         size = random.randint(7, 10)
-    elif planet_type in ["terrestrial", "oceanic", "jungle"]:
+    elif planet_type in [PlanetType.TERRESTRIAL, PlanetType.OCEANIC, PlanetType.JUNGLE]:
         size = random.randint(4, 7)
     else:
         size = random.randint(1, 5)
@@ -115,12 +124,12 @@ def generate_star_system(position: Dict[str, float]) -> StarSystem:
     return system
 
 
-def generate_galaxy(size: str) -> Galaxy:
+def generate_galaxy(size: GalaxySize) -> Galaxy:
     """Generate a galaxy with random star systems based on the specified size."""
     # Determine number of star systems based on galaxy size
-    if size == "small":
+    if size == GalaxySize.SMALL:
         num_systems = random.randint(10, 20)
-    elif size == "medium":
+    elif size == GalaxySize.MEDIUM:
         num_systems = random.randint(20, 40)
     else:  # large
         num_systems = random.randint(40, 60)
@@ -152,14 +161,18 @@ def create_new_game(player_name: str, difficulty: str = "normal", galaxy_size: s
     # Create player
     player = Player(name=player_name)
     
+    # Convert string parameters to enums
+    difficulty_enum = getattr(Difficulty, difficulty.upper(), Difficulty.NORMAL)
+    galaxy_size_enum = getattr(GalaxySize, galaxy_size.upper(), GalaxySize.MEDIUM)
+    
     # Generate galaxy
-    galaxy = generate_galaxy(galaxy_size)
+    galaxy = generate_galaxy(galaxy_size_enum)
     
     # Create game state
     game = GameState(
         player=player,
         galaxy=galaxy,
-        difficulty=difficulty
+        difficulty=difficulty_enum
     )
     
     # Store game in memory

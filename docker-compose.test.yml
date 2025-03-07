@@ -41,6 +41,7 @@ services:
       dockerfile: docker/Dockerfile.backend
     volumes:
       - ./backend:/app
+      - ./config:/config
     environment:
       - ENVIRONMENT=test
     command: python -m pytest
@@ -51,6 +52,7 @@ services:
       dockerfile: docker/Dockerfile.backend
     volumes:
       - ./backend:/app
+      - ./config:/config
     environment:
       - ENVIRONMENT=test
     command: python -m pytest -v
@@ -61,6 +63,7 @@ services:
       dockerfile: docker/Dockerfile.backend
     volumes:
       - ./backend:/app
+      - ./config:/config
     environment:
       - ENVIRONMENT=test
     command: python -m pytest --cov=app --cov-report=term-missing
