@@ -1,3 +1,5 @@
+// This comment was added to test automatic reloading in Docker
+// This is a second comment to test if hot reloading works correctly
 import Phaser from 'phaser';
 import Button from '../ui/Button';
 import { TextStyles } from '../ui/TextStyles';

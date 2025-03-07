@@ -51,5 +51,11 @@ module.exports = {
     compress: true,
     port: 8080,
     hot: true,
+    watchFiles: {
+      paths: ['src/**/*'],
+      options: {
+        poll: true, // Enable polling for file watching in Docker environment
+      }
+    },
   },
 };

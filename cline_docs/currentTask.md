@@ -1,18 +1,26 @@
 # Current Task
 
 ## Current Objective
-Use enums.json config file for enum values in the frontend.
+Enable automatic reloading for the frontend in Docker Compose when code changes are made.
 
 ## Context
-The backend already uses the shared enums.json configuration file for enum values, but the frontend still uses hardcoded values. Using the shared configuration file in the frontend will ensure consistency between the backend and frontend, making the codebase more maintainable and reducing the risk of errors.
-
-## Plan
-1. **Update docker-compose.yml and docker-compose.test.yml** to mount the config directory in the frontend containers
-2. **Create a utility file** in the frontend to load and use the enums from the config file
-3. **Update the StartupScene.ts** file to use the enums from the utility file instead of hardcoding them
-4. **Test the changes** to ensure everything works correctly
+Currently, when changes are made to the frontend code, the Docker container does not automatically detect these changes and reload the application. This makes development slower as it requires manual restarts of the container or the application. Enabling automatic reloading will improve the development workflow by instantly reflecting code changes in the browser.
 
 ## Completed Actions
+1. ✅ **Modify webpack.config.js** to enable polling for file watching in Docker environment:
+   - Initially added `watchOptions: { poll: true }` to the devServer configuration
+   - Updated to use `watchFiles: { paths: ['src/**/*'], options: { poll: true } }` to match the current webpack-dev-server API
+2. ✅ **Test the changes** to ensure automatic reloading works correctly:
+   - Restarted Docker Compose to apply the changes
+   - Made a test change to the StartupScene.ts file
+   - Verified that webpack detected the change and automatically recompiled the code
+   - Confirmed that the frontend is accessible and displays correctly with the changes
+
+## Previous Task (Completed)
+### Objective
+Use enums.json config file for enum values in the frontend.
+
+### Results
 1. ✅ Updated docker-compose.yml to mount the config directory in the frontend container:
    - Added volume mapping: `./config:/app/config`
 2. ✅ Updated docker-compose.test.yml to mount the config directory in the frontend test containers:

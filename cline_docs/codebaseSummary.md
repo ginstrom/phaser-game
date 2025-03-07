@@ -87,6 +87,8 @@ phaser-game/
 - `/exit`: Handle game exit, optionally saving the game
 
 ## Recent Significant Changes
+- [2025-03-07] Enabled automatic reloading for the frontend in Docker Compose when code changes are made
+- [2025-03-07] Updated webpack.config.js to use file watching with polling for better Docker compatibility
 - [2025-03-07] Implemented enum-based type system for game entities using a shared JSON configuration for both backend and frontend
 - [2025-03-07] Created a shared config directory with enums.json for synchronizing enums between backend and frontend
 - [2025-03-07] Updated backend models and services to use enum types for planet types, galaxy sizes, and difficulty levels

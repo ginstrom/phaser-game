@@ -35,6 +35,7 @@
 - Stable multiplayer functionality
 
 ## Completed Tasks
+- [2025-03-07] Enabled automatic reloading for the frontend in Docker Compose when code changes are made
 - [2025-03-07] Implemented enum-based type system for game entities using a shared JSON configuration for both backend and frontend
 - [2025-03-07] Created test.sh script for running unit tests with support for frontend, backend, and various options
 - [2025-03-06] Project initialization
