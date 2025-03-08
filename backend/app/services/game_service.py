@@ -1,6 +1,7 @@
 import random
 import string
 from typing import Dict, List, Any, Optional
+from sqlalchemy.ext.asyncio import AsyncSession
 import math
 
 from app.config import PlanetType, GalaxySize, Difficulty
@@ -156,29 +157,29 @@ def generate_galaxy(size: GalaxySize) -> Galaxy:
     return galaxy
 
 
-def create_new_game(player_name: str, difficulty: str = "normal", galaxy_size: str = "medium") -> GameState:
-    """Create a new game with the specified parameters."""
-    # Create player
-    player = Player(name=player_name)
-    
-    # Convert string parameters to enums
-    difficulty_enum = getattr(Difficulty, difficulty.upper(), Difficulty.NORMAL)
-    galaxy_size_enum = getattr(GalaxySize, galaxy_size.upper(), GalaxySize.MEDIUM)
-    
-    # Generate galaxy
-    galaxy = generate_galaxy(galaxy_size_enum)
-    
-    # Create game state
-    game = GameState(
-        player=player,
-        galaxy=galaxy,
-        difficulty=difficulty_enum
-    )
-    
-    # Store game in memory
-    games[game.id] = game
-    
-    return game
+async def create_new_game(session: AsyncSession, player_name: str, difficulty: str = "normal", galaxy_size: str = "medium") -> dict:
+    """
+    Create a new game with the specified parameters using the repository pattern.
+    """
+    game_data = {
+        "player_name": player_name,
+        "difficulty": difficulty,
+        "player_resources": {
+            "organic": 0,
+            "mineral": 500,
+            "energy": 200,
+            "exotics": 0,
+            "credits": 1000,
+            "research": 0
+        },
+        "galaxy_data": {
+            "size": galaxy_size
+        }
+    }
+    from app.database.repositories import GameRepository
+    repo = GameRepository(session)
+    game = await repo.create_game(game_data)
+    return game.to_dict()
 
 
 def get_game(game_id: str) -> Optional[GameState]:
