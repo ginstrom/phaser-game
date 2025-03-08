@@ -1,37 +1,43 @@
 import os
 import sys
-# Adjust sys.path so that 'app' resolves from the backend directory
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
+# Adjust sys.path so that 'app' resolves correctly
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import pytest
-import asyncio
 from fastapi.testclient import TestClient
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.main import app
-from app.database.config import get_db
-from app.models.game import Base
+from app.database.config import get_db, Base
 
 # Configure in-memory SQLite database for testing
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+TEST_DATABASE_URL = "sqlite:///:memory:"
 
-engine = create_async_engine(
-    TEST_DATABASE_URL, connect_args={"check_same_thread": False}
+engine = create_engine(
+    TEST_DATABASE_URL,
+    connect_args={"check_same_thread": False}
 )
-TestSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-async def override_get_db():
-    async with TestSessionLocal() as session:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
-        finally:
-            await session.close()
+TestSessionLocal = sessionmaker(bind=engine)
+
+# Create tables before tests
+@pytest.fixture(scope="session", autouse=True)
+def create_tables():
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
+
+# Override the get_db dependency for tests
+def override_get_db():
+    db = TestSessionLocal()
+    try:
+        yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
 
 app.dependency_overrides[get_db] = override_get_db
 
@@ -42,3 +48,19 @@ def client():
     This fixture can be used in tests to make requests to the API.
     """
     return TestClient(app)
+
+@pytest.fixture
+def db():
+    """
+    Create a database session for tests.
+    This fixture can be used in tests to access the database directly.
+    """
+    db = TestSessionLocal()
+    try:
+        yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()

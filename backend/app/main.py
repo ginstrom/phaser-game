@@ -2,8 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
+# Import database
+from app.database.config import engine, Base
+
 # Import routers
 from app.routers import new_game, load_game, settings, exit_game
+
+# Create tables
+Base.metadata.create_all(bind=engine)
 
 # Create FastAPI app
 app = FastAPI(
