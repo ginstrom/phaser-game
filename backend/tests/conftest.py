@@ -1,3 +1,8 @@
+import os
+import sys
+# Adjust sys.path so that 'app' resolves from the backend directory
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
+
 import pytest
 import asyncio
 from fastapi.testclient import TestClient
