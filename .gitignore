@@ -128,3 +128,15 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+# Python cache and compiled files
+*.pyc
+__pycache__/
+# Frontend build outputs
+/frontend/dist
+/frontend/build
+# Frontend additional temporary files
+/frontend/coverage
+*.map
+# Frontend dependency directory
+/frontend/node_modules/
+/frontend/.cache
