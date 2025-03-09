@@ -1,9 +1,63 @@
 import os
+import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from enum import Enum
+from pathlib import Path
 
 # Base class for declarative models
 Base = declarative_base()
+
+# Load shared enums from JSON
+ENUMS_PATH = Path(__file__).parent.parent.parent.parent / "config" / "enums.json"
+with open(ENUMS_PATH) as f:
+    SHARED_ENUMS = json.load(f)
+
+class PlanetType(str, Enum):
+    """Planet types loaded from shared enums"""
+    def _generate_next_value_(name, start, count, last_values):
+        return name
+    
+    @classmethod
+    def _missing_(cls, value):
+        # Handle case-insensitive lookup
+        try:
+            return cls[value.upper()]
+        except KeyError:
+            return None
+
+    # Dynamically create enum values from shared JSON
+    locals().update({name.upper(): name for name in SHARED_ENUMS["PlanetType"]})
+
+class GalaxySize(str, Enum):
+    """Galaxy sizes loaded from shared enums"""
+    def _generate_next_value_(name, start, count, last_values):
+        return name
+    
+    @classmethod
+    def _missing_(cls, value):
+        try:
+            return cls[value.upper()]
+        except KeyError:
+            return None
+
+    # Dynamically create enum values from shared JSON
+    locals().update({name.upper(): name for name in SHARED_ENUMS["GalaxySize"]})
+
+class Difficulty(str, Enum):
+    """Difficulty levels loaded from shared enums"""
+    def _generate_next_value_(name, start, count, last_values):
+        return name
+    
+    @classmethod
+    def _missing_(cls, value):
+        try:
+            return cls[value.upper()]
+        except KeyError:
+            return None
+
+    # Dynamically create enum values from shared JSON
+    locals().update({name.upper(): name for name in SHARED_ENUMS["Difficulty"]})
 
 # Get database URL from environment or default to SQLite
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
