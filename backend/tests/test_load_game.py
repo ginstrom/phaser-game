@@ -1,8 +1,7 @@
 import pytest
 from fastapi import status
 
-@pytest.mark.asyncio
-async def test_list_saved_games(client):
+def test_list_saved_games(client):
     """
     Test listing all saved games.
     The endpoint should return a list of saved games.
@@ -21,14 +20,13 @@ async def test_list_saved_games(client):
     
     # Check the structure of the first saved game
     first_game = data[0]
-    assert "game_id" in first_game
+    assert "game_id" in first_game  # API returns game_id
     assert "player_name" in first_game
     assert "empire_name" in first_game
     assert "turn" in first_game
     assert "save_date" in first_game
 
-@pytest.mark.asyncio
-async def test_load_existing_game(client):
+def test_load_existing_game(client):
     """
     Test loading an existing game by ID.
     The endpoint should return the game state for the specified game ID.
@@ -39,7 +37,7 @@ async def test_load_existing_game(client):
         json={"player_name": "LoadGameTest"}
     )
     new_game_data = new_game_response.json()
-    valid_game_id = new_game_data["game_id"]
+    valid_game_id = new_game_data["game_id"]  # The API returns game_id at the top level
     
     # Now try to load the game with the valid ID
     response = client.post(
@@ -59,8 +57,7 @@ async def test_load_existing_game(client):
     assert "galaxy" in game_state
     assert "turn" in game_state
 
-@pytest.mark.asyncio
-async def test_load_nonexistent_game(client):
+def test_load_nonexistent_game(client):
     """
     Test loading a game with a non-existent ID.
     The endpoint should return a 404 error.
@@ -74,8 +71,7 @@ async def test_load_nonexistent_game(client):
     assert "detail" in data
     assert "not found" in data["detail"].lower()
 
-@pytest.mark.asyncio
-async def test_load_game_missing_id(client):
+def test_load_game_missing_id(client):
     """
     Test loading a game without providing a game ID.
     The endpoint should return a validation error.

@@ -2,11 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-# Import database
-from app.database.config import engine, Base
+# Import database with relative imports for testing
+from database.config import engine, Base
 
-# Import routers
-from app.routers import new_game, load_game, settings, exit_game
+# Import routers with relative imports for testing
+from routers import new_game, load_game, settings, exit_game
 
 # Create FastAPI app
 app = FastAPI(
@@ -45,4 +45,4 @@ def create_tables():
     Base.metadata.create_all(bind=engine)
 
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app.main_test:app", host="0.0.0.0", port=8000, reload=True)

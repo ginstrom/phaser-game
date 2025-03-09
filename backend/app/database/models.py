@@ -40,16 +40,25 @@ class Game(Base):
             "resources": self.player_resources.to_dict() if self.player_resources else {}
         }
         
-        galaxy = {
+        # Ensure galaxy is loaded
+        galaxy_data = {
             "size": self.galaxy_size,
-            "systems": self.galaxy.total_systems if self.galaxy else 0,
-            "explored": self.galaxy.explored_count if self.galaxy else 0
+            "systems": 0,
+            "explored": 0
         }
+        
+        if self.galaxy:
+            galaxy_data["systems"] = self.galaxy.total_systems
+            galaxy_data["explored"] = self.galaxy.explored_count
+            if hasattr(self.galaxy, 'to_dict'):
+                galaxy_data.update(self.galaxy.to_dict())
         
         return {
             "id": self.id,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "player": player,
-            "galaxy": galaxy,
+            "galaxy": galaxy_data,
             "turn": self.turn,
             "difficulty": self.difficulty
         }
@@ -72,6 +81,16 @@ class Galaxy(Base):
     def total_systems(self):
         """Get the total number of star systems in the galaxy."""
         return len(self.systems)
+    
+    def to_dict(self):
+        """Convert the galaxy to a dictionary for the API response."""
+        return {
+            "id": self.id,
+            "size": self.size,
+            "explored_count": self.explored_count,
+            "total_systems": self.total_systems,
+            "systems": [system.to_dict() for system in self.systems] if self.systems else []
+        }
 
 
 class StarSystem(Base):

@@ -4,12 +4,10 @@ pydantic==2.4.2
 python-multipart==0.0.6
 psycopg2-binary==2.9.6
 SQLAlchemy==2.0.23
-# Async database drivers
-asyncpg==0.29.0  # For PostgreSQL
-aiosqlite==0.19.0  # For SQLite
+# Database drivers (synchronous)
+# psycopg2-binary is already included above for PostgreSQL
 
 # Testing dependencies
 pytest==7.4.3
 httpx==0.25.1
 pytest-cov==4.1.0
-pytest-asyncio==0.21.1  # For testing async code

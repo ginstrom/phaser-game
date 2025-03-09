@@ -1,66 +1,58 @@
 import os
 import sys
-import asyncio
 import pytest
+import importlib.util
 from fastapi.testclient import TestClient
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
 
-# Add the backend directory to sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+# Simplify the import approach based on debug findings
+# The debug script showed that app.main can be imported directly
+# when the Python path is set correctly
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Fixed import: the bug was introduced with external DB integration.
-# The correct import in both local and docker-compose environments is now:
-from app.main import app
+# Import the app
+import app.main
+app = app.main.app
 from app.database.config import get_db, Base
 
 # Configure in-memory SQLite database for testing
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+TEST_DATABASE_URL = "sqlite:///:memory:"
 
-# Create async engine
-engine = create_async_engine(
+# Create synchronous engine
+engine = create_engine(
     TEST_DATABASE_URL,
     future=True,
-    echo=True
+    echo=True,
+    connect_args={"check_same_thread": False}
 )
 
-# Create async session factory
+# Create synchronous session factory
 TestSessionLocal = sessionmaker(
     bind=engine,
-    class_=AsyncSession,
     expire_on_commit=False
 )
 
 # Create tables before tests
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create an instance of the default event loop for each test case."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
-
-@pytest.fixture(scope="session")
-async def setup_database():
+@pytest.fixture(scope="session", autouse=True)
+def setup_database():
     # Create the tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
     yield
     # Drop the tables after tests complete
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+    Base.metadata.drop_all(bind=engine)
 
 # Override the get_db dependency for tests
-async def override_get_db():
-    async with TestSessionLocal() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
-        finally:
-            await session.close()
+def override_get_db():
+    session = TestSessionLocal()
+    try:
+        yield session
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 app.dependency_overrides[get_db] = override_get_db
 
@@ -74,15 +66,16 @@ def client(setup_database):
         yield test_client
 
 @pytest.fixture
-async def db():
+def db():
     """
     Create a database session for tests.
     This fixture can be used in tests to access the database directly.
     """
-    async with TestSessionLocal() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
+    session = TestSessionLocal()
+    try:
+        yield session
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()

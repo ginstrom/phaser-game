@@ -47,7 +47,8 @@ services:
       - ./config:/config
     environment:
       - ENVIRONMENT=test
-    command: python -m pytest
+      - PYTHONPATH=/app
+    command: /app/run_tests.sh
 
   backend-verbose:
     build:
@@ -58,7 +59,8 @@ services:
       - ./config:/config
     environment:
       - ENVIRONMENT=test
-    command: python -m pytest -v
+      - PYTHONPATH=/app
+    command: /app/run_tests.sh -v
 
   backend-coverage:
     build:
@@ -69,4 +71,5 @@ services:
       - ./config:/config
     environment:
       - ENVIRONMENT=test
-    command: python -m pytest --cov=app --cov-report=term-missing
+      - PYTHONPATH=/app
+    command: /app/run_tests.sh --cov=app --cov-report=term-missing

@@ -1,8 +1,7 @@
 import pytest
 from fastapi import status
 
-@pytest.mark.asyncio
-async def test_get_settings(client):
+def test_get_settings(client):
     """
     Test getting the current game settings.
     The endpoint should return the default settings.
@@ -27,8 +26,7 @@ async def test_get_settings(client):
     assert settings["ui_scale"] == 1.0
     assert settings["show_tutorials"] is True
 
-@pytest.mark.asyncio
-async def test_update_settings_all_fields(client):
+def test_update_settings_all_fields(client):
     """
     Test updating all game settings.
     The endpoint should return the updated settings.
@@ -61,8 +59,7 @@ async def test_update_settings_all_fields(client):
     for key, value in new_settings.items():
         assert updated_settings[key] == value
 
-@pytest.mark.asyncio
-async def test_update_settings_partial(client):
+def test_update_settings_partial(client):
     """
     Test updating only some of the game settings.
     The endpoint should return all settings with only the specified ones updated.
@@ -94,8 +91,7 @@ async def test_update_settings_partial(client):
     assert updated_settings["ui_scale"] == 1.0
     assert updated_settings["show_tutorials"] is True
 
-@pytest.mark.asyncio
-async def test_update_settings_invalid_field(client):
+def test_update_settings_invalid_field(client):
     """
     Test updating settings with an invalid field.
     The endpoint should return a 400 error.
@@ -113,8 +109,7 @@ async def test_update_settings_invalid_field(client):
     assert "detail" in data
     assert "Invalid setting" in data["detail"]
 
-@pytest.mark.asyncio
-async def test_reset_settings(client):
+def test_reset_settings(client):
     """
     Test resetting game settings to default values.
     The endpoint should return the default settings.

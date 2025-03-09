@@ -1,8 +1,7 @@
 import pytest
 from fastapi import status
 
-@pytest.mark.asyncio
-async def test_create_new_game_with_default_values(client):
+def test_create_new_game_with_default_values(client):
     """
     Test creating a new game with only the required player_name parameter.
     Default values should be used for difficulty and galaxy_size.
@@ -35,8 +34,7 @@ async def test_create_new_game_with_default_values(client):
     # Check turn data
     assert data["initial_state"]["turn"] == 1
 
-@pytest.mark.asyncio
-async def test_create_new_game_with_custom_values(client):
+def test_create_new_game_with_custom_values(client):
     """
     Test creating a new game with custom values for all parameters.
     """
@@ -56,8 +54,7 @@ async def test_create_new_game_with_custom_values(client):
     assert data["initial_state"]["player"]["name"] == "CustomPlayer"
     assert data["initial_state"]["galaxy"]["size"] == "large"
 
-@pytest.mark.asyncio
-async def test_create_new_game_missing_player_name(client):
+def test_create_new_game_missing_player_name(client):
     """
     Test that creating a new game without a player_name returns a validation error.
     """

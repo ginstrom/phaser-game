@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from app.database.config import get_db
 
@@ -27,7 +27,7 @@ class SettingsResponse(BaseModel):
     settings: GameSettings
 
 @router.get("/settings", response_model=SettingsResponse)
-async def get_settings(db: AsyncSession = Depends(get_db)):
+def get_settings(db: Session = Depends(get_db)):
     """
     Get the current game settings.
     
@@ -37,13 +37,13 @@ async def get_settings(db: AsyncSession = Depends(get_db)):
         # Stub implementation - in a real implementation, this would retrieve settings from a database
         return {
             "message": "Settings retrieved successfully",
-            "settings": GameSettings().dict()
+            "settings": GameSettings().model_dump()
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve settings: {str(e)}")
 
 @router.post("/settings", response_model=SettingsResponse)
-async def update_settings(request: UpdateSettingsRequest, db: AsyncSession = Depends(get_db)):
+def update_settings(request: UpdateSettingsRequest, db: Session = Depends(get_db)):
     """
     Update game settings.
     
@@ -53,7 +53,7 @@ async def update_settings(request: UpdateSettingsRequest, db: AsyncSession = Dep
         # Stub implementation - in a real implementation, this would update settings in a database
         
         # Start with default settings
-        current_settings = GameSettings().dict()
+        current_settings = GameSettings().model_dump()
         
         # Update with the provided settings
         for key, value in request.settings.items():
@@ -75,7 +75,7 @@ async def update_settings(request: UpdateSettingsRequest, db: AsyncSession = Dep
         raise HTTPException(status_code=500, detail=f"Failed to update settings: {str(e)}")
 
 @router.get("/settings/reset", response_model=SettingsResponse)
-async def reset_settings(db: AsyncSession = Depends(get_db)):
+def reset_settings(db: Session = Depends(get_db)):
     """
     Reset game settings to default values.
     
@@ -85,7 +85,7 @@ async def reset_settings(db: AsyncSession = Depends(get_db)):
         # Stub implementation - in a real implementation, this would reset settings in a database
         return {
             "message": "Settings reset to defaults",
-            "settings": GameSettings().dict()
+            "settings": GameSettings().model_dump()
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to reset settings: {str(e)}")

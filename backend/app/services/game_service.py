@@ -1,12 +1,12 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 from typing import Dict, List, Any, Optional
 
 from app.database.repositories import GameRepository
 
-async def create_new_game(
-    db: AsyncSession, 
-    player_name: str, 
-    difficulty: str = "normal", 
+def create_new_game(
+    db: Session,
+    player_name: str,
+    difficulty: str = "normal",
     galaxy_size: str = "medium"
 ) -> dict:
     """
@@ -27,37 +27,37 @@ async def create_new_game(
     }
     
     repo = GameRepository(db)
-    game = await repo.create_game(game_data)
+    game = repo.create_game(game_data)
     return game.to_dict()
 
-async def get_game(db: AsyncSession, game_id: str) -> Optional[dict]:
+def get_game(db: Session, game_id: str) -> Optional[dict]:
     """
     Get a game by ID.
     """
     repo = GameRepository(db)
-    game = await repo.get_game_by_id(game_id)
+    game = repo.get_game_by_id(game_id)
     if game:
         return game.to_dict()
     return None
 
-async def get_all_games(db: AsyncSession) -> List[dict]:
+def get_all_games(db: Session) -> List[dict]:
     """
     Get all games.
     """
     repo = GameRepository(db)
-    games = await repo.list_games()
+    games = repo.list_games()
     return [game.to_dict() for game in games]
 
-async def delete_game(db: AsyncSession, game_id: str) -> bool:
+def delete_game(db: Session, game_id: str) -> bool:
     """
     Delete a game by ID.
     """
     repo = GameRepository(db)
-    return await repo.delete_game(game_id)
+    return repo.delete_game(game_id)
 
-async def update_game_turn(db: AsyncSession, game_id: str, turn: int) -> bool:
+def update_game_turn(db: Session, game_id: str, turn: int) -> bool:
     """
     Update the turn of a game.
     """
     repo = GameRepository(db)
-    return await repo.update_game_turn(game_id, turn)
+    return repo.update_game_turn(game_id, turn)
