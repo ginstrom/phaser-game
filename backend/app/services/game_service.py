@@ -1,10 +1,14 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict, List, Any, Optional
 
 from app.database.repositories import GameRepository
-from app.config import PlanetType, GalaxySize, Difficulty
 
-def create_new_game(db: Session, player_name: str, difficulty: str = "normal", galaxy_size: str = "medium") -> dict:
+async def create_new_game(
+    db: AsyncSession, 
+    player_name: str, 
+    difficulty: str = "normal", 
+    galaxy_size: str = "medium"
+) -> dict:
     """
     Create a new game with the specified parameters using the repository pattern.
     """
@@ -23,37 +27,37 @@ def create_new_game(db: Session, player_name: str, difficulty: str = "normal", g
     }
     
     repo = GameRepository(db)
-    game = repo.create_game(game_data)
+    game = await repo.create_game(game_data)
     return game.to_dict()
 
-def get_game(db: Session, game_id: str) -> Optional[dict]:
+async def get_game(db: AsyncSession, game_id: str) -> Optional[dict]:
     """
     Get a game by ID.
     """
     repo = GameRepository(db)
-    game = repo.get_game_by_id(game_id)
+    game = await repo.get_game_by_id(game_id)
     if game:
         return game.to_dict()
     return None
 
-def get_all_games(db: Session) -> List[dict]:
+async def get_all_games(db: AsyncSession) -> List[dict]:
     """
     Get all games.
     """
     repo = GameRepository(db)
-    games = repo.list_games()
+    games = await repo.list_games()
     return [game.to_dict() for game in games]
 
-def delete_game(db: Session, game_id: str) -> bool:
+async def delete_game(db: AsyncSession, game_id: str) -> bool:
     """
     Delete a game by ID.
     """
     repo = GameRepository(db)
-    return repo.delete_game(game_id)
+    return await repo.delete_game(game_id)
 
-def update_game_turn(db: Session, game_id: str, turn: int) -> bool:
+async def update_game_turn(db: AsyncSession, game_id: str, turn: int) -> bool:
     """
     Update the turn of a game.
     """
     repo = GameRepository(db)
-    return repo.update_game_turn(game_id, turn)
+    return await repo.update_game_turn(game_id, turn)

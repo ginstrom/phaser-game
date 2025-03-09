@@ -18,11 +18,16 @@ else:
 engine = create_async_engine(
     DATABASE_URL,
     echo=True,
+    future=True,
     connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 )
 
 # Create async session factory
-async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+async_session_maker = sessionmaker(
+    engine, 
+    class_=AsyncSession, 
+    expire_on_commit=False
+)
 
 # Dependency for FastAPI endpoints to provide a database session
 async def get_db():

@@ -1,6 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database.config import get_db
 
 router = APIRouter()
 
@@ -24,7 +27,7 @@ class SettingsResponse(BaseModel):
     settings: GameSettings
 
 @router.get("/settings", response_model=SettingsResponse)
-async def get_settings():
+async def get_settings(db: AsyncSession = Depends(get_db)):
     """
     Get the current game settings.
     
@@ -40,7 +43,7 @@ async def get_settings():
         raise HTTPException(status_code=500, detail=f"Failed to retrieve settings: {str(e)}")
 
 @router.post("/settings", response_model=SettingsResponse)
-async def update_settings(request: UpdateSettingsRequest):
+async def update_settings(request: UpdateSettingsRequest, db: AsyncSession = Depends(get_db)):
     """
     Update game settings.
     
@@ -72,7 +75,7 @@ async def update_settings(request: UpdateSettingsRequest):
         raise HTTPException(status_code=500, detail=f"Failed to update settings: {str(e)}")
 
 @router.get("/settings/reset", response_model=SettingsResponse)
-async def reset_settings():
+async def reset_settings(db: AsyncSession = Depends(get_db)):
     """
     Reset game settings to default values.
     

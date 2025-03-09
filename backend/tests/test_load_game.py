@@ -1,11 +1,18 @@
 import pytest
 from fastapi import status
 
-def test_list_saved_games(client):
+@pytest.mark.asyncio
+async def test_list_saved_games(client):
     """
     Test listing all saved games.
     The endpoint should return a list of saved games.
     """
+    # First create a game to ensure there's at least one to list
+    client.post(
+        "/new-game",
+        json={"player_name": "TestPlayer"}
+    )
+    
     response = client.get("/saved-games")
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
@@ -20,15 +27,19 @@ def test_list_saved_games(client):
     assert "turn" in first_game
     assert "save_date" in first_game
 
-def test_load_existing_game(client):
+@pytest.mark.asyncio
+async def test_load_existing_game(client):
     """
     Test loading an existing game by ID.
     The endpoint should return the game state for the specified game ID.
     """
-    # First, get a list of saved games to find a valid game ID
-    saved_games_response = client.get("/saved-games")
-    saved_games = saved_games_response.json()
-    valid_game_id = saved_games[0]["game_id"]
+    # First, create a new game to get a valid game ID
+    new_game_response = client.post(
+        "/new-game",
+        json={"player_name": "LoadGameTest"}
+    )
+    new_game_data = new_game_response.json()
+    valid_game_id = new_game_data["game_id"]
     
     # Now try to load the game with the valid ID
     response = client.post(
@@ -48,7 +59,8 @@ def test_load_existing_game(client):
     assert "galaxy" in game_state
     assert "turn" in game_state
 
-def test_load_nonexistent_game(client):
+@pytest.mark.asyncio
+async def test_load_nonexistent_game(client):
     """
     Test loading a game with a non-existent ID.
     The endpoint should return a 404 error.
@@ -62,7 +74,8 @@ def test_load_nonexistent_game(client):
     assert "detail" in data
     assert "not found" in data["detail"].lower()
 
-def test_load_game_missing_id(client):
+@pytest.mark.asyncio
+async def test_load_game_missing_id(client):
     """
     Test loading a game without providing a game ID.
     The endpoint should return a validation error.

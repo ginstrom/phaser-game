@@ -1,6 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional, Union
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database.config import get_db
 
 router = APIRouter()
 
@@ -21,7 +24,7 @@ class ExitGameNotSavedResponse(BaseModel):
 ExitGameResponse = Union[ExitGameSavedResponse, ExitGameNotSavedResponse]
 
 @router.post("/exit", response_model=ExitGameResponse)
-async def exit_game(request: ExitGameRequest):
+async def exit_game(request: ExitGameRequest, db: AsyncSession = Depends(get_db)):
     """
     Handle game exit, optionally saving the game before exiting.
     

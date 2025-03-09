@@ -1,13 +1,13 @@
 import random
 import math
-from sqlalchemy.orm import Session
-from sqlalchemy import select, update, delete
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from sqlalchemy.future import select
 
 from app.database.models import (
     Game, Galaxy, StarSystem, Planet, 
     PlanetResources, PlayerResources
 )
-from app.config import PlanetType, GalaxySize, Difficulty
 
 # Star system name components for random generation
 STAR_NAME_PREFIXES = [
@@ -33,18 +33,17 @@ PLANET_NAME_SUFFIXES = [
 ]
 
 class GameRepository:
-    """Repository for game operations."""
-    def __init__(self, session: Session):
+    """Repository for game operations with async SQLAlchemy."""
+    def __init__(self, session: AsyncSession):
         self.session = session
 
-    def create_game(self, game_data: dict):
+    async def create_game(self, game_data: dict):
         """Create a new game with the specified parameters."""
         # Extract basic game info
         player_name = game_data.get("player_name")
         difficulty = game_data.get("difficulty", "normal")
         galaxy_size = game_data.get("galaxy_size", "medium")
         player_resources_data = game_data.get("player_resources", {})
-        galaxy_data = game_data.get("galaxy_data", {})
         
         # Create the game
         game = Game(
@@ -66,43 +65,47 @@ class GameRepository:
         )
         
         # Create galaxy
-        galaxy = self._generate_galaxy(game, galaxy_size)
+        galaxy = await self._generate_galaxy(game, galaxy_size)
         
         # Add to session
         self.session.add(game)
         self.session.add(player_resources)
         self.session.add(galaxy)
-        self.session.flush()
+        await self.session.flush()
         
         return game
 
-    def get_game_by_id(self, game_id: str):
+    async def get_game_by_id(self, game_id: str):
         """Get a game by ID."""
-        return self.session.query(Game).filter(Game.id == game_id).first()
+        stmt = select(Game).where(Game.id == game_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
 
-    def list_games(self):
+    async def list_games(self):
         """List all saved games."""
-        return self.session.query(Game).all()
+        stmt = select(Game)
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
 
-    def delete_game(self, game_id: str):
+    async def delete_game(self, game_id: str):
         """Delete a game by ID."""
-        game = self.get_game_by_id(game_id)
+        game = await self.get_game_by_id(game_id)
         if game:
-            self.session.delete(game)
-            self.session.flush()
+            await self.session.delete(game)
+            await self.session.flush()
             return True
         return False
 
-    def update_game_turn(self, game_id: str, turn: int):
+    async def update_game_turn(self, game_id: str, turn: int):
         """Update the turn of a game."""
-        game = self.get_game_by_id(game_id)
+        game = await self.get_game_by_id(game_id)
         if game:
             game.turn = turn
-            self.session.flush()
+            await self.session.flush()
             return True
         return False
 
-    def _generate_galaxy(self, game: Game, size: str):
+    async def _generate_galaxy(self, game: Game, size: str):
         """Generate a galaxy with random star systems."""
         galaxy = Galaxy(game=game, size=size)
         
@@ -117,7 +120,7 @@ class GameRepository:
         # Generate star systems
         systems = []
         for _ in range(num_systems):
-            system = self._generate_star_system(galaxy)
+            system = await self._generate_star_system(galaxy)
             systems.append(system)
         
         # Mark the first system as explored
@@ -128,7 +131,7 @@ class GameRepository:
         
         return galaxy
 
-    def _generate_star_system(self, galaxy: Galaxy):
+    async def _generate_star_system(self, galaxy: Galaxy):
         """Generate a random star system in the galaxy."""
         # Generate random position within a circular galaxy
         radius = random.random()  # 0 to 1
@@ -152,7 +155,7 @@ class GameRepository:
         # Generate planets
         num_planets = random.randint(1, 8)
         for i in range(num_planets):
-            self._generate_planet(system, i + 1)
+            await self._generate_planet(system, i + 1)
         
         return system
 
@@ -178,7 +181,7 @@ class GameRepository:
             number = random.randint(1, 9)
             return f"{suffix} {number}"
 
-    def _generate_planet(self, system: StarSystem, position_in_system: int):
+    async def _generate_planet(self, system: StarSystem, position_in_system: int):
         """Generate a random planet in the star system."""
         # Planet type probabilities based on position
         if position_in_system <= 2:  # Inner planets

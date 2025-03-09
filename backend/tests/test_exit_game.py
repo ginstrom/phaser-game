@@ -1,7 +1,8 @@
 import pytest
 from fastapi import status
 
-def test_exit_game_with_save(client):
+@pytest.mark.asyncio
+async def test_exit_game_with_save(client):
     """
     Test exiting the game with saving.
     The endpoint should return a success message and save information.
@@ -19,7 +20,8 @@ def test_exit_game_with_save(client):
     assert data["save_id"] is not None
     assert "auto-exit" in data["save_id"]
 
-def test_exit_game_with_custom_save_name(client):
+@pytest.mark.asyncio
+async def test_exit_game_with_custom_save_name(client):
     """
     Test exiting the game with a custom save name.
     The endpoint should return a success message and save information with the custom name.
@@ -38,7 +40,8 @@ def test_exit_game_with_custom_save_name(client):
     assert "save_id" in data
     assert "my-custom-save" in data["save_id"]
 
-def test_exit_game_without_save(client):
+@pytest.mark.asyncio
+async def test_exit_game_without_save(client):
     """
     Test exiting the game without saving.
     The endpoint should return a success message without save information.
@@ -55,7 +58,8 @@ def test_exit_game_without_save(client):
     assert data["saved"] is False
     assert "save_id" not in data
 
-def test_exit_game_default_behavior(client):
+@pytest.mark.asyncio
+async def test_exit_game_default_behavior(client):
     """
     Test exiting the game with default parameters.
     By default, the game should be saved before exit.

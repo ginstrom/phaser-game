@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.config import get_db
 from app.services.game_service import get_game, get_all_games
@@ -25,12 +25,12 @@ class LoadGameResponse(BaseModel):
     game_state: Dict[str, Any]
 
 @router.get("/saved-games", response_model=List[SavedGame])
-def list_saved_games(db: Session = Depends(get_db)):
+async def list_saved_games(db: AsyncSession = Depends(get_db)):
     """
     List all saved games.
     """
     try:
-        games = get_all_games(db)
+        games = await get_all_games(db)
         # Convert to SavedGame format
         saved_games = []
         for game in games:
@@ -47,12 +47,12 @@ def list_saved_games(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Failed to list saved games: {str(e)}")
 
 @router.post("/load-game", response_model=LoadGameResponse)
-def load_game_endpoint(request: LoadGameRequest, db: Session = Depends(get_db)):
+async def load_game_endpoint(request: LoadGameRequest, db: AsyncSession = Depends(get_db)):
     """
     Load a saved game with the specified game ID.
     """
     try:
-        game = get_game(db, request.game_id)
+        game = await get_game(db, request.game_id)
         if not game:
             raise HTTPException(status_code=404, detail=f"Game with ID {request.game_id} not found")
         
