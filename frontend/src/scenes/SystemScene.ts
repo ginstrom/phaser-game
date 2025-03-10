@@ -1,37 +1,24 @@
 import Phaser from 'phaser';
 import Button from '../ui/Button';
-import Panel from '../ui/Panel';
+import Panel, { PanelConfig } from '../ui/Panel';
 import { TextStyles } from '../ui/TextStyles';
+import { useGameState } from '../state/GameState';
+import type { Planet } from '../state/GameState';
 
-interface Planet {
-    id: number;
-    name: string;
+interface ButtonConfig {
+    scene: Phaser.Scene;
     x: number;
     y: number;
-    size: number;
-    color: number;
-    type: string;
-    resources: string;
-    colonized: boolean;
+    text: string;
+    callback: () => void;
 }
 
 export default class SystemScene extends Phaser.Scene {
-    private systemId: number = 0;
-    private systemName: string = '';
-    private discoveryLevel: number = 0; // 0: visible light, 1-5: scanning levels, 6: visited
     private planets: Planet[] = [];
-    private selectedPlanet: Planet | null = null;
     private infoPanel: Panel | null = null;
-    private orbitGraphics: Phaser.GameObjects.Graphics | null = null;
 
     constructor() {
         super('SystemScene');
-    }
-
-    init(data: { systemId: number, discoveryLevel?: number }) {
-        this.systemId = data.systemId;
-        this.systemName = `System ${this.systemId + 1}`;
-        this.discoveryLevel = data.discoveryLevel || 0;
     }
 
     preload() {
@@ -40,304 +27,125 @@ export default class SystemScene extends Phaser.Scene {
 
     create() {
         const { width, height } = this.cameras.main;
-        
-        // Title
-        this.add.text(
+        const gameState = useGameState.getState();
+        const selectedSystem = gameState.selectedSystem;
+
+        if (!selectedSystem) {
+            console.error('No system selected, returning to galaxy view');
+            this.scene.start('GalaxyScene');
+            return;
+        }
+
+        // Add system name
+        this.add.text(width / 2, 30, selectedSystem.name, TextStyles.title)
+            .setOrigin(0.5);
+
+        // Create orbit circles
+        const orbitRadii = [100, 150, 200, 250, 300];
+        orbitRadii.forEach(radius => {
+            this.add.circle(width / 2, height / 2, radius * 2)
+                .setStrokeStyle(1, 0x444444);
+        });
+
+        // Add star at center
+        this.add.circle(width / 2, height / 2, 20, selectedSystem.color);
+
+        // Create planets
+        const planetPositions = this.calculatePlanetPositions(
+            selectedSystem.planets,
             width / 2,
-            30,
-            `${this.systemName} - System View`,
-            TextStyles.subtitle
-        ).setOrigin(0.5);
+            height / 2,
+            orbitRadii
+        );
 
-        // Create graphics for orbits
-        this.orbitGraphics = this.add.graphics();
-        this.orbitGraphics.lineStyle(1, 0x444444);
+        planetPositions.forEach((pos, index) => {
+            const planet = this.add.circle(pos.x, pos.y, 10, 0x00ff00);
+            planet.setInteractive();
 
-        // Create star in the center
-        const starSize = 20;
-        const star = this.add.circle(width / 2, height / 2, starSize, 0xffff00);
-        
-        // Generate planets
-        this.generatePlanets();
-        
-        // Draw orbits and planets based on discovery level
-        this.drawOrbitsAndPlanets();
+            planet.on('pointerover', () => this.onPlanetHover(gameState.planets[index]));
+            planet.on('pointerout', () => this.onPlanetOut());
+            planet.on('pointerdown', () => this.onPlanetClick(gameState.planets[index]));
+        });
 
-        // Back button
-        new Button({
+        // Add back button
+        const buttonConfig: ButtonConfig = {
             scene: this,
-            x: 100,
-            y: height - 50,
+            x: 10,
+            y: height - 40,
             text: 'Back to Galaxy',
-            textStyle: TextStyles.button,
             callback: () => this.backToGalaxy()
-        });
-
-        // System info panel with details based on discovery level
-        const systemInfoPanel = new Panel({
-            scene: this,
-            x: width - 150,
-            y: 100,
-            width: 250,
-            height: 150,
-            title: 'System Info'
-        });
-
-        // Determine what information to show based on discovery level
-        let infoText = '';
-        
-        // At minimum, show star details and number of planets/orbits
-        infoText = `Star Type: ${this.getStarType()}\nPlanets: ${this.planets.length}`;
-        
-        // Add more details as discovery level increases
-        if (this.discoveryLevel >= 2) {
-            infoText += `\nAsteroids: ${this.hasAsteroids() ? 'Yes' : 'No'}`;
-        }
-        
-        if (this.discoveryLevel >= 3) {
-            infoText += `\nStability: ${this.getSystemStability()}`;
-        }
-        
-        if (this.discoveryLevel >= 4) {
-            infoText += `\nResources: ${this.getSystemResourceLevel()}`;
-        }
-        
-        if (this.discoveryLevel >= 5) {
-            infoText += `\nSpecial Features: ${this.getSpecialFeatures()}`;
-        }
-        
-        const systemInfo = this.add.text(
-            0,
-            0,
-            infoText,
-            TextStyles.normal
-        ).setOrigin(0.5);
-
-        systemInfoPanel.addContent(systemInfo);
-        
-        // Add discovery level indicator
-        this.add.text(
-            width - 20,
-            20,
-            `Discovery Level: ${this.getDiscoveryLevelText()}`,
-            TextStyles.small
-        ).setOrigin(1, 0);
-    }
-    
-    private getDiscoveryLevelText(): string {
-        const levels = [
-            'Visible Light Only',
-            'Scan Level 1',
-            'Scan Level 2',
-            'Scan Level 3',
-            'Scan Level 4',
-            'Scan Level 5',
-            'Visited'
-        ];
-        return levels[this.discoveryLevel];
-    }
-    
-    private getStarType(): string {
-        // Determine star type based on system ID for consistency
-        const types = ['G-class', 'K-class', 'M-class', 'F-class', 'A-class', 'B-class', 'O-class'];
-        const typeIndex = this.systemId % types.length;
-        return types[typeIndex];
-    }
-    
-    private hasAsteroids(): boolean {
-        // Determine if system has asteroids based on system ID
-        return this.systemId % 3 === 0;
-    }
-    
-    private getSystemStability(): string {
-        // Determine system stability based on system ID
-        const stability = ['Unstable', 'Moderate', 'Stable', 'Very Stable'];
-        return stability[this.systemId % stability.length];
-    }
-    
-    private getSystemResourceLevel(): string {
-        // Determine system resource level based on system ID
-        const resources = ['Poor', 'Average', 'Rich', 'Abundant'];
-        return resources[this.systemId % resources.length];
-    }
-    
-    private getSpecialFeatures(): string {
-        // Determine special features based on system ID
-        const features = ['None', 'Nebula', 'Black Hole', 'Neutron Star', 'Wormhole'];
-        return features[this.systemId % features.length];
+        };
+        new Button(buttonConfig);
     }
 
-    private generatePlanets(): void {
-        // Planet types
-        const types = ['Rocky', 'Gas Giant', 'Ice', 'Terrestrial', 'Desert'];
-        const resources = ['Poor', 'Average', 'Rich', 'Abundant'];
-        const colors = [0x888888, 0x8888ff, 0x88ff88, 0xff8888, 0xffff88];
-        
-        // Number of planets (3-7)
-        const planetCount = Phaser.Math.Between(3, 7);
-        
+    private calculatePlanetPositions(
+        planetCount: number,
+        centerX: number,
+        centerY: number,
+        orbitRadii: number[]
+    ): { x: number; y: number }[] {
+        const positions: { x: number; y: number }[] = [];
+        let orbitIndex = 0;
+
         for (let i = 0; i < planetCount; i++) {
-            const planet: Planet = {
-                id: i,
-                name: `Planet ${String.fromCharCode(65 + i)}`, // A, B, C, etc.
-                x: 0, // Will be set in drawOrbitsAndPlanets
-                y: 0, // Will be set in drawOrbitsAndPlanets
-                size: Phaser.Math.Between(5, 15),
-                color: colors[Phaser.Math.Between(0, colors.length - 1)],
-                type: types[Phaser.Math.Between(0, types.length - 1)],
-                resources: resources[Phaser.Math.Between(0, resources.length - 1)],
-                colonized: Phaser.Math.Between(0, 10) > 7 // 30% chance of being colonized
-            };
-            
-            this.planets.push(planet);
-        }
-    }
+            if (orbitIndex >= orbitRadii.length) break;
 
-    private drawOrbitsAndPlanets(): void {
-        const { width, height } = this.cameras.main;
-        const centerX = width / 2;
-        const centerY = height / 2;
-        
-        // Minimum and maximum orbit radius
-        const minRadius = 60;
-        const maxRadius = Math.min(width, height) / 2 - 100;
-        const radiusStep = (maxRadius - minRadius) / (this.planets.length - 1 || 1);
-        
-        // Draw orbits and planets based on discovery level
-        this.planets.forEach((planet, index) => {
-            // Calculate orbit radius
-            const radius = minRadius + index * radiusStep;
-            
-            // Always draw orbits at minimum
-            if (this.orbitGraphics) {
-                this.orbitGraphics.strokeCircle(centerX, centerY, radius);
-            }
-            
-            // Calculate planet position on orbit
-            const angle = Phaser.Math.Between(0, 360) * Math.PI / 180;
-            planet.x = centerX + radius * Math.cos(angle);
-            planet.y = centerY + radius * Math.sin(angle);
-            
-            // Draw planets with varying detail based on discovery level
-            let planetColor = 0x444444; // Default dark color for low discovery levels
-            let planetVisible = true;
-            
-            if (this.discoveryLevel === 0) {
-                // At visible light level, only show orbits, not planets
-                planetVisible = false;
-            } else if (this.discoveryLevel >= 1 && this.discoveryLevel <= 3) {
-                // At low scan levels, show planets as simple dots
-                planetColor = 0x888888;
-            } else if (this.discoveryLevel >= 4) {
-                // At higher scan levels, show planets with their actual colors
-                planetColor = planet.color;
-            }
-            
-            if (planetVisible) {
-                // Draw planet
-                const planetCircle = this.add.circle(planet.x, planet.y, planet.size, planetColor);
-                
-                // Make planet interactive
-                planetCircle.setInteractive({ useHandCursor: true })
-                    .on('pointerover', () => this.onPlanetHover(planet))
-                    .on('pointerout', () => this.onPlanetOut())
-                    .on('pointerdown', () => this.onPlanetClick(planet));
-                
-                // Add colonized indicator if applicable and discovery level is high enough
-                if (planet.colonized && this.discoveryLevel >= 5) {
-                    this.add.rectangle(planet.x, planet.y - planet.size - 5, 10, 10, 0x00ff00);
-                }
-            }
-        });
+            const angle = (Math.PI * 2 * i) / Math.min(planetCount, 3);
+            const radius = orbitRadii[orbitIndex];
+
+            positions.push({
+                x: centerX + Math.cos(angle) * radius,
+                y: centerY + Math.sin(angle) * radius
+            });
+
+            if ((i + 1) % 3 === 0) orbitIndex++;
+        }
+
+        return positions;
     }
 
     private onPlanetHover(planet: Planet): void {
-        // Show planet name in a tooltip
-        const tooltip = this.add.text(
-            planet.x,
-            planet.y - planet.size - 20,
-            planet.name,
-            TextStyles.normal
-        ).setOrigin(0.5);
+        if (this.infoPanel) {
+            this.infoPanel.destroy();
+        }
+
+        const panelConfig: PanelConfig = {
+            scene: this,
+            x: 10,
+            y: 10,
+            width: 200,
+            height: 180,
+            title: planet.name,
+            backgroundColor: 0x000000,
+            backgroundAlpha: 0.8,
+            borderColor: 0x4a6fa5,
+            borderWidth: 2,
+            cornerRadius: 8
+        };
         
-        // Store reference to remove on pointer out
-        (this as any).tooltip = tooltip;
+        this.infoPanel = new Panel(panelConfig);
+        this.infoPanel.addContent([
+            this.add.text(0, 0, `Type: ${planet.type}`, TextStyles.normal),
+            this.add.text(0, 20, `Size: ${planet.size}`, TextStyles.normal),
+            this.add.text(0, 40, 'Resources:', TextStyles.normal),
+            this.add.text(0, 60, `  Minerals: ${planet.resources.minerals}`, TextStyles.normal),
+            this.add.text(0, 80, `  Energy: ${planet.resources.energy}`, TextStyles.normal),
+            this.add.text(0, 100, `  Organics: ${planet.resources.organics}`, TextStyles.normal),
+            this.add.text(0, 120, planet.colonized ? 'Colonized' : 'Uncolonized', TextStyles.normal)
+        ]);
     }
 
     private onPlanetOut(): void {
-        // Remove tooltip
-        if ((this as any).tooltip) {
-            (this as any).tooltip.destroy();
-            (this as any).tooltip = null;
-        }
-    }
-
-    private onPlanetClick(planet: Planet): void {
-        this.selectedPlanet = planet;
-        
-        // Remove existing info panel if any
         if (this.infoPanel) {
             this.infoPanel.destroy();
             this.infoPanel = null;
         }
-        
-        // Create info panel
-        const { width, height } = this.cameras.main;
-        this.infoPanel = new Panel({
-            scene: this,
-            x: width - 150,
-            y: height / 2 + 100,
-            width: 250,
-            height: 300,
-            title: planet.name,
-            draggable: true
-        });
-        
-        // Always add View Planet button
-        const viewButton = new Button({
-            scene: this,
-            x: 0,
-            y: 100,
-            text: 'View Planet',
-            textStyle: TextStyles.button,
-            callback: () => this.viewPlanet(planet)
-        });
-        
-        this.infoPanel.addContent(viewButton);
-        
-        // Add planet info based on discovery level
-        let infoText = '';
-        
-        if (this.discoveryLevel <= 2) {
-            // At low discovery levels, only show basic info
-            infoText = 'Limited data available';
-        } else if (this.discoveryLevel === 3) {
-            // At medium discovery level, show planet type
-            infoText = `Type: ${planet.type}\nSize: ${planet.size * 1000} km`;
-        } else if (this.discoveryLevel === 4) {
-            // At higher discovery level, add resources
-            infoText = `Type: ${planet.type}\nSize: ${planet.size * 1000} km\nResources: ${planet.resources}`;
-        } else if (this.discoveryLevel >= 5) {
-            // At highest discovery levels, show all info
-            infoText = `Type: ${planet.type}\nSize: ${planet.size * 1000} km\nResources: ${planet.resources}\nColonized: ${planet.colonized ? 'Yes' : 'No'}`;
-        }
-        
-        const info = this.add.text(
-            0,
-            -50,
-            infoText,
-            TextStyles.normal
-        ).setOrigin(0.5, 0);
-        
-        this.infoPanel.addContent(info);
     }
 
-    private viewPlanet(planet: Planet): void {
-        console.log(`Viewing planet ${planet.name}`);
-        this.scene.start('PlanetScene', { 
-            systemId: this.systemId,
-            planetId: planet.id
-        });
+    private onPlanetClick(planet: Planet): void {
+        const gameState = useGameState.getState();
+        gameState.selectPlanet(planet);
+        this.scene.start('PlanetScene');
     }
 
     private backToGalaxy(): void {

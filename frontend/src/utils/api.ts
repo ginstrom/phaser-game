@@ -37,6 +37,25 @@ export interface NewGameResponse {
     };
 }
 
+export interface EmpireResponse {
+    id: string;
+    name: string;
+    is_player: boolean;
+    color: string;
+    credits: number;
+    research_points: number;
+    research_levels: {
+        weapons: number;
+        shields: number;
+        propulsion: number;
+        economics: number;
+    };
+    controlled_systems_count: number;
+    controlled_planets_count: number;
+    controlled_systems?: any[];  // TODO: Add proper type
+    controlled_planets?: any[];  // TODO: Add proper type
+}
+
 /**
  * Create a new game
  * @param params The parameters for creating a new game
@@ -205,6 +224,39 @@ export class GameState {
         this._galaxyExplored = null;
         this._turn = null;
     }
+}
+
+export async function fetchEmpireDetails(gameId: string): Promise<EmpireResponse> {
+    const response = await fetch(`/api/games/${gameId}/empires`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch empire details');
+    }
+    const empires = await response.json();
+    // Return the player's empire
+    return empires.find((empire: EmpireResponse) => empire.is_player);
+}
+
+export async function updateEmpireResearch(
+    gameId: string,
+    empireId: string,
+    researchArea: string,
+    level: number
+): Promise<EmpireResponse> {
+    const response = await fetch(`/api/games/${gameId}/empires/${empireId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            research_levels: {
+                [researchArea]: level
+            }
+        })
+    });
+    if (!response.ok) {
+        throw new Error('Failed to update research level');
+    }
+    return response.json();
 }
 
 export default {

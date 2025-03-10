@@ -3,16 +3,19 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: .
-      dockerfile: docker/Dockerfile.frontend
+      context: ./frontend
+      dockerfile: ../docker/Dockerfile.frontend
     ports:
-      - "8080:8080"
+      - "3000:3000"
     volumes:
       - ./frontend:/app
       - /app/node_modules
       - ./config:/app/config
     environment:
       - NODE_ENV=development
+      - WDS_SOCKET_HOST=0.0.0.0
+      - WDS_SOCKET_PORT=3000
+      - WATCHPACK_POLLING=true
     command: npm start
 
   # Backend service

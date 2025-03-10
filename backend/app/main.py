@@ -1,18 +1,29 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+from contextlib import asynccontextmanager
 
 # Import database
 from app.database.config import engine, Base
 
 # Import routers
 from app.routers import new_game, load_game, settings, exit_game
+from app.routes import game
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Create database tables
+    Base.metadata.create_all(bind=engine)
+    yield
+    # Clean up resources if needed
+    pass
 
 # Create FastAPI app
 app = FastAPI(
     title="4X Space Empire API",
     description="Backend API for the 4X Space Empire game",
-    version="0.1.0"
+    version="0.1.0",
+    lifespan=lifespan
 )
 
 # Add CORS middleware
@@ -29,20 +40,16 @@ app.include_router(new_game.router, tags=["Game"])
 app.include_router(load_game.router, tags=["Game"])
 app.include_router(settings.router, tags=["Settings"])
 app.include_router(exit_game.router, tags=["Game"])
+app.include_router(game.router)
 
 # Root endpoint
 @app.get("/")
-def root():
+async def root():
     return {
         "message": "Welcome to the 4X Space Empire API",
         "version": "0.1.0",
         "documentation": "/docs"
     }
-
-# Create tables on startup
-@app.on_event("startup")
-def create_tables():
-    Base.metadata.create_all(bind=engine)
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

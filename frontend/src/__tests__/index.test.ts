@@ -1,50 +1,46 @@
-import Phaser from 'phaser';
+// Mock all scene imports first
+jest.mock('../scenes/StartupScene', () => ({}));
+jest.mock('../scenes/GalaxyScene', () => ({}));
+jest.mock('../scenes/SystemScene', () => ({}));
+jest.mock('../scenes/PlanetScene', () => ({}));
+jest.mock('../scenes/MainScene', () => ({}));
 
-// No need to mock Phaser here as it's already mocked in __mocks__/phaserMock.js
+// Import the mock Phaser module
+import mockPhaser from '../__mocks__/phaser';
 
 describe('Game Initialization', () => {
-  beforeEach(() => {
-    // Clear all mocks before each test
-    jest.clearAllMocks();
-  });
+    beforeEach(() => {
+        (mockPhaser.Game as jest.Mock).mockClear();
+        jest.resetModules();
+    });
 
-  it('should initialize Phaser game with correct configuration', () => {
-    // Create a mock configuration similar to what's in index.ts
-    const config: Phaser.Types.Core.GameConfig = {
-      type: Phaser.AUTO,
-      width: 1024,
-      height: 768,
-      parent: 'game-container',
-      backgroundColor: '#000000',
-      scene: [],
-      physics: {
-        default: 'arcade',
-        arcade: {
-          gravity: { x: 0, y: 0 },
-          debug: false
-        }
-      }
-    };
+    it('should initialize game with correct configuration', () => {
+        // Import the index file to trigger game initialization
+        jest.isolateModules(() => {
+            require('../index');
+        });
 
-    // Initialize a new Phaser game with the mock configuration
-    const game = new Phaser.Game(config);
-
-    // Check if Phaser.Game constructor was called
-    expect(Phaser.Game).toHaveBeenCalled();
-
-    // Get the configuration passed to Phaser.Game
-    const passedConfig = (Phaser.Game as jest.Mock).mock.calls[0][0];
-
-    // Verify configuration properties
-    expect(passedConfig.type).toBe(Phaser.AUTO);
-    expect(passedConfig.width).toBe(1024);
-    expect(passedConfig.height).toBe(768);
-    expect(passedConfig.parent).toBe('game-container');
-    expect(passedConfig.backgroundColor).toBe('#000000');
-    
-    // Verify physics configuration
-    expect(passedConfig.physics.default).toBe('arcade');
-    expect(passedConfig.physics.arcade.gravity.x).toBe(0);
-    expect(passedConfig.physics.arcade.gravity.y).toBe(0);
-  });
-});
+        // Verify that the Game constructor was called
+        expect(mockPhaser.Game).toHaveBeenCalledTimes(1);
+        
+        // Get and verify the configuration
+        const config = (mockPhaser.Game as jest.Mock).mock.calls[0][0];
+        expect(config).toEqual(expect.objectContaining({
+            type: 'auto',
+            width: 1024,
+            height: 768,
+            parent: 'game-container',
+            backgroundColor: '#000000',
+            physics: expect.objectContaining({
+                default: 'arcade',
+                arcade: expect.objectContaining({
+                    gravity: { x: 0, y: 0 },
+                    debug: false
+                })
+            })
+        }));
+        
+        // Check that scenes array exists and has correct length
+        expect(config.scene).toHaveLength(5);
+    });
+}); 

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { TextStyles } from './TextStyles';
 
 export interface PanelConfig {
     scene: Phaser.Scene;
@@ -47,6 +48,7 @@ export default class Panel extends Phaser.GameObjects.Container {
             backgroundAlpha
         );
         this.background.setOrigin(0.5);
+        this.add(this.background);
 
         // Create border if needed
         if (borderWidth > 0) {
@@ -56,58 +58,53 @@ export default class Panel extends Phaser.GameObjects.Container {
                 0,
                 config.width,
                 config.height,
-                borderColor,
-                1
+                borderColor
             );
             this.border.setOrigin(0.5);
             this.border.setStrokeStyle(borderWidth, borderColor);
+            this.add(this.border);
         }
 
-        // Create title if needed
+        // Create title if provided
         if (config.title) {
-            const titleStyle = config.titleStyle || {
-                color: '#ffffff',
-                fontSize: '24px',
-                fontFamily: 'Arial',
-                fontStyle: 'bold'
-            };
-            
             this.titleText = new Phaser.GameObjects.Text(
                 config.scene,
                 0,
                 -config.height / 2 + 20,
                 config.title,
-                titleStyle
+                config.titleStyle || TextStyles.panelTitle
             );
             this.titleText.setOrigin(0.5);
+            this.add(this.titleText);
         }
 
         // Create content container
-        this.contentContainer = new Phaser.GameObjects.Container(
-            config.scene,
-            0,
-            this.titleText ? 10 : 0
-        );
-
-        // Add to container
-        this.add(this.background);
-        if (this.border) this.add(this.border);
-        if (this.titleText) this.add(this.titleText);
+        this.contentContainer = new Phaser.GameObjects.Container(config.scene, 0, 0);
         this.add(this.contentContainer);
 
         // Set size
-        this.setSize(config.width, config.height);
+        super.setSize(config.width, config.height);
 
         // Make draggable if needed
         if (draggable) {
-            this.setInteractive({ useHandCursor: true, draggable: true })
-                .on('dragstart', this.onDragStart, this)
-                .on('drag', this.onDrag, this)
-                .on('dragend', this.onDragEnd, this);
+            this.setInteractive({ useHandCursor: true })
+                .on('pointerdown', this.onDragStart, this)
+                .on('pointermove', this.onDrag, this)
+                .on('pointerup', this.onDragEnd, this)
+                .on('pointerout', this.onDragEnd, this);
         }
 
         // Add to scene
         config.scene.add.existing(this);
+    }
+
+    addContent(content: Phaser.GameObjects.GameObject | Phaser.GameObjects.GameObject[]): this {
+        if (Array.isArray(content)) {
+            content.forEach(item => this.contentContainer.add(item));
+        } else {
+            this.contentContainer.add(content);
+        }
+        return this;
     }
 
     private onDragStart(pointer: Phaser.Input.Pointer): void {
@@ -118,18 +115,15 @@ export default class Panel extends Phaser.GameObjects.Container {
 
     private onDrag(pointer: Phaser.Input.Pointer): void {
         if (this.isDragging) {
-            this.x = pointer.x - this.dragStartX;
-            this.y = pointer.y - this.dragStartY;
+            this.setPosition(
+                pointer.x - this.dragStartX,
+                pointer.y - this.dragStartY
+            );
         }
     }
 
     private onDragEnd(): void {
         this.isDragging = false;
-    }
-
-    public addContent(gameObject: Phaser.GameObjects.GameObject | Phaser.GameObjects.GameObject[]): this {
-        this.contentContainer.add(gameObject);
-        return this;
     }
 
     public clearContent(): this {

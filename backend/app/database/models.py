@@ -31,6 +31,7 @@ class Game(Base):
     # Related entities
     galaxy = relationship("Galaxy", uselist=False, back_populates="game", cascade="all, delete-orphan")
     player_resources = relationship("PlayerResources", uselist=False, back_populates="game", cascade="all, delete-orphan")
+    empires = relationship("Empire", back_populates="game", cascade="all, delete-orphan")
     
     def to_dict(self):
         """Convert the game to a dictionary for the API response."""
@@ -53,6 +54,9 @@ class Game(Base):
             if hasattr(self.galaxy, 'to_dict'):
                 galaxy_data.update(self.galaxy.to_dict())
         
+        # Add empires data
+        empires_data = [empire.to_dict() for empire in self.empires] if self.empires else []
+        
         return {
             "id": self.id,
             "created_at": self.created_at.isoformat() if self.created_at else None,
@@ -60,7 +64,8 @@ class Game(Base):
             "player": player,
             "galaxy": galaxy_data,
             "turn": self.turn,
-            "difficulty": self.difficulty
+            "difficulty": self.difficulty,
+            "empires": empires_data
         }
 
 
@@ -199,4 +204,26 @@ class PlayerResources(Base):
             "exotics": self.exotics,
             "credits": self.credits,
             "research": self.research
+        }
+
+class GameStateDB(Base):
+    __tablename__ = "game_states"
+
+    id = Column(String, primary_key=True)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    player_name = Column(String, nullable=False)
+    empire_name = Column(String, nullable=False)
+    turn = Column(Integer, default=1)
+    difficulty = Column(String, nullable=False)
+    game_data = Column(JSON, nullable=False)  # Stores the complete game state as JSON
+
+    def to_dict(self):
+        return {
+            "game_id": self.id,
+            "player_name": self.player_name,
+            "empire_name": self.empire_name,
+            "turn": self.turn,
+            "save_date": self.updated_at.isoformat(),
+            "game_state": self.game_data
         }

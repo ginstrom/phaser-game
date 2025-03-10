@@ -5,71 +5,64 @@ services:
     build:
       context: ./frontend
       dockerfile: ../docker/Dockerfile.frontend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - ./config:/app/config
+    command: npm test src/__tests__/index.test.ts -- --watchAll=false --verbose
     environment:
+      - CI=true
       - NODE_ENV=test
-    command: npm test
 
   frontend-watch:
     build:
       context: ./frontend
       dockerfile: ../docker/Dockerfile.frontend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - ./config:/app/config
+    command: npm test
     environment:
       - NODE_ENV=test
-    command: npm run test:watch
 
   frontend-coverage:
     build:
       context: ./frontend
       dockerfile: ../docker/Dockerfile.frontend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - ./config:/app/config
+    command: npm test -- --coverage --watchAll=false
     environment:
+      - CI=true
       - NODE_ENV=test
-    command: npm run test:coverage
 
-  # Backend tests
   backend:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
-    volumes:
-      - ./backend:/app
-      - ./config:/config
+    command: python -m pytest
     environment:
       - ENVIRONMENT=test
-      - PYTHONPATH=/app
-    command: /app/run_tests.sh
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/phaser_game_test_db
+    depends_on:
+      - db
 
   backend-verbose:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
-    volumes:
-      - ./backend:/app
-      - ./config:/config
+    command: python -m pytest -v
     environment:
       - ENVIRONMENT=test
-      - PYTHONPATH=/app
-    command: /app/run_tests.sh -v
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/phaser_game_test_db
+    depends_on:
+      - db
 
   backend-coverage:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
-    volumes:
-      - ./backend:/app
-      - ./config:/config
+    command: python -m pytest --cov=app
     environment:
       - ENVIRONMENT=test
-      - PYTHONPATH=/app
-    command: /app/run_tests.sh --cov=app --cov-report=term-missing
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/phaser_game_test_db
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=phaser_game_test_db

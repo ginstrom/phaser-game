@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.database.repositories import GameRepository
 from app.database.models import Game, Galaxy, StarSystem, Planet, PlanetResources, PlayerResources
 
-def test_create_game(db: Session):
+def test_create_game(db_session: Session):
     """Test creating a game in the database."""
     # Prepare test data
     game_data = {
@@ -20,7 +20,7 @@ def test_create_game(db: Session):
     }
     
     # Create repository and game
-    repo = GameRepository(db)
+    repo = GameRepository(db_session)
     game = repo.create_game(game_data)
     
     # Verify game was created
@@ -56,10 +56,10 @@ def test_create_game(db: Session):
     first_planet = first_system.planets[0]
     assert first_planet.resources is not None
 
-def test_get_game_by_id(db: Session):
+def test_get_game_by_id(db_session: Session):
     """Test retrieving a game by ID."""
     # First create a game
-    repo = GameRepository(db)
+    repo = GameRepository(db_session)
     game = repo.create_game({"player_name": "TestPlayer"})
     game_id = game.id
     
@@ -71,10 +71,10 @@ def test_get_game_by_id(db: Session):
     assert retrieved_game.id == game_id
     assert retrieved_game.player_name == "TestPlayer"
 
-def test_list_games(db: Session):
+def test_list_games(db_session: Session):
     """Test listing all games."""
     # Create repository
-    repo = GameRepository(db)
+    repo = GameRepository(db_session)
     
     # Create some games
     game1 = repo.create_game({"player_name": "Player1"})
@@ -89,10 +89,10 @@ def test_list_games(db: Session):
     assert game1.id in game_ids
     assert game2.id in game_ids
 
-def test_delete_game(db: Session):
+def test_delete_game(db_session: Session):
     """Test deleting a game."""
     # First create a game
-    repo = GameRepository(db)
+    repo = GameRepository(db_session)
     game = repo.create_game({"player_name": "TestPlayer"})
     game_id = game.id
     
@@ -108,10 +108,10 @@ def test_delete_game(db: Session):
     # Verify it's not found
     assert deleted_game is None
 
-def test_update_game_turn(db: Session):
+def test_update_game_turn(db_session: Session):
     """Test updating a game's turn."""
     # First create a game
-    repo = GameRepository(db)
+    repo = GameRepository(db_session)
     game = repo.create_game({"player_name": "TestPlayer"})
     game_id = game.id
     

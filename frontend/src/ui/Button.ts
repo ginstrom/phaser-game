@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { TextStyles } from './TextStyles';
 
 export interface ButtonConfig {
     scene: Phaser.Scene;
@@ -25,14 +26,10 @@ export default class Button extends Phaser.GameObjects.Container {
         super(config.scene, config.x, config.y);
 
         // Default values
-        const textStyle = config.textStyle || {
-            color: '#ffffff',
-            fontSize: '24px',
-            fontFamily: 'Arial'
-        };
         const backgroundColor = config.backgroundColor !== undefined ? config.backgroundColor : 0x4a6fa5;
         const backgroundAlpha = config.backgroundAlpha !== undefined ? config.backgroundAlpha : 1;
         const padding = config.padding || { x: 20, y: 10 };
+        this.callback = config.callback;
 
         // Create text
         this.text = new Phaser.GameObjects.Text(
@@ -40,13 +37,15 @@ export default class Button extends Phaser.GameObjects.Container {
             0,
             0,
             config.text,
-            textStyle
+            config.textStyle || TextStyles.button
         );
         this.text.setOrigin(0.5);
 
-        // Create background
+        // Calculate size
         const width = this.text.width + padding.x * 2;
         const height = this.text.height + padding.y * 2;
+
+        // Create background
         this.background = new Phaser.GameObjects.Rectangle(
             config.scene,
             0,
@@ -56,15 +55,15 @@ export default class Button extends Phaser.GameObjects.Container {
             backgroundColor,
             backgroundAlpha
         );
+        this.background.setOrigin(0.5);
 
         // Add to container
         this.add([this.background, this.text]);
 
-        // Set callback
-        this.callback = config.callback;
+        // Set size
+        super.setSize(width, height);
 
         // Make interactive
-        this.setSize(width, height);
         this.setInteractive({ useHandCursor: true })
             .on('pointerover', this.onPointerOver, this)
             .on('pointerout', this.onPointerOut, this)
@@ -76,21 +75,29 @@ export default class Button extends Phaser.GameObjects.Container {
     }
 
     private onPointerOver(): void {
-        this.background.setAlpha(0.8);
+        if (this.enabled) {
+            this.text.setAlpha(0.8);
+        }
     }
 
     private onPointerOut(): void {
-        this.background.setAlpha(1);
+        if (this.enabled) {
+            this.text.setAlpha(1);
+        }
     }
 
     private onPointerDown(): void {
-        this.background.setAlpha(0.5);
+        if (this.enabled) {
+            this.text.setAlpha(0.5);
+        }
     }
 
     private onPointerUp(): void {
-        this.background.setAlpha(0.8);
-        if (this.callback && this.enabled) {
-            this.callback();
+        if (this.enabled) {
+            this.text.setAlpha(1);
+            if (this.callback) {
+                this.callback();
+            }
         }
     }
 
@@ -101,38 +108,35 @@ export default class Button extends Phaser.GameObjects.Container {
 
     public setText(text: string): this {
         this.text.setText(text);
-        
-        // Resize background to fit new text
-        const width = this.text.width + 40;
-        const height = this.text.height + 20;
+
+        // Recalculate size
+        const padding = { x: 20, y: 10 }; // Use default padding
+        const width = this.text.width + padding.x * 2;
+        const height = this.text.height + padding.y * 2;
+
+        // Update background size
         this.background.setSize(width, height);
-        this.setSize(width, height);
-        
+
+        // Update container size
+        super.setSize(width, height);
+
         return this;
     }
 
-    /**
-     * Enable or disable the button
-     * @param enabled Whether the button should be enabled
-     */
     public setEnabled(enabled: boolean): this {
         this.enabled = enabled;
-        
-        // Visual feedback for disabled state
         if (enabled) {
-            this.background.setAlpha(1);
             this.text.setAlpha(1);
+            this.background.setAlpha(1);
+            this.setInteractive();
         } else {
-            this.background.setAlpha(0.5);
             this.text.setAlpha(0.5);
+            this.background.setAlpha(0.5);
+            this.disableInteractive();
         }
-        
         return this;
     }
 
-    /**
-     * Check if the button is enabled
-     */
     public isEnabled(): boolean {
         return this.enabled;
     }

@@ -2,12 +2,16 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY frontend/package*.json ./
+COPY package*.json ./
 
 RUN npm install
 
-COPY frontend ./
+COPY . .
 
-EXPOSE 8080
+EXPOSE 3000
+
+ENV WDS_SOCKET_HOST=0.0.0.0
+ENV WDS_SOCKET_PORT=3000
+ENV WATCHPACK_POLLING=true
 
 CMD ["npm", "start"]

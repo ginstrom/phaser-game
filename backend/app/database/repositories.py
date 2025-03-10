@@ -7,6 +7,7 @@ from app.database.models import (
     Game, Galaxy, StarSystem, Planet,
     PlanetResources, PlayerResources
 )
+from app.services.empire_service import initialize_game_empires
 
 # Star system name components for random generation
 STAR_NAME_PREFIXES = [
@@ -71,6 +72,9 @@ class GameRepository:
         self.session.add(player_resources)
         self.session.add(galaxy)
         self.session.commit()
+        
+        # Initialize empires
+        initialize_game_empires(self.session, game.id)
         
         return game
 
