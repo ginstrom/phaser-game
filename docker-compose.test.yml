@@ -32,6 +32,9 @@ services:
       context: .
       dockerfile: docker/Dockerfile.backend
     command: python -m pytest
+    volumes:
+      - ./backend:/app
+      - ./config:/config
     environment:
       - ENVIRONMENT=test
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/phaser_game_test_db
@@ -43,6 +46,9 @@ services:
       context: .
       dockerfile: docker/Dockerfile.backend
     command: python -m pytest -v
+    volumes:
+      - ./backend:/app
+      - ./config:/config
     environment:
       - ENVIRONMENT=test
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/phaser_game_test_db
@@ -54,6 +60,9 @@ services:
       context: .
       dockerfile: docker/Dockerfile.backend
     command: python -m pytest --cov=app
+    volumes:
+      - ./backend:/app
+      - ./config:/config
     environment:
       - ENVIRONMENT=test
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/phaser_game_test_db

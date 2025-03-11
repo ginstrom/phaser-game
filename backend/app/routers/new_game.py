@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
-from typing import Dict, Any
+from pydantic import BaseModel, Field, constr
+from typing import Dict, Any, Literal
 from sqlalchemy.orm import Session
 
 from app.database.config import get_db
@@ -9,9 +9,9 @@ from app.services.game_service import create_new_game
 router = APIRouter()
 
 class NewGameRequest(BaseModel):
-    player_name: str
-    difficulty: str = "normal"  # Kept as string for API compatibility
-    galaxy_size: str = "medium"  # Kept as string for API compatibility
+    player_name: constr(min_length=1, max_length=50) = Field(..., description="Player name between 1 and 50 characters")
+    difficulty: Literal["easy", "normal", "hard"] = Field(default="normal", description="Game difficulty level")
+    galaxy_size: Literal["small", "medium", "large"] = Field(default="medium", description="Size of the galaxy")
     
 class NewGameResponse(BaseModel):
     game_id: str

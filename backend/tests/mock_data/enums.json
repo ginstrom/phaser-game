@@ -1,0 +1,23 @@
+{
+    "PlanetType": {
+        "terrestrial": "Terrestrial",
+        "gas_giant": "Gas Giant",
+        "ice_giant": "Ice Giant",
+        "rocky": "Rocky",
+        "volcanic": "Volcanic",
+        "oceanic": "Oceanic",
+        "jungle": "Jungle",
+        "desert": "Desert",
+        "arctic": "Arctic"
+    },
+    "GalaxySize": {
+        "small": "Small",
+        "medium": "Medium",
+        "large": "Large"
+    },
+    "Difficulty": {
+        "easy": "Easy",
+        "normal": "Normal",
+        "hard": "Hard"
+    }
+} 

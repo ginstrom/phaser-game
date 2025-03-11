@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, Float, JSON, Table
 from sqlalchemy.orm import relationship
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional, Dict
 from datetime import datetime
 
@@ -80,5 +80,4 @@ class EmpireResponse(EmpireBase):
     controlled_systems_count: int
     controlled_planets_count: int
 
-    class Config:
-        from_attributes = True 
+    model_config = ConfigDict(from_attributes=True) 

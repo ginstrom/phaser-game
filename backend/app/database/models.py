@@ -1,9 +1,10 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, JSON, DateTime, func
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, JSON, DateTime, func, Table
 from sqlalchemy.orm import relationship
 import uuid
 from datetime import datetime
 
 from app.database.config import Base
+from app.models.empire import Empire, empire_systems
 
 def generate_uuid():
     """Generate a UUID string for use as a primary key."""

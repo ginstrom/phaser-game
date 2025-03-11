@@ -28,6 +28,7 @@ services:
     volumes:
       - ./backend:/app
       - ./config:/config
+      - ./config:/app/tests/mock_data
     environment:
       - ENVIRONMENT=development
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/phaser_game_db
