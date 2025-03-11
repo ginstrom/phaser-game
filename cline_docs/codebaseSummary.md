@@ -64,6 +64,70 @@ phaser-game/
 - **Asset Loading**: Phaser's loader for game assets
 - **Database**: PostgreSQL for persistent game state storage
 
+## Database Schema
+### Core Tables
+- **games**: Stores game session information
+  - `id`: UUID primary key
+  - `created_at`: Timestamp of game creation
+  - `updated_at`: Timestamp of last update
+  - `player_name`: Player's name
+  - `empire_name`: Name of player's empire
+  - `difficulty`: Game difficulty setting
+  - `galaxy_size`: Size of the galaxy
+  - `turn`: Current game turn
+
+- **empires**: Represents civilizations in the game
+  - `id`: UUID primary key
+  - `game_id`: Foreign key to games table
+  - `name`: Empire name
+  - `is_player`: Boolean indicating if this is the player's empire
+  - `color`: Empire's color
+  - `credits`: Current credit balance
+  - `research_points`: Accumulated research points
+  - `research_levels`: JSON field storing research progress
+
+- **galaxies**: Represents game galaxies
+  - `id`: UUID primary key
+  - `game_id`: Foreign key to games table
+  - `size`: Galaxy size category
+  - `explored_count`: Number of explored systems
+
+- **star_systems**: Represents star systems in galaxies
+  - `id`: UUID primary key
+  - `galaxy_id`: Foreign key to galaxies table
+  - `name`: System name
+  - `position_x`: X coordinate in galaxy
+  - `position_y`: Y coordinate in galaxy
+  - `explored`: Boolean indicating if system is explored
+  - `discovery_level`: Integer (0-6) indicating scanning/discovery level
+
+- **planets**: Represents planets in star systems
+  - `id`: UUID primary key
+  - `system_id`: Foreign key to star_systems table
+  - `name`: Planet name
+  - `type`: Planet type (terrestrial, gas giant, etc.)
+  - `size`: Planet size (1-10)
+  - `colonized`: Boolean indicating if planet is colonized
+  - `empire_id`: Foreign key to empires table (nullable)
+
+- **planet_resources**: Resource deposits on planets
+  - `id`: UUID primary key
+  - `planet_id`: Foreign key to planets table
+  - `organic`: Organic resource amount
+  - `mineral`: Mineral resource amount
+  - `energy`: Energy resource amount
+  - `exotics`: Exotic resource amount
+
+- **player_resources**: Player's current resource stockpile
+  - `id`: UUID primary key
+  - `game_id`: Foreign key to games table
+  - `organic`: Organic resource amount
+  - `mineral`: Mineral resource amount
+  - `energy`: Energy resource amount
+  - `exotics`: Exotic resource amount
+  - `credits`: Credit balance
+  - `research`: Research points
+
 ## Data Flow
 1. User interacts with the Phaser game UI
 2. Game logic processes user input
@@ -89,6 +153,11 @@ phaser-game/
 - `/exit`: Handle game exit, optionally saving the game
 
 ## Recent Significant Changes
+- [2025-03-11] Added `empire_id` column to planets table to support empire ownership
+- [2025-03-11] Fixed database schema mismatch between SQLAlchemy models and PostgreSQL tables
+- [2025-03-11] Added proper foreign key constraint from planets.empire_id to empires.id with ON DELETE SET NULL
+- [2025-03-10] Updated Planet model to include empire relationship and foreign key
+- [2025-03-10] Added relationship between Empire and StarSystem models through controlled_systems
 - [2025-03-07] Configured PostgreSQL database in docker-compose for the data store
 - [2025-03-07] Added a PostgreSQL service to docker-compose.yml with persistent volume
 - [2025-03-07] Updated the backend service to connect to the database
