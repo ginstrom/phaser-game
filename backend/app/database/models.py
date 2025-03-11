@@ -113,6 +113,7 @@ class StarSystem(Base):
     # Related entities
     galaxy = relationship("Galaxy", back_populates="systems")
     planets = relationship("Planet", back_populates="system", cascade="all, delete-orphan")
+    controlling_empire = relationship("Empire", secondary="empire_systems", back_populates="controlled_systems")
     
     def to_dict(self):
         """Convert the star system to a dictionary for the API response."""
@@ -136,11 +137,12 @@ class Planet(Base):
     type = Column(String, nullable=False)
     size = Column(Integer, nullable=False)
     colonized = Column(Boolean, default=False)
-    owner = Column(String, nullable=True)
+    empire_id = Column(String, ForeignKey("empires.id", ondelete="SET NULL"), nullable=True)
     
     # Related entities
     system = relationship("StarSystem", back_populates="planets")
     resources = relationship("PlanetResources", uselist=False, back_populates="planet", cascade="all, delete-orphan")
+    empire = relationship("Empire", back_populates="controlled_planets")
     
     def to_dict(self):
         """Convert the planet to a dictionary for the API response."""
@@ -150,7 +152,7 @@ class Planet(Base):
             "type": self.type,
             "size": self.size,
             "colonized": self.colonized,
-            "owner": self.owner,
+            "empire_id": self.empire_id,
             "resources": self.resources.to_dict() if self.resources else {}
         }
 
