@@ -34,7 +34,6 @@ export default class Panel extends Phaser.GameObjects.Container {
         const backgroundAlpha = config.backgroundAlpha !== undefined ? config.backgroundAlpha : 0.8;
         const borderColor = config.borderColor !== undefined ? config.borderColor : 0x4a6fa5;
         const borderWidth = config.borderWidth !== undefined ? config.borderWidth : 2;
-        const cornerRadius = config.cornerRadius !== undefined ? config.cornerRadius : 0;
         const draggable = config.draggable !== undefined ? config.draggable : false;
 
         // Create background

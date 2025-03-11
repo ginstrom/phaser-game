@@ -86,7 +86,7 @@ export async function createNewGame(params: NewGameRequest): Promise<NewGameResp
 /**
  * Game state singleton to store the current game state
  */
-export class GameState {
+class GameState {
     private static instance: GameState;
     private _gameId: string | null = null;
     private _playerName: string | null = null;
@@ -226,6 +226,9 @@ export class GameState {
     }
 }
 
+// Create a singleton instance
+const gameState = GameState.getInstance();
+
 export async function fetchEmpireDetails(gameId: string): Promise<EmpireResponse> {
     const response = await fetch(`/api/games/${gameId}/empires`);
     if (!response.ok) {
@@ -259,7 +262,11 @@ export async function updateEmpireResearch(
     return response.json();
 }
 
-export default {
+const api = {
     createNewGame,
-    GameState: GameState.getInstance(),
+    GameState: gameState,
+    fetchEmpireDetails,
+    updateEmpireResearch
 };
+
+export default api;

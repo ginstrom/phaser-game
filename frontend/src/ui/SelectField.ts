@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import Button from './Button';
 
 export interface SelectOption {
     value: string;

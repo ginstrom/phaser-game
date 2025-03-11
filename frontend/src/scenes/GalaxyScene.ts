@@ -26,7 +26,7 @@ export default class GalaxyScene extends Phaser.Scene {
     }
 
     create() {
-        const { width, height } = this.cameras.main;
+        const { height } = this.cameras.main;
         const gameState = useGameState.getState();
 
         // Check if we have a game state
