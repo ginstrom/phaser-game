@@ -8,6 +8,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from contextlib import asynccontextmanager
+import subprocess
+import os
 
 # Import database
 from app.database.config import engine, Base
@@ -18,8 +20,8 @@ from app.routes import game
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Create database tables
-    Base.metadata.create_all(bind=engine)
+    # Run database migrations
+    subprocess.run(["alembic", "upgrade", "head"], check=True)
     yield
     # Clean up resources if needed
     pass
