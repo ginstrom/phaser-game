@@ -6,6 +6,7 @@ import random
 from enum import Enum
 
 from app.config import PlanetType, GalaxySize, Difficulty
+from .empire import EmpireBase
 
 
 class PlanetResources(BaseModel):
@@ -29,7 +30,7 @@ class PlayerResources(BaseModel):
 class Player(BaseModel):
     """Model representing a player in the game."""
     name: str
-    empire: str = "Human Empire"
+    empire: Optional[str | Dict[str, Any]] = "Human Empire"
     resources: PlayerResources = Field(default_factory=PlayerResources)
 
 

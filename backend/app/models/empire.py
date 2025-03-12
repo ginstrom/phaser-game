@@ -38,7 +38,7 @@ class Empire(Base):
     })
     
     # Relationships
-    game = relationship("Game", back_populates="empires")
+    game = relationship("Game", foreign_keys=[game_id], back_populates="empires")
     controlled_systems = relationship("StarSystem", secondary=empire_systems, back_populates="controlling_empire")
     controlled_planets = relationship("Planet", back_populates="empire")
 

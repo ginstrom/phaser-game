@@ -24,7 +24,8 @@ from app.database.models import (
     Galaxy as GalaxyDB,
     StarSystem as StarSystemDB,
     Planet as PlanetDB,
-    PlayerResources as PlayerResourcesDB
+    PlayerResources as PlayerResourcesDB,
+    Empire as EmpireDB
 )
 
 router = APIRouter(prefix="/api/v1")
@@ -42,7 +43,7 @@ async def get_player(player_name: str, db: Session = Depends(get_db)):
     
     return Player(
         name=game.player_name,
-        empire=game.empire_name,
+        empire=game.player_empire.to_dict() if game.player_empire else None,
         resources=PlayerResources(**game.player_resources.to_dict()) if game.player_resources else PlayerResources()
     )
 
@@ -60,8 +61,19 @@ async def create_player(player: Player, db: Session = Depends(get_db)):
     # Create new game for the player
     game = GameDB(
         player_name=player.name,
-        empire_name=player.empire
     )
+    
+    # Create player empire
+    empire_name = player.empire if isinstance(player.empire, str) else player.empire.get("name", "Human Empire")
+    empire = EmpireDB(
+        game=game,
+        name=empire_name,
+        is_player=True,
+        color="#0000FF"  # Default color for player empire
+    )
+    
+    # Set the player's empire
+    game.player_empire = empire
     
     # Create player resources
     resources = PlayerResourcesDB(
@@ -70,10 +82,15 @@ async def create_player(player: Player, db: Session = Depends(get_db)):
     )
     
     db.add(game)
+    db.add(empire)
     db.add(resources)
     db.commit()
     
-    return player
+    return Player(
+        name=game.player_name,
+        empire=empire.to_dict(),
+        resources=PlayerResources(**resources.to_dict())
+    )
 
 # Galaxy endpoints
 @router.get("/galaxies/{galaxy_id}", response_model=Galaxy)
