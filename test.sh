@@ -101,6 +101,25 @@ run_backend_tests() {
     fi
 }
 
+run_cli() {
+    echo "Starting backend API and CLI..."
+    # Ensure services are up
+    docker-compose -f docker-compose.test.yml up -d db
+    # Wait for database to be ready
+    echo "Waiting for database to be ready..."
+    sleep 3
+    # Initialize database
+    echo "Initializing database..."
+    docker-compose -f docker-compose.test.yml run --rm backend python -c "from app.db.init_db import init_db; init_db()"
+    # Start backend API
+    docker-compose -f docker-compose.test.yml up -d backend-api
+    # Wait for backend to be ready
+    echo "Waiting for backend API to be ready..."
+    sleep 5
+    # Run CLI
+    docker-compose -f docker-compose.test.yml run --rm cli
+}
+
 # Execute tests based on target
 case $TEST_TARGET in
     frontend)
@@ -114,12 +133,13 @@ case $TEST_TARGET in
         run_backend_tests
         ;;
     cli)
-        echo "Starting interactive CLI..."
-        docker-compose -f docker-compose.test.yml run cli
+        run_cli
         ;;
     *)
         show_usage
         ;;
 esac
 
-echo "Tests completed."
+if [ "$TEST_TARGET" != "cli" ]; then
+    echo "Tests completed."
+fi
