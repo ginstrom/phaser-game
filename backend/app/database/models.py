@@ -20,7 +20,7 @@ class Game(Base):
     
     # Player info
     player_name = Column(String, nullable=False)
-    empire_name = Column(String, default="Human Empire")
+    player_empire_id = Column(String, ForeignKey("empires.id"), nullable=True)
     
     # Game settings
     difficulty = Column(String, nullable=False, default="normal")
@@ -32,13 +32,14 @@ class Game(Base):
     # Related entities
     galaxy = relationship("Galaxy", uselist=False, back_populates="game", cascade="all, delete-orphan")
     player_resources = relationship("PlayerResources", uselist=False, back_populates="game", cascade="all, delete-orphan")
-    empires = relationship("Empire", back_populates="game", cascade="all, delete-orphan")
+    empires = relationship("Empire", back_populates="game", foreign_keys="[Empire.game_id]", cascade="all, delete-orphan")
+    player_empire = relationship("Empire", foreign_keys=[player_empire_id], post_update=True)
     
     def to_dict(self):
         """Convert the game to a dictionary for the API response."""
         player = {
             "name": self.player_name,
-            "empire": self.empire_name,
+            "empire": self.player_empire.to_dict() if self.player_empire else None,
             "resources": self.player_resources.to_dict() if self.player_resources else {}
         }
         
