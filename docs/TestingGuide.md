@@ -1,175 +1,212 @@
-# Testing Guide for Phaser Game
+# Testing Guide for Space Empire 4X Game
 
-This document provides comprehensive information about testing in the Phaser Game project.
+This document provides comprehensive information about testing in the Space Empire 4X game project.
 
-## Test Structure
+## Test Stack
 
-The project has two main test suites:
-
-1. **Frontend Tests**: Jest tests for the TypeScript/Phaser frontend
-2. **Backend Tests**: Pytest tests for the FastAPI backend
+- Jest with React Testing Library for frontend
+- Custom Phaser component testing utilities
+- Webpack 5 test configuration
+- Custom game state testing tools
 
 ## Running Tests
 
-Always use the `test.sh` script to run tests. This script ensures the proper environment is set up in Docker containers.
-
-### Basic Usage
+Use the project's test script to run tests:
 
 ```bash
-# Run frontend tests
 ./test.sh frontend
-
-# Run backend tests
-./test.sh backend
-
-# Run all tests
-./test.sh all
 ```
 
-### Advanced Options
-
-#### Frontend Test Options
+### Test Options
 
 ```bash
-# Run frontend tests in watch mode (automatically re-run on file changes)
-./test.sh frontend --watch
+# Run tests in watch mode
+npm run test:watch
 
-# Run frontend tests with coverage report
-./test.sh frontend --coverage
+# Generate coverage report
+npm run test:coverage
+
+# Run specific test file
+npm test -- path/to/test/file.test.ts
 ```
 
-#### Backend Test Options
+## Test Structure
 
-```bash
-# Run backend tests with verbose output
-./test.sh backend --verbose
+### Directory Structure
 
-# Run backend tests with coverage report
-./test.sh backend --coverage
+```
+frontend/
+├── src/
+│   ├── __tests__/           # Test files
+│   ├── __mocks__/          # Mock files
+│   └── test-utils/         # Testing utilities
+└── jest.config.js          # Jest configuration
 ```
 
-## How Tests Work
+### Test Categories
 
-### Frontend Tests
+1. **Scene Tests**
+   - Startup Scene
+   - Main Scene
+   - Galaxy Scene
+   - System Scene
+   - Planet Scene
+   - Combat Scene
 
-- Uses Jest as the test runner
-- Tests are located in `frontend/src/__tests__/`
-- Mocks for Phaser are in `frontend/__mocks__/`
-- Configuration is in `frontend/jest.config.js`
+2. **Game System Tests**
+   - Empire Management
+   - Resource System
+   - Fleet Management
+   - Technology System
+   - Map Generation
 
-### Backend Tests
-
-- Uses pytest as the test runner
-- Tests are located in `backend/tests/`
-- Test configuration is in `backend/pytest.ini`
-- Test fixtures are defined in `backend/tests/conftest.py`
-
-### Docker Test Environment
-
-The `docker-compose.test.yml` file defines the test environment:
-
-1. **Frontend Test Container**:
-   - Builds from `docker/Dockerfile.frontend`
-   - Mounts the frontend directory to `/app`
-   - Runs npm test commands
-
-2. **Backend Test Container**:
-   - Builds from `docker/Dockerfile.backend`
-   - Mounts the backend directory to `/app`
-   - Sets `PYTHONPATH=/app` environment variable
-   - Runs the `run_tests.sh` script
+3. **UI Component Tests**
+   - Custom Button System
+   - Resource Display
+   - Modal Windows
+   - Context Menus
+   - Tooltips
 
 ## Writing Tests
 
-### Frontend Test Guidelines
+### Scene Testing
 
-1. Place test files in `frontend/src/__tests__/` mirroring the structure of the source files
-2. Name test files with `.test.ts` extension
-3. Use Jest's `describe` and `it` functions for test organization
-4. Use the Phaser mocks for testing game components
+Example of testing a game scene:
 
-Example:
 ```typescript
-import { Button } from '../../ui/Button';
+import { MainScene } from '../scenes/MainScene';
 
-describe('Button', () => {
-  it('should create a button with the correct text', () => {
-    const button = new Button({
-      scene: {} as Phaser.Scene,
-      x: 100,
-      y: 100,
-      text: 'Test Button'
-    });
-    
-    expect(button.text).toBe('Test Button');
+describe('MainScene', () => {
+  let scene: MainScene;
+
+  beforeEach(() => {
+    scene = new MainScene();
+  });
+
+  it('should initialize with correct configuration', () => {
+    expect(scene.sys.settings.key).toBe('MainScene');
+  });
+
+  it('should create menu buttons', () => {
+    scene.create();
+    expect(scene.buttons.length).toBeGreaterThan(0);
   });
 });
 ```
 
-### Backend Test Guidelines
+### Game System Testing
 
-1. Place test files in `backend/tests/` with `test_` prefix
-2. Use pytest fixtures for common setup
-3. Group related tests in the same file
-4. Use descriptive test names that explain the behavior being tested
+Example of testing game systems:
 
-Example:
-```python
-def test_create_new_game_with_default_values(client):
-    """
-    Test creating a new game with only the required player_name parameter.
-    Default values should be used for difficulty and galaxy_size.
-    """
-    response = client.post(
-        "/new-game",
-        json={"player_name": "TestPlayer"}
-    )
-    assert response.status_code == 200
-    data = response.json()
-    assert "game_id" in data
-    assert data["initial_state"]["player"]["name"] == "TestPlayer"
+```typescript
+import { ResourceSystem } from '../systems/ResourceSystem';
+
+describe('ResourceSystem', () => {
+  let system: ResourceSystem;
+
+  beforeEach(() => {
+    system = new ResourceSystem();
+  });
+
+  it('should track resource production', () => {
+    system.addResource('minerals', 100);
+    expect(system.getResource('minerals')).toBe(100);
+  });
+});
 ```
 
-## Troubleshooting
+### UI Component Testing
 
-### Common Frontend Test Issues
+Example of testing UI components:
 
-1. **Module not found errors**:
-   - Check that all dependencies are installed in the Docker container
-   - Verify import paths are correct (case-sensitive)
+```typescript
+import { Button } from '../ui/Button';
 
-2. **Phaser-related errors**:
-   - Make sure you're using the Phaser mocks correctly
-   - Check that game objects are properly initialized in tests
+describe('Button', () => {
+  it('should handle click events', () => {
+    const onClick = jest.fn();
+    const button = new Button({
+      scene: mockScene,
+      x: 100,
+      y: 100,
+      text: 'Test',
+      onClick
+    });
 
-### Common Backend Test Issues
+    button.emit('pointerdown');
+    expect(onClick).toHaveBeenCalled();
+  });
+});
+```
 
-1. **Import errors**:
-   - Ensure all directories have `__init__.py` files
-   - Check that `PYTHONPATH` is set correctly in the Docker container
-   - Use absolute imports in test files
+## Performance Testing
 
-2. **Database errors**:
-   - The test environment uses an in-memory SQLite database
-   - Make sure database models are properly defined
-   - Check that test fixtures are setting up the database correctly
+### Targets
 
-3. **API response errors**:
-   - Verify the expected response structure matches the actual API response
-   - Check for changes in the API endpoints that might affect tests
+- 60 FPS gameplay
+- < 100ms response time
+- < 2s initial load
+- < 500KB initial bundle
 
-## Continuous Integration
+### Tools
 
-The project uses GitHub Actions for continuous integration:
-- Tests are run automatically on pull requests
-- Both frontend and backend tests must pass before merging
-- Test coverage reports are generated and uploaded as artifacts
+- Chrome DevTools Performance Panel
+- Webpack Bundle Analyzer
+- Custom FPS monitoring
 
 ## Best Practices
 
-1. **Write tests before code** (Test-Driven Development)
-2. **Keep tests independent** - each test should run in isolation
-3. **Test edge cases** - not just the happy path
-4. **Keep tests fast** - slow tests discourage frequent testing
-5. **Use meaningful assertions** - test for specific behaviors
-6. **Don't test implementation details** - test behavior, not how it's implemented
+1. **Scene Testing**
+   - Test scene initialization
+   - Verify asset loading
+   - Check scene transitions
+   - Test game object creation
+
+2. **Game Logic**
+   - Unit test core mechanics
+   - Test state management
+   - Verify calculations
+   - Test game rules
+
+3. **UI Testing**
+   - Test component rendering
+   - Verify user interactions
+   - Check responsive behavior
+   - Test accessibility
+
+4. **Performance Testing**
+   - Monitor frame rate
+   - Check memory usage
+   - Verify load times
+   - Test with varying conditions
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Scene Loading Failures**
+   - Check asset paths
+   - Verify scene configuration
+   - Check for missing dependencies
+
+2. **Game Object Issues**
+   - Verify object creation
+   - Check position calculations
+   - Test collision detection
+
+3. **Performance Problems**
+   - Profile render calls
+   - Check asset optimization
+   - Monitor memory leaks
+
+## Continuous Integration
+
+Tests are run automatically on:
+- Pull requests
+- Main branch commits
+- Release tags
+
+Coverage reports are generated for:
+- Scene tests
+- System tests
+- UI components
