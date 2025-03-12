@@ -1,3 +1,9 @@
+"""Game entities router handling core game state and actions.
+* Manages CRUD operations for players, galaxies, star systems, and planets
+* Handles game state operations like colonization and turn advancement
+* Provides endpoints for retrieving game state and entity information
+"""
+
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from sqlalchemy.orm import Session

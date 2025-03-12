@@ -1,3 +1,9 @@
+"""Router for managing empire entities in the game.
+* Provides CRUD operations for empires within a game
+* Handles empire creation, updates, and removal
+* Returns empire details and relationships
+"""
+
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional

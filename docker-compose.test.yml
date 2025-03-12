@@ -69,6 +69,26 @@ services:
     depends_on:
       - db
 
+  cli:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    volumes:
+      - ./backend:/app
+      - ./config:/config
+    environment:
+      - ENVIRONMENT=test
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/phaser_game_test_db
+      - API_URL=http://backend:8000/api/v1
+    depends_on:
+      backend:
+        condition: service_started
+      db:
+        condition: service_started
+    stdin_open: true
+    tty: true
+    entrypoint: ["python", "cli.py"]
+
   db:
     image: postgres:13-alpine
     environment:

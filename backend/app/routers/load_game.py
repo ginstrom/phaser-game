@@ -1,3 +1,9 @@
+"""Router for managing saved game operations.
+* Lists available saved games with metadata
+* Handles loading saved game states
+* Returns complete game state for resuming play
+"""
+
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional

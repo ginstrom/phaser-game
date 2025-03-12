@@ -1,3 +1,9 @@
+"""Main FastAPI application module.
+* Initializes FastAPI app with CORS middleware and database
+* Sets up API routes for game operations
+* Handles application lifecycle with lifespan context manager
+"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn

@@ -1,3 +1,9 @@
+"""Router for managing game settings and preferences.
+* Handles audio, display, and gameplay settings
+* Provides CRUD operations for user preferences
+* Includes default settings and reset functionality
+"""
+
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Dict, Any, Optional

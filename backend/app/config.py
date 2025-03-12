@@ -1,3 +1,9 @@
+"""Configuration module for database and game enums.
+* Sets up SQLAlchemy database connection and base model
+* Defines game enums (PlanetType, GalaxySize, Difficulty) shared with frontend
+* Provides database session management utilities
+"""
+
 import os
 import json
 from sqlalchemy import create_engine

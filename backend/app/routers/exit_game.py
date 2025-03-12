@@ -1,3 +1,9 @@
+"""Router for handling game exit operations.
+* Manages graceful game termination with optional save
+* Handles save state persistence before exit
+* Returns exit status and save confirmation
+"""
+
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional, Union

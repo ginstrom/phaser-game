@@ -1,3 +1,9 @@
+"""Router for creating new game instances.
+* Handles new game creation with configurable settings
+* Validates player name, difficulty and galaxy size
+* Returns initial game state and configuration
+"""
+
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field, constr
 from typing import Dict, Any, Literal

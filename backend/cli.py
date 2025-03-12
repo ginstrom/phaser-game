@@ -4,7 +4,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich import print as rprint
-from typing import Optional, List
+from typing import Optional, List, Dict
 import json
 from enum import Enum
 from prompt_toolkit import PromptSession
@@ -31,10 +31,14 @@ class InteractiveCLI:
     def __init__(self):
         self.commands = {
             'player': self.player,
+            'players': self.list_players,
             'planet': self.planet,
+            'planets': self.list_planets,
             'colonize': self.colonize,
-            'systems': self.systems,
+            'systems': self.list_systems,
+            'system': self.system_details,
             'game': self.game,
+            'new-game': self.new_game,
             'next-turn': self.next_turn,
             'help': self.show_help,
             'clear': self.clear_screen,
@@ -43,6 +47,9 @@ class InteractiveCLI:
         self.session = PromptSession()
         self.completer = WordCompleter(list(self.commands.keys()) + ['--format', 'json', 'table'])
         self.running = True
+        # Cache for system and planet data to support index-based access
+        self.systems_cache: Dict[int, dict] = {}
+        self.planets_cache: Dict[str, Dict[int, dict]] = {}  # system_id -> {index: planet_data}
 
     def clear_screen(self, *args):
         """Clear the terminal screen."""
@@ -61,11 +68,15 @@ class InteractiveCLI:
         help_table.add_column("Usage", style="yellow")
 
         commands_help = {
-            'player': ('Get player details', 'player <name> [--format json/table]'),
-            'planet': ('Get planet details', 'planet <id> [--format json/table]'),
-            'colonize': ('Colonize a planet', 'colonize <planet_id> <player_name>'),
-            'systems': ('List star systems', 'systems [skip] [limit] [--format json/table]'),
+            'players': ('List all players', 'players [--format json/table]'),
+            'player': ('Get player details', 'player <name/index> [--format json/table]'),
+            'planets': ('List planets in a system', 'planets <system_index> [--format json/table]'),
+            'planet': ('Get planet details', 'planet <system_index> <planet_index> [--format json/table]'),
+            'colonize': ('Colonize a planet', 'colonize <system_index> <planet_index> <player_name>'),
+            'systems': ('List star systems', 'systems [--format json/table]'),
+            'system': ('Get system details', 'system <index> [--format json/table]'),
             'game': ('Get game state', 'game <id> [--format json/table]'),
+            'new-game': ('Create a new game', 'new-game <player_name> <empire_name>'),
             'next-turn': ('Advance game turn', 'next-turn <game_id>'),
             'help': ('Show this help', 'help'),
             'clear': ('Clear screen', 'clear'),
@@ -103,18 +114,58 @@ class InteractiveCLI:
 
         return command, args, kwargs
 
-    def player(self, *args, **kwargs):
-        """Get player details by name."""
-        if not args:
-            console.print("[red]Error: Player name required[/red]")
-            return
-
+    def list_players(self, *args, **kwargs):
+        """List all players with indices."""
         format_type = Format(kwargs.get('format', 'table'))
-        name = args[0]
         
         try:
             with httpx.Client() as client:
-                response = client.get(f"{get_api_url()}/players/{name}")
+                response = client.get(f"{get_api_url()}/players/")
+                response.raise_for_status()
+                data = response.json()
+                
+                if format_type == Format.json:
+                    rprint(data)
+                else:
+                    players_table = Table(title="Players")
+                    players_table.add_column("Index", style="cyan")
+                    players_table.add_column("Name", style="green")
+                    players_table.add_column("Empire", style="yellow")
+                    
+                    for idx, player in enumerate(data):
+                        players_table.add_row(
+                            str(idx),
+                            player['name'],
+                            player['empire']
+                        )
+                    
+                    console.print(players_table)
+                    console.print("\nUse 'player <index>' to view details")
+        except httpx.HTTPError as e:
+            console.print(f"[red]Error: {str(e)}[/red]")
+
+    def player(self, *args, **kwargs):
+        """Get player details by name or index."""
+        if not args:
+            console.print("[red]Error: Player name or index required[/red]")
+            return
+
+        format_type = Format(kwargs.get('format', 'table'))
+        player_id = args[0]
+        
+        try:
+            with httpx.Client() as client:
+                # First try to get all players to resolve index
+                if player_id.isdigit():
+                    list_response = client.get(f"{get_api_url()}/players/")
+                    list_response.raise_for_status()
+                    players = list_response.json()
+                    if int(player_id) >= len(players):
+                        console.print(f"[red]Error: Invalid player index {player_id}[/red]")
+                        return
+                    player_id = players[int(player_id)]['name']
+
+                response = client.get(f"{get_api_url()}/players/{player_id}")
                 response.raise_for_status()
                 data = response.json()
                 
@@ -125,6 +176,7 @@ class InteractiveCLI:
                     player_table.add_column("Attribute", style="cyan")
                     player_table.add_column("Value", style="green")
                     
+                    player_table.add_row("Name", data['name'])
                     player_table.add_row("Empire", data['empire'])
                     
                     for resource, value in data['resources'].items():
@@ -134,55 +186,203 @@ class InteractiveCLI:
         except httpx.HTTPError as e:
             console.print(f"[red]Error: {str(e)}[/red]")
 
-    def planet(self, *args, **kwargs):
-        """Get planet details by ID."""
-        if not args:
-            console.print("[red]Error: Planet ID required[/red]")
-            return
-
+    def list_systems(self, *args, **kwargs):
+        """List star systems with indices."""
         format_type = Format(kwargs.get('format', 'table'))
-        planet_id = args[0]
         
         try:
             with httpx.Client() as client:
-                response = client.get(f"{get_api_url()}/planets/{planet_id}")
+                response = client.get(f"{get_api_url()}/systems/")
                 response.raise_for_status()
                 data = response.json()
+                
+                # Update systems cache
+                self.systems_cache = {i: system for i, system in enumerate(data)}
                 
                 if format_type == Format.json:
                     rprint(data)
                 else:
-                    planet_table = Table(title=f"Planet: {data['name']}")
-                    planet_table.add_column("Attribute", style="cyan")
-                    planet_table.add_column("Value", style="green")
+                    systems_table = Table(title="Star Systems")
+                    systems_table.add_column("Index", style="cyan")
+                    systems_table.add_column("Name", style="green")
+                    systems_table.add_column("Position", style="magenta")
+                    systems_table.add_column("Explored", style="yellow")
+                    systems_table.add_column("Planets", style="blue")
                     
-                    planet_table.add_row("ID", data['id'])
-                    planet_table.add_row("Type", data['type'])
-                    planet_table.add_row("Size", str(data['size']))
-                    planet_table.add_row("Colonized", str(data['colonized']))
-                    if data.get('owner'):
-                        planet_table.add_row("Owner", data['owner'])
+                    for idx, system in self.systems_cache.items():
+                        systems_table.add_row(
+                            str(idx),
+                            system['name'],
+                            f"({system['position']['x']:.2f}, {system['position']['y']:.2f})",
+                            "✓" if system['explored'] else "✗",
+                            str(len(system.get('planets', [])))
+                        )
                     
-                    if 'resources' in data:
-                        for resource, value in data['resources'].items():
-                            planet_table.add_row(f"Resource: {resource}", str(value))
-                    
-                    console.print(planet_table)
+                    console.print(systems_table)
+                    console.print("\nUse 'system <index>' to view details")
+                    console.print("Use 'planets <index>' to list planets in a system")
         except httpx.HTTPError as e:
             console.print(f"[red]Error: {str(e)}[/red]")
 
-    def colonize(self, *args, **kwargs):
-        """Colonize a planet."""
-        if len(args) < 2:
-            console.print("[red]Error: Planet ID and player name required[/red]")
+    def system_details(self, *args, **kwargs):
+        """Get system details by index."""
+        if not args:
+            console.print("[red]Error: System index required[/red]")
             return
 
-        planet_id, player_name = args[0], args[1]
-        
+        format_type = Format(kwargs.get('format', 'table'))
         try:
+            system_idx = int(args[0])
+            if system_idx not in self.systems_cache:
+                console.print(f"[red]Error: Invalid system index {system_idx}[/red]")
+                return
+            
+            system = self.systems_cache[system_idx]
+            
+            if format_type == Format.json:
+                rprint(system)
+            else:
+                system_table = Table(title=f"System: {system['name']}")
+                system_table.add_column("Attribute", style="cyan")
+                system_table.add_column("Value", style="green")
+                
+                system_table.add_row("Index", str(system_idx))
+                system_table.add_row("Name", system['name'])
+                system_table.add_row("Position", f"({system['position']['x']:.2f}, {system['position']['y']:.2f})")
+                system_table.add_row("Explored", "✓" if system['explored'] else "✗")
+                system_table.add_row("Planets", str(len(system.get('planets', []))))
+                
+                console.print(system_table)
+                console.print("\nUse 'planets <index>' to list planets in this system")
+        except ValueError:
+            console.print("[red]Error: System index must be a number[/red]")
+        except Exception as e:
+            console.print(f"[red]Error: {str(e)}[/red]")
+
+    def list_planets(self, *args, **kwargs):
+        """List planets in a system by system index."""
+        if not args:
+            console.print("[red]Error: System index required[/red]")
+            return
+
+        format_type = Format(kwargs.get('format', 'table'))
+        try:
+            system_idx = int(args[0])
+            if system_idx not in self.systems_cache:
+                console.print(f"[red]Error: Invalid system index {system_idx}[/red]")
+                return
+            
+            system = self.systems_cache[system_idx]
+            planets = system.get('planets', [])
+            
+            # Update planets cache for this system
+            self.planets_cache[str(system_idx)] = {i: planet for i, planet in enumerate(planets)}
+            
+            if format_type == Format.json:
+                rprint(planets)
+            else:
+                planets_table = Table(title=f"Planets in {system['name']}")
+                planets_table.add_column("Index", style="cyan")
+                planets_table.add_column("Name", style="green")
+                planets_table.add_column("Type", style="yellow")
+                planets_table.add_column("Size", style="blue")
+                planets_table.add_column("Colonized", style="magenta")
+                planets_table.add_column("Owner", style="red")
+                
+                for idx, planet in self.planets_cache[str(system_idx)].items():
+                    planets_table.add_row(
+                        str(idx),
+                        planet['name'],
+                        planet['type'],
+                        str(planet['size']),
+                        "✓" if planet['colonized'] else "✗",
+                        planet.get('owner', '-')
+                    )
+                
+                console.print(planets_table)
+                console.print("\nUse 'planet <system_index> <planet_index>' to view details")
+        except ValueError:
+            console.print("[red]Error: System index must be a number[/red]")
+        except Exception as e:
+            console.print(f"[red]Error: {str(e)}[/red]")
+
+    def planet(self, *args, **kwargs):
+        """Get planet details by system and planet indices."""
+        if len(args) < 2:
+            console.print("[red]Error: Both system index and planet index required[/red]")
+            return
+
+        format_type = Format(kwargs.get('format', 'table'))
+        try:
+            system_idx = int(args[0])
+            planet_idx = int(args[1])
+            
+            if system_idx not in self.systems_cache:
+                console.print(f"[red]Error: Invalid system index {system_idx}[/red]")
+                return
+            
+            if str(system_idx) not in self.planets_cache or planet_idx not in self.planets_cache[str(system_idx)]:
+                # Load planets if not in cache
+                self.list_planets([system_idx])
+            
+            if str(system_idx) not in self.planets_cache or planet_idx not in self.planets_cache[str(system_idx)]:
+                console.print(f"[red]Error: Invalid planet index {planet_idx}[/red]")
+                return
+            
+            planet = self.planets_cache[str(system_idx)][planet_idx]
+            
+            if format_type == Format.json:
+                rprint(planet)
+            else:
+                planet_table = Table(title=f"Planet: {planet['name']}")
+                planet_table.add_column("Attribute", style="cyan")
+                planet_table.add_column("Value", style="green")
+                
+                planet_table.add_row("Name", planet['name'])
+                planet_table.add_row("Type", planet['type'])
+                planet_table.add_row("Size", str(planet['size']))
+                planet_table.add_row("Colonized", "✓" if planet['colonized'] else "✗")
+                if planet.get('owner'):
+                    planet_table.add_row("Owner", planet['owner'])
+                
+                if 'resources' in planet:
+                    for resource, value in planet['resources'].items():
+                        planet_table.add_row(f"Resource: {resource}", str(value))
+                
+                console.print(planet_table)
+        except ValueError:
+            console.print("[red]Error: Both system index and planet index must be numbers[/red]")
+        except Exception as e:
+            console.print(f"[red]Error: {str(e)}[/red]")
+
+    def colonize(self, *args, **kwargs):
+        """Colonize a planet using system index, planet index, and player name."""
+        if len(args) < 3:
+            console.print("[red]Error: System index, planet index, and player name required[/red]")
+            return
+
+        try:
+            system_idx = int(args[0])
+            planet_idx = int(args[1])
+            player_name = args[2]
+            
+            if system_idx not in self.systems_cache:
+                console.print(f"[red]Error: Invalid system index {system_idx}[/red]")
+                return
+            
+            if str(system_idx) not in self.planets_cache or planet_idx not in self.planets_cache[str(system_idx)]:
+                # Load planets if not in cache
+                self.list_planets([system_idx])
+            
+            if str(system_idx) not in self.planets_cache or planet_idx not in self.planets_cache[str(system_idx)]:
+                console.print(f"[red]Error: Invalid planet index {planet_idx}[/red]")
+                return
+            
+            planet = self.planets_cache[str(system_idx)][planet_idx]
+            
             with httpx.Client() as client:
                 response = client.patch(
-                    f"{get_api_url()}/planets/{planet_id}/colonize",
+                    f"{get_api_url()}/planets/{planet['id']}/colonize",
                     params={"player_name": player_name}
                 )
                 response.raise_for_status()
@@ -191,41 +391,42 @@ class InteractiveCLI:
                 console.print(Panel(
                     f"[green]Successfully colonized planet {data['name']} for player {player_name}[/green]"
                 ))
+                
+                # Update cache
+                self.planets_cache[str(system_idx)][planet_idx] = data
+        except ValueError:
+            console.print("[red]Error: System index and planet index must be numbers[/red]")
         except httpx.HTTPError as e:
             console.print(f"[red]Error: {str(e)}[/red]")
 
-    def systems(self, *args, **kwargs):
-        """List star systems."""
-        skip = int(args[0]) if args else 0
-        limit = int(args[1]) if len(args) > 1 else 10
-        format_type = Format(kwargs.get('format', 'table'))
+    def new_game(self, *args, **kwargs):
+        """Create a new game."""
+        if len(args) < 2:
+            console.print("[red]Error: Player name and empire name required[/red]")
+            return
+        
+        player_name = args[0]
+        empire_name = args[1]
         
         try:
             with httpx.Client() as client:
-                response = client.get(f"{get_api_url()}/systems/", params={"skip": skip, "limit": limit})
+                response = client.post(
+                    f"{get_api_url()}/games/",
+                    json={
+                        "player_name": player_name,
+                        "empire_name": empire_name
+                    }
+                )
                 response.raise_for_status()
                 data = response.json()
                 
-                if format_type == Format.json:
-                    rprint(data)
-                else:
-                    systems_table = Table(title="Star Systems")
-                    systems_table.add_column("ID", style="cyan")
-                    systems_table.add_column("Name", style="green")
-                    systems_table.add_column("Position", style="magenta")
-                    systems_table.add_column("Explored", style="yellow")
-                    systems_table.add_column("Planets", style="blue")
-                    
-                    for system in data:
-                        systems_table.add_row(
-                            system['id'],
-                            system['name'],
-                            f"({system['position']['x']:.2f}, {system['position']['y']:.2f})",
-                            "✓" if system['explored'] else "✗",
-                            str(len(system.get('planets', [])))
-                        )
-                    
-                    console.print(systems_table)
+                console.print(Panel(
+                    f"[green]Successfully created new game![/green]\n"
+                    f"Game ID: {data['id']}\n"
+                    f"Player: {data['player']['name']}\n"
+                    f"Empire: {data['player']['empire']}\n"
+                    f"Turn: {data['turn']}"
+                ))
         except httpx.HTTPError as e:
             console.print(f"[red]Error: {str(e)}[/red]")
 

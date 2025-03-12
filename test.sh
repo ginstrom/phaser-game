@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # test.sh - A script to run unit tests for the Phaser game project
-# Usage: ./test.sh [frontend|backend|all] [options]
+# Usage: ./test.sh [frontend|backend|all|cli] [options]
 # Options:
 #   --watch     Run tests in watch mode (frontend only)
 #   --coverage  Generate test coverage report
@@ -10,12 +10,13 @@
 
 # Display usage information
 show_usage() {
-    echo "Usage: ./test.sh [frontend|backend|all] [options]"
+    echo "Usage: ./test.sh [frontend|backend|all|cli] [options]"
     echo ""
     echo "Arguments:"
     echo "  frontend   Run frontend tests"
     echo "  backend    Run backend tests"
     echo "  all        Run both frontend and backend tests"
+    echo "  cli        Start interactive CLI for debugging the backend API"
     echo ""
     echo "Options:"
     echo "  --watch     Run tests in watch mode (frontend only)"
@@ -38,7 +39,7 @@ VERBOSE_MODE=false
 
 for arg in "$@"; do
     case $arg in
-        frontend|backend|all)
+        frontend|backend|all|cli)
             if [ -z "$TEST_TARGET" ]; then
                 TEST_TARGET=$arg
             else
@@ -111,6 +112,10 @@ case $TEST_TARGET in
     all)
         run_frontend_tests
         run_backend_tests
+        ;;
+    cli)
+        echo "Starting interactive CLI..."
+        docker-compose -f docker-compose.test.yml run cli
         ;;
     *)
         show_usage
