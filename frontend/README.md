@@ -27,29 +27,32 @@ A turn-based 4X space strategy game built with Phaser 3 and TypeScript, offering
 ┌─────────────┴───────┐
 │      Scenes         │
 ├─────────────────────┤
-│ • MainMenu         │
+│ • Startup          │
+│ • Main             │
 │ • Galaxy           │
+│ • System           │
+│ • Planet           │
 │ • Combat           │
-│ • Colony           │
-│ • Research         │
 └─────────────────────┘
 ```
 
 ## Core Components
 
 1. **Scene System**
-   - MainMenuScene: Game entry point and settings
-   - GalaxyScene: Main strategic view
-   - CombatScene: Tactical battle interface
-   - ColonyScene: Planet management
-   - ResearchScene: Technology development
+   - StartupScene: Initial loading and game setup
+   - MainScene: Main menu and game settings
+   - GalaxyScene: Strategic galaxy-level view
+   - SystemScene: Detailed star system view
+   - PlanetScene: Individual planet management
+   - CombatScene: Space battle interface (Coming soon)
 
 2. **Game Systems**
    - Empire Management
    - Resource Tracking
-   - Combat Resolution
+   - Fleet Movement
    - Tech Tree Progression
    - Map Generation
+   - Combat Resolution (Coming soon)
 
 3. **UI Components**
    - Custom Button System
