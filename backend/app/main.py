@@ -16,7 +16,6 @@ from app.database.config import engine, Base
 
 # Import routers
 from app.routers import new_game, load_game, settings, exit_game, game_entities
-from app.routes import game
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -48,7 +47,6 @@ app.include_router(new_game.router, tags=["Game"])
 app.include_router(load_game.router, tags=["Game"])
 app.include_router(settings.router, tags=["Settings"])
 app.include_router(exit_game.router, tags=["Game"])
-app.include_router(game.router)
 app.include_router(game_entities.router, tags=["Game Entities"])
 
 # Root endpoint
