@@ -11,7 +11,6 @@ if ENVIRONMENT == "test":
     DATABASE_URL = "sqlite:///:memory:"
 else:
     DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./test.db")
-    # No need to replace postgresql:// with postgresql+asyncpg:// anymore
 
 # Create synchronous engine with SQLite-specific config if needed
 engine = create_engine(
@@ -29,6 +28,13 @@ session_maker = sessionmaker(
 
 # Dependency for FastAPI endpoints to provide a database session
 def get_db():
+    """
+    Creates and yields a new database session.
+    Ensures proper cleanup of the session after use.
+    
+    Yields:
+        Session: SQLAlchemy database session
+    """
     session = session_maker()
     try:
         yield session

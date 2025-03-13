@@ -26,9 +26,9 @@ from app.database.models import (
     StarSystem as StarSystemDB,
     Planet as PlanetDB,
     PlayerResources as PlayerResourcesDB,
-    Empire as EmpireDB,
     GameStateDB
 )
+from app.models.empire import EmpireDB
 from app.config import GalaxySize, Difficulty
 
 router = APIRouter(prefix="/api/v1")
