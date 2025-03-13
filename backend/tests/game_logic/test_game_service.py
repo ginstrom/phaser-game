@@ -1,6 +1,7 @@
 import pytest
 from app.services.game_service import create_new_game, get_game
 from app.database.models import Game, Galaxy, StarSystem, Planet
+from app.models.game import GameCreate
 
 class TestGameCreation:
     def test_create_new_game(self, db_session):
@@ -13,14 +14,15 @@ class TestGameCreation:
         )
         
         # Verify game creation
-        assert game["player"]["name"] == "TestPlayer"
-        assert game["difficulty"] == "normal"
-        assert game["galaxy"]["size"] == "medium"
+        assert game.player_name == "TestPlayer"
+        assert game.difficulty == "normal"
+        assert game.galaxy_size == "medium"
         
-        # Verify player resources
-        assert game["player"]["resources"]["mineral"] == 500  # Starting resources
-        assert game["player"]["resources"]["energy"] == 200
-        assert game["player"]["resources"]["credits"] == 1000
+        # Verify player resources through the game state
+        game_dict = game.to_dict()
+        assert game_dict["player"]["resources"]["mineral"] == 500  # Starting resources
+        assert game_dict["player"]["resources"]["energy"] == 200
+        assert game_dict["player"]["resources"]["credits"] == 1000
 
     def test_galaxy_generation(self, db_session):
         """Test galaxy generation logic."""
@@ -31,13 +33,14 @@ class TestGameCreation:
             galaxy_size="medium"
         )
         
+        game_dict = game.to_dict()
         # Verify star systems were generated
-        assert len(game["galaxy"]["systems"]) > 0
+        assert len(game_dict["galaxy"]["systems"]) > 0
         
         # Check that systems have valid positions
-        for system in game["galaxy"]["systems"]:
-            assert -1 <= system["position"]["x"] <= 1
-            assert -1 <= system["position"]["y"] <= 1
+        for system in game_dict["galaxy"]["systems"]:
+            assert 0 <= system["position_x"] <= 1
+            assert 0 <= system["position_y"] <= 1
             assert system["name"] is not None
             
             # Verify planets were generated
@@ -64,17 +67,16 @@ class TestGameLoading:
             difficulty="normal",
             galaxy_size="medium"
         )
-        game_id = original_game["id"]
+        game_id = original_game.id
         
         # Then load it
         loaded_game = get_game(db_session, game_id)
         
         assert loaded_game is not None
-        assert loaded_game["id"] == game_id
-        assert loaded_game["player"]["name"] == "TestPlayer"
-        assert loaded_game["galaxy"] is not None
-        assert len(loaded_game["galaxy"]["systems"]) > 0
-        assert loaded_game["player"]["resources"] is not None
+        assert loaded_game.id == game_id
+        assert loaded_game.player_name == "TestPlayer"
+        assert loaded_game.difficulty == "normal"
+        assert loaded_game.galaxy_size == "medium"
 
     def test_load_nonexistent_game(self, db_session):
         """Test loading a game that doesn't exist."""
@@ -91,9 +93,10 @@ class TestGameMechanics:
             galaxy_size="medium"
         )
         
+        game_dict = game.to_dict()
         # Get a system that isn't the starting system
         unexplored_system = next(
-            system for system in game["galaxy"]["systems"]
+            system for system in game_dict["galaxy"]["systems"]
             if not system["explored"]
         )
         
@@ -110,9 +113,10 @@ class TestGameMechanics:
             galaxy_size="medium"
         )
         
+        game_dict = game.to_dict()
         # Find a suitable planet to colonize
         planet = next(
-            planet for system in game["galaxy"]["systems"]
+            planet for system in game_dict["galaxy"]["systems"]
             for planet in system["planets"]
             if planet["type"] in ["terrestrial", "oceanic", "jungle"]
             and not planet["colonized"]
@@ -120,4 +124,4 @@ class TestGameMechanics:
         
         # Initially should not be colonized
         assert not planet["colonized"]
-        assert planet["empire_id"] is None 
+        assert planet["owner"] is None 

@@ -8,7 +8,6 @@ class TestGameModel:
         """Test creating a new game record."""
         game = Game(
             player_name="TestPlayer",
-            empire_name="Test Empire",
             difficulty="normal",
             galaxy_size="medium"
         )
@@ -19,13 +18,11 @@ class TestGameModel:
         assert game.created_at is not None
         assert game.turn == 1
         assert game.player_name == "TestPlayer"
-        assert game.empire_name == "Test Empire"
 
     def test_game_relationships(self, db_session: Session):
         """Test game relationships with other models."""
         game = Game(
             player_name="TestPlayer",
-            empire_name="Test Empire",
             difficulty="normal",
             galaxy_size="medium"
         )
@@ -55,7 +52,6 @@ class TestGalaxyModel:
         """Test creating a new galaxy."""
         game = Game(
             player_name="TestPlayer",
-            empire_name="Test Empire",
             difficulty="normal",
             galaxy_size="medium"
         )
@@ -71,7 +67,6 @@ class TestGalaxyModel:
         """Test galaxy relationship with star systems."""
         game = Game(
             player_name="TestPlayer",
-            empire_name="Test Empire",
             difficulty="normal",
             galaxy_size="medium"
         )
@@ -93,7 +88,6 @@ class TestStarSystemModel:
         """Test creating a new star system."""
         game = Game(
             player_name="TestPlayer",
-            empire_name="Test Empire",
             difficulty="normal",
             galaxy_size="medium"
         )
@@ -119,7 +113,6 @@ class TestPlanetModel:
         """Test creating a new planet."""
         game = Game(
             player_name="TestPlayer",
-            empire_name="Test Empire",
             difficulty="normal",
             galaxy_size="medium"
         )
@@ -150,7 +143,6 @@ class TestPlanetModel:
         """Test planet relationship with resources."""
         game = Game(
             player_name="TestPlayer",
-            empire_name="Test Empire",
             difficulty="normal",
             galaxy_size="medium"
         )

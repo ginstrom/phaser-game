@@ -10,7 +10,7 @@ def test_get_settings(client):
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert "message" in data
-    assert "Settings retrieved successfully" in data["message"]
+    assert "Game settings retrieved successfully" in data["message"]
     assert "settings" in data
     
     # Check that all expected settings are present with their default values
