@@ -15,8 +15,8 @@ empire_systems = Table(
     Column('system_id', String, ForeignKey('star_systems.id'))
 )
 
-class Empire(Base):
-    """SQLAlchemy model for an empire."""
+class EmpireDB(Base):
+    """SQLAlchemy model for an empire in the database."""
     __tablename__ = "empires"
 
     id = Column(String, primary_key=True, default=generate_uuid)
@@ -64,6 +64,21 @@ class Empire(Base):
             "controlled_systems_count": len(self.controlled_systems),
             "controlled_planets_count": len(self.controlled_planets)
         }
+    
+    def to_api_model(self) -> "EmpireResponse":
+        """Convert the database model to an API response model."""
+        return EmpireResponse(
+            id=self.id,
+            name=self.name,
+            color=self.color,
+            is_player=self.is_player,
+            credits=self.credits,
+            research_points=self.research_points,
+            research_levels=ResearchLevels(**self.research_levels),
+            perks=EmpirePerks(**self.perks),
+            controlled_systems_count=len(self.controlled_systems),
+            controlled_planets_count=len(self.controlled_planets)
+        )
 
 # Pydantic models for API
 class ResearchLevels(BaseModel):

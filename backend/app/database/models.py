@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 
 from app.database.config import Base
-from app.models.empire import Empire, empire_systems
+from app.models.empire import EmpireDB, empire_systems
 
 def generate_uuid():
     """Generate a UUID string for use as a primary key."""
@@ -32,8 +32,8 @@ class Game(Base):
     # Related entities
     galaxy = relationship("Galaxy", uselist=False, back_populates="game", cascade="all, delete-orphan")
     player_resources = relationship("PlayerResources", uselist=False, back_populates="game", cascade="all, delete-orphan")
-    empires = relationship("Empire", back_populates="game", foreign_keys="[Empire.game_id]", cascade="all, delete-orphan")
-    player_empire = relationship("Empire", foreign_keys=[player_empire_id], post_update=True)
+    empires = relationship("EmpireDB", back_populates="game", foreign_keys="[EmpireDB.game_id]", cascade="all, delete-orphan")
+    player_empire = relationship("EmpireDB", foreign_keys=[player_empire_id], post_update=True)
     
     def to_dict(self):
         """Convert the game to a dictionary for the API response."""
@@ -116,7 +116,7 @@ class StarSystem(Base):
     # Related entities
     galaxy = relationship("Galaxy", back_populates="systems")
     planets = relationship("Planet", back_populates="system", cascade="all, delete-orphan")
-    controlling_empire = relationship("Empire", secondary="empire_systems", back_populates="controlled_systems")
+    controlling_empire = relationship("EmpireDB", secondary="empire_systems", back_populates="controlled_systems")
     
     def to_dict(self):
         """Convert the star system to a dictionary for the API response."""
@@ -147,7 +147,7 @@ class Planet(Base):
     # Related entities
     system = relationship("StarSystem", back_populates="planets")
     resources = relationship("PlanetResources", uselist=False, back_populates="planet", cascade="all, delete-orphan")
-    empire = relationship("Empire", back_populates="controlled_planets")
+    empire = relationship("EmpireDB", back_populates="controlled_planets")
     
     def to_dict(self):
         """Convert the planet to a dictionary for the API response."""
