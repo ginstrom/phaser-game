@@ -20,7 +20,7 @@ class Empire(Base):
     __tablename__ = "empires"
 
     id = Column(String, primary_key=True, default=generate_uuid)
-    game_id = Column(String, ForeignKey("games.id", ondelete="CASCADE"), nullable=False)
+    game_id = Column(String, ForeignKey('games.id', use_alter=True, name='fk_empire_game_id'), nullable=False)
     name = Column(String, nullable=False)
     is_player = Column(Boolean, default=False)
     color = Column(String, nullable=False)  # Hex color code
@@ -35,6 +35,14 @@ class Empire(Base):
         "shields": 0,
         "propulsion": 0,
         "economics": 0
+    })
+
+    # Empire perks (stored as JSON)
+    perks = Column(JSON, default=lambda: {
+        "research_efficiency": 1.0,
+        "combat_efficiency": 1.0,
+        "economic_efficiency": 1.0,
+        "diplomatic_influence": 1.0
     })
     
     # Relationships
@@ -52,15 +60,30 @@ class Empire(Base):
             "credits": self.credits,
             "research_points": self.research_points,
             "research_levels": self.research_levels,
+            "perks": self.perks,
             "controlled_systems_count": len(self.controlled_systems),
             "controlled_planets_count": len(self.controlled_planets)
         }
 
 # Pydantic models for API
+class ResearchLevels(BaseModel):
+    weapons: int = 0
+    shields: int = 0
+    propulsion: int = 0
+    economics: int = 0
+
+class EmpirePerks(BaseModel):
+    research_efficiency: float = 1.0
+    combat_efficiency: float = 1.0
+    economic_efficiency: float = 1.0
+    diplomatic_influence: float = 1.0
+
 class EmpireBase(BaseModel):
     name: str
     color: str
     is_player: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
 
 class EmpireCreate(EmpireBase):
     pass
@@ -72,11 +95,14 @@ class EmpireUpdate(BaseModel):
     research_points: Optional[int] = None
     research_levels: Optional[Dict[str, int]] = None
 
+    model_config = ConfigDict(from_attributes=True)
+
 class EmpireResponse(EmpireBase):
     id: str
     credits: int
     research_points: int
-    research_levels: Dict[str, int]
+    research_levels: ResearchLevels
+    perks: EmpirePerks
     controlled_systems_count: int
     controlled_planets_count: int
 

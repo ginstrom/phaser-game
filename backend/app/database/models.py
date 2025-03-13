@@ -20,7 +20,7 @@ class Game(Base):
     
     # Player info
     player_name = Column(String, nullable=False)
-    player_empire_id = Column(String, ForeignKey("empires.id"), nullable=True)
+    player_empire_id = Column(String, ForeignKey("empires.id", use_alter=True, name='fk_game_player_empire_id'), nullable=True)
     
     # Game settings
     difficulty = Column(String, nullable=False, default="normal")
@@ -67,6 +67,7 @@ class Game(Base):
             "galaxy": galaxy_data,
             "turn": self.turn,
             "difficulty": self.difficulty,
+            "galaxy_size": self.galaxy_size,
             "empires": empires_data
         }
 
@@ -122,6 +123,8 @@ class StarSystem(Base):
         return {
             "id": self.id,
             "name": self.name,
+            "position_x": self.position_x,
+            "position_y": self.position_y,
             "position": {"x": self.position_x, "y": self.position_y},
             "explored": self.explored,
             "discovery_level": self.discovery_level,
@@ -155,6 +158,7 @@ class Planet(Base):
             "size": self.size,
             "colonized": self.colonized,
             "empire_id": self.empire_id,
+            "owner": self.empire_id,
             "resources": self.resources.to_dict() if self.resources else {}
         }
 

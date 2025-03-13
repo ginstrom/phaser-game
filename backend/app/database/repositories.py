@@ -37,20 +37,25 @@ class GameRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def create_game(self, game_data: dict):
+    def create_game(self, game_data):
         """Create a new game with the specified parameters."""
         # Extract basic game info
-        player_name = game_data.get("player_name")
-        difficulty = game_data.get("difficulty", "normal")
-        galaxy_size = game_data.get("galaxy_size", "medium")
-        player_resources_data = game_data.get("player_resources", {})
+        if isinstance(game_data, dict):
+            player_name = game_data.get("player_name")
+            difficulty = game_data.get("difficulty", "normal")
+            galaxy_size = game_data.get("galaxy_size", "medium")
+            player_resources_data = game_data.get("player_resources", {})
+        else:
+            player_name = game_data.player_name
+            difficulty = getattr(game_data, 'difficulty', 'normal')
+            galaxy_size = getattr(game_data, 'galaxy_size', 'medium')
+            player_resources_data = getattr(game_data, 'player_resources', {}) or {}
         
         # Create the game
         game = Game(
             player_name=player_name,
             difficulty=difficulty,
-            galaxy_size=galaxy_size,
-            empire_name=game_data.get("empire_name", "Human Empire")
+            galaxy_size=galaxy_size
         )
         
         # Create player resources
@@ -74,7 +79,12 @@ class GameRepository:
         self.session.commit()
         
         # Initialize empires
-        initialize_game_empires(self.session, game.id)
+        initialize_game_empires(
+            self.session,
+            game.id,
+            player_name,
+            difficulty=difficulty
+        )
         
         return game
 
@@ -180,9 +190,9 @@ class GameRepository:
         radius = random.random()  # 0 to 1
         angle = random.random() * 2 * math.pi  # 0 to 2π
         
-        # Convert polar coordinates to Cartesian
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
+        # Convert polar coordinates to Cartesian and normalize to [0,1] range
+        x = (radius * math.cos(angle) + 1) / 2  # Convert from [-1,1] to [0,1]
+        y = (radius * math.sin(angle) + 1) / 2  # Convert from [-1,1] to [0,1]
         
         # Generate system name
         name = self._generate_star_system_name()
