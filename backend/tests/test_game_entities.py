@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from app.database.models import (
     Game as GameDB,
     PlayerResources as PlayerResourcesDB,
-    Galaxy as GalaxyDB,
-    Empire
+    Galaxy as GalaxyDB
 )
+from app.models.empire import EmpireDB
 from app.config import Difficulty, GalaxySize
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def test_game(db_session, sample_player):
     )
     
     # Create player empire
-    empire = Empire(
+    empire = EmpireDB(
         game=game,
         name=f"{sample_player['name']}'s Empire",
         is_player=True,

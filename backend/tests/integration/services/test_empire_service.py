@@ -9,7 +9,7 @@ from app.services.empire_service import (
     get_empire,
     get_empires
 )
-from app.models.empire import Empire
+from app.models.empire import EmpireDB, EmpireResponse
 from app.utils.config_loader import config
 from app.database.models import Game
 
@@ -44,21 +44,25 @@ def test_perks() -> Dict:
 
 def test_create_player_empire(db_session: Session, test_game_id: str, test_player_name: str, test_perks: Dict):
     """Test creating a player empire with default settings."""
-    empire = create_player_empire(
+    empire_response = create_player_empire(
         db=db_session,
         game_id=test_game_id,
         name=f"{test_player_name}'s Empire",
         perks=test_perks
     )
+
+    assert empire_response is not None
+    # Query the database to check game_id
+    empire_db = db_session.query(EmpireDB).filter(EmpireDB.id == empire_response.id).first()
+    assert empire_db.game_id == test_game_id
     
-    assert empire is not None
-    assert empire.game_id == test_game_id
-    assert empire.name == f"{test_player_name}'s Empire"
-    assert empire.is_player is True
-    assert empire.color == "#00FF00"  # Default player color
-    assert empire.credits == 1000  # Default normal difficulty
-    assert empire.research_points == 50  # Default normal difficulty
-    assert empire.perks == test_perks
+    # Check other properties from the response
+    assert empire_response.name == f"{test_player_name}'s Empire"
+    assert empire_response.is_player is True
+    assert empire_response.color == "#00FF00"  # Default player color
+    assert empire_response.credits == 1000  # Default normal difficulty
+    assert empire_response.research_points == 50  # Default normal difficulty
+    assert empire_response.perks.model_dump() == test_perks
 
 def test_create_player_empire_with_difficulty(db_session: Session, test_game_id: str, test_player_name: str):
     """Test creating a player empire with different difficulty settings."""
@@ -79,19 +83,23 @@ def test_create_player_empire_with_difficulty(db_session: Session, test_game_id:
 
 def test_create_computer_empire(db_session: Session, test_game_id: str):
     """Test creating a computer-controlled empire."""
-    empire = create_computer_empire(db=db_session, game_id=test_game_id)
+    empire_response = create_computer_empire(db=db_session, game_id=test_game_id)
+
+    assert empire_response is not None
+    # Query the database to check game_id
+    empire_db = db_session.query(EmpireDB).filter(EmpireDB.id == empire_response.id).first()
+    assert empire_db.game_id == test_game_id
     
-    assert empire is not None
-    assert empire.game_id == test_game_id
-    assert empire.is_player is False
-    assert empire.name != ""  # Should have a generated name
-    assert empire.color != ""  # Should have a color from archetype
+    # Check other properties from the response
+    assert empire_response.is_player is False
+    assert empire_response.name != ""  # Should have a generated name
+    assert empire_response.color != ""  # Should have a color from archetype
     
     # Verify the empire has valid perks from an archetype
     archetypes = config.get_config_section("empire_archetypes")
     archetype_found = False
     for archetype in archetypes:
-        if empire.perks == archetype.perks.model_dump():
+        if empire_response.perks.model_dump() == archetype.perks.model_dump():
             archetype_found = True
             break
     assert archetype_found
@@ -187,7 +195,7 @@ def test_get_empires(db_session: Session, test_game_id: str, test_player_name: s
     retrieved_empires = get_empires(db_session, test_game_id)
     
     assert len(retrieved_empires) == len(created_empires)
-    assert all(isinstance(empire, Empire) for empire in retrieved_empires)
+    assert all(isinstance(empire, EmpireResponse) for empire in retrieved_empires)
     
     # Verify we have the correct number of player and computer empires
     player_empires = [e for e in retrieved_empires if e.is_player]

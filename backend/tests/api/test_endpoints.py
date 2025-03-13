@@ -14,7 +14,7 @@ os.environ["ENVIRONMENT"] = "test"
 
 from app.main import app
 from app.database.models import Base, Game
-from app.models.empire import Empire
+from app.models.empire import EmpireDB
 from app.database.config import get_db
 
 # Use SQLite in-memory database for tests

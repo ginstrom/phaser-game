@@ -1,6 +1,7 @@
 import pytest
 from sqlalchemy.orm import Session
-from app.database.models import Game, Galaxy, StarSystem, Planet, Empire, PlanetResources, PlayerResources
+from app.database.models import Game, Galaxy, StarSystem, Planet, PlanetResources, PlayerResources
+from app.models.empire import EmpireDB
 from datetime import datetime
 
 class TestGameModel:
@@ -29,7 +30,7 @@ class TestGameModel:
         
         # Create related entities
         galaxy = Galaxy(game=game, size="medium")
-        empire = Empire(game=game, name="Test Empire", is_player=True, color="#FF0000")
+        empire = EmpireDB(game=game, name="Test Empire", is_player=True, color="#FF0000")
         player_resources = PlayerResources(game=game)
         
         # Add all entities to session

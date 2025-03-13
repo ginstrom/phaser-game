@@ -27,6 +27,7 @@ from app.database.models import (
     Empire,
     StarSystem as StarSystemDB
 )
+from app.models.empire import EmpireDB
 
 # Create test database
 TEST_DATABASE_URL = "sqlite:///:memory:"
@@ -144,8 +145,7 @@ def test_game(db_session, sample_player):
     )
     
     # Create player empire
-    empire = Empire(
-        id=str(uuid.uuid4()),
+    empire = EmpireDB(
         game=game,
         name=f"{sample_player['name']}'s Empire",
         is_player=True,
