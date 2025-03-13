@@ -7,7 +7,7 @@ from enum import Enum
 from sqlalchemy import Column, String, ForeignKey
 
 from app.config import PlanetType, GalaxySize, Difficulty
-from app.models.empire import Empire, EmpireResponse
+from app.models.empire import EmpireDB, EmpireResponse
 
 
 class PlanetResources(BaseModel):
