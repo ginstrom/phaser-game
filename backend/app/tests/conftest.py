@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 
 from app.main import app
@@ -43,7 +43,7 @@ def setup_test_database():
     Base.metadata.drop_all(bind=engine)
 
 @pytest.fixture
-def client():
+def client(db_session: Session) -> TestClient:
     """Create a test client."""
     return TestClient(app)
 
@@ -54,4 +54,51 @@ def db_session():
     try:
         yield db
     finally:
-        db.close() 
+        db.close()
+
+@pytest.fixture
+def sample_player():
+    """Fixture providing sample player data."""
+    return {
+        "name": "TestPlayer",
+        "empire": "Human Empire",
+        "resources": {
+            "organic": 0,
+            "mineral": 500,
+            "energy": 200,
+            "exotics": 0,
+            "credits": 1000,
+            "research": 0
+        }
+    }
+
+@pytest.fixture
+def sample_planet():
+    """Fixture providing sample planet data."""
+    return {
+        "name": "Test Planet",
+        "type": "terrestrial",
+        "size": 5,
+        "resources": {
+            "organic": 50,
+            "mineral": 50,
+            "energy": 50,
+            "exotics": 50
+        },
+        "colonized": False,
+        "owner": None
+    }
+
+@pytest.fixture
+def sample_game_state(sample_player):
+    """Fixture providing sample game state data."""
+    return {
+        "player": sample_player,
+        "galaxy": {
+            "size": "small",
+            "systems": [],
+            "explored_count": 0
+        },
+        "turn": 1,
+        "difficulty": "normal"
+    } 

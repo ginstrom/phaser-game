@@ -77,6 +77,7 @@ class GameState(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
+    player_name: str
     player: Player
     galaxy: Galaxy
     turn: int = 1
@@ -94,6 +95,7 @@ class GameState(BaseModel):
             "id": self.id,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
+            "player_name": self.player_name,
             "player": {
                 "name": self.player.name,
                 "empire": self.player.empire,

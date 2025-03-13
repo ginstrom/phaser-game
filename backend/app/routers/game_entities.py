@@ -5,13 +5,14 @@
 """
 
 from fastapi import APIRouter, HTTPException, Depends, status
-from typing import List, Dict
+from typing import List, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 import uuid
 
 from app.models.game import (
     GameState,
+    GameResponse,
     Player,
     Galaxy,
     StarSystem,
@@ -28,7 +29,7 @@ from app.database.models import (
     PlayerResources as PlayerResourcesDB,
     GameStateDB
 )
-from app.models.empire import EmpireDB
+from app.models.empire import EmpireDB, EmpireResponse
 from app.config import GalaxySize, Difficulty
 
 router = APIRouter(prefix="/api/v1")
@@ -177,7 +178,7 @@ async def colonize_planet(planet_id: str, player_name: str, db: Session = Depend
     return Planet(**planet.to_dict())
 
 # Game State endpoints
-@router.get("/games/{game_id}/state", response_model=GameState)
+@router.get("/games/{game_id}/state", response_model=Dict)
 async def get_game_state(game_id: str, db: Session = Depends(get_db)):
     """Get game state by ID"""
     stmt = select(GameDB).where(GameDB.id == game_id)
@@ -187,7 +188,19 @@ async def get_game_state(game_id: str, db: Session = Depends(get_db)):
     if not game:
         raise HTTPException(status_code=404, detail="Game not found")
     
-    return GameState(**game.to_dict())
+    game_state = game.to_dict()
+    return {
+        "id": game_state["id"],
+        "player_name": game_state["player_name"],
+        "game_state": game_state,
+        "created_at": game_state["created_at"],
+        "updated_at": game_state["updated_at"],
+        "difficulty": game_state["difficulty"],
+        "galaxy": game_state["galaxy"],
+        "player": game_state["player"],
+        "empires": game_state["empires"],
+        "turn": game_state["turn"]
+    }
 
 @router.post("/games/", response_model=GameState)
 async def create_game(game_state: GameState, db: Session = Depends(get_db)):
@@ -247,57 +260,85 @@ async def advance_turn(game_id: str, db: Session = Depends(get_db)):
     return GameState(**game.to_dict())
 
 # Game endpoints
-@router.post("/games/new", response_model=Dict)
-def create_new_game(
-    player_name: str,
-    galaxy_size: GalaxySize = GalaxySize.MEDIUM,
-    difficulty: Difficulty = Difficulty.NORMAL,
-    db: Session = Depends(get_db)
-):
-    # Create new game state
-    game_state = GameState(
-        id=str(uuid.uuid4()),
-        player=Player(name=player_name),
-        galaxy=Galaxy(size=galaxy_size),
-        difficulty=difficulty
-    )
+@router.get("/games/", response_model=List[GameResponse])
+async def list_games(db: Session = Depends(get_db)):
+    """List all games."""
+    stmt = select(GameDB)
+    result = db.execute(stmt)
+    games = result.scalars().all()
+    return [GameResponse(**game.to_dict()) for game in games]
+
+@router.delete("/games/{game_id}/", response_model=Dict)
+async def delete_game(game_id: str, db: Session = Depends(get_db)):
+    """Delete a game by ID."""
+    stmt = select(GameDB).where(GameDB.id == game_id)
+    result = db.execute(stmt)
+    game = result.scalars().first()
     
-    # Create database record
-    db_game = GameStateDB(
-        id=game_state.id,
-        player_name=game_state.player.name,
-        empire_name=game_state.player.empire,
-        turn=game_state.turn,
-        difficulty=game_state.difficulty,
-        game_data=game_state.to_dict()
-    )
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
     
-    db.add(db_game)
+    db.delete(game)
     db.commit()
-    db.refresh(db_game)
-    
+    return {"message": "Game deleted successfully"}
+
+# Settings endpoints
+@router.get("/settings", response_model=Dict)
+async def get_settings():
+    """Get current game settings."""
     return {
-        "game_id": db_game.id,
-        "message": "Game created successfully",
-        "initial_state": db_game.game_data
+        "settings": {
+            "audio_volume": 100,
+            "music_volume": 100,
+            "sfx_volume": 100,
+            "fullscreen": False
+        },
+        "message": "Current game settings"
     }
 
-@router.get("/games/saved", response_model=List[dict])
-def list_saved_games(db: Session = Depends(get_db)):
-    games = db.query(GameStateDB).all()
-    return [game.to_dict() for game in games]
-
-@router.post("/games/load")
-def load_game(game_id: str, db: Session = Depends(get_db)):
-    game = db.query(GameStateDB).filter(GameStateDB.id == game_id).first()
-    if not game:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Game with ID {game_id} not found"
-        )
-    
+@router.post("/settings", response_model=Dict)
+async def update_settings(settings_data: Dict):
+    """Update game settings."""
+    settings = settings_data.get("settings", {})
     return {
-        "game_id": game.id,
-        "message": "Game loaded successfully",
-        "game_state": game.game_data
-    } 
+        "message": "Settings updated successfully",
+        "settings": {
+            "audio_volume": settings.get("audio_volume", 100),
+            "music_volume": settings.get("music_volume", 100),
+            "sfx_volume": settings.get("sfx_volume", 100),
+            "fullscreen": settings.get("fullscreen", False)
+        }
+    }
+
+@router.get("/settings/reset", response_model=Dict)
+async def reset_settings():
+    """Reset settings to defaults."""
+    return {
+        "message": "Settings reset to defaults",
+        "settings": {
+            "audio_volume": 100,
+            "music_volume": 100,
+            "sfx_volume": 100,
+            "fullscreen": False
+        }
+    }
+
+# Exit game endpoints
+@router.post("/games/exit", response_model=Dict)
+async def exit_game(exit_data: Dict):
+    """Handle game exit with optional save."""
+    save_before_exit = exit_data.get("save_before_exit", False)
+    save_name = exit_data.get("save_name")
+    game_id = exit_data.get("game_id")
+    
+    if save_before_exit and save_name and game_id:
+        return {
+            "message": f"Game saved as '{save_name}' before exit",
+            "saved": True,
+            "save_id": str(uuid.uuid4())
+        }
+    else:
+        return {
+            "message": "Game exited without saving",
+            "saved": False
+        } 

@@ -1,73 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
 from app.main import app
-from app.utils.config_loader import config
-from app.database.models import Base
-from app.database.config import get_db
-from app.utils.config_loader import GameSettings
-
-# Use SQLite in-memory database for tests
-TEST_DATABASE_URL = "sqlite:///:memory:"
-
-# Create test engine
-engine = create_engine(
-    TEST_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool
-)
-
-# Create test session factory
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-@pytest.fixture(scope="session", autouse=True)
-def setup_test_database():
-    """Set up the test database with tables and any required initial data."""
-    # Create all tables
-    Base.metadata.create_all(bind=engine)
-    
-    # Add any required initial data here
-    db = TestingSessionLocal()
-    try:
-        # Add initial data if needed
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        raise e
-    finally:
-        db.close()
-    
-    # Override the database dependency
-    app.dependency_overrides[get_db] = override_get_db
-    
-    yield
-    
-    # Clean up after all tests
-    Base.metadata.drop_all(bind=engine)
-
-@pytest.fixture
-def client():
-    return TestClient(app)
-
-@pytest.fixture
-def db():
-    """Create a test database session."""
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+from app.utils.config_loader import config, GameSettings
 
 def test_create_game_success(client: TestClient):
     """Test successful game creation with default settings."""

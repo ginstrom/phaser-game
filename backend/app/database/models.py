@@ -36,39 +36,43 @@ class Game(Base):
     player_empire = relationship("EmpireDB", foreign_keys=[player_empire_id], post_update=True)
     
     def to_dict(self):
-        """Convert the game to a dictionary for the API response."""
-        player = {
-            "name": self.player_name,
-            "empire": self.player_empire.to_dict() if self.player_empire else None,
-            "resources": self.player_resources.to_dict() if self.player_resources else {}
+        """Convert the game to a dictionary for API responses."""
+        # Get empire data with a default if None
+        empire_data = self.player_empire.to_dict() if self.player_empire else {
+            "name": f"{self.player_name}'s Empire",
+            "is_player": True,
+            "color": "#0000FF",
+            "credits": 1000,
+            "research_points": 0
         }
-        
-        # Ensure galaxy is loaded
-        galaxy_data = {
-            "size": self.galaxy_size,
-            "systems": 0,
-            "explored": 0
-        }
-        
-        if self.galaxy:
-            galaxy_data["systems"] = self.galaxy.total_systems
-            galaxy_data["explored"] = self.galaxy.explored_count
-            if hasattr(self.galaxy, 'to_dict'):
-                galaxy_data.update(self.galaxy.to_dict())
-        
-        # Add empires data
-        empires_data = [empire.to_dict() for empire in self.empires] if self.empires else []
         
         return {
             "id": self.id,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-            "player": player,
-            "galaxy": galaxy_data,
-            "turn": self.turn,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "player_name": self.player_name,
+            "player_empire_id": self.player_empire_id,
             "difficulty": self.difficulty,
             "galaxy_size": self.galaxy_size,
-            "empires": empires_data
+            "turn": self.turn,
+            "player": {
+                "name": self.player_name,
+                "empire": empire_data,
+                "resources": self.player_resources.to_dict() if self.player_resources else {
+                    "organic": 0,
+                    "mineral": 500,
+                    "energy": 200,
+                    "exotics": 0,
+                    "credits": 1000,
+                    "research": 0
+                }
+            },
+            "galaxy": self.galaxy.to_dict() if self.galaxy else {
+                "size": self.galaxy_size,
+                "systems": [],
+                "explored_count": 0
+            },
+            "empires": [empire.to_dict() for empire in self.empires] if self.empires else []
         }
 
 
