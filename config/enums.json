@@ -1,14 +1,14 @@
 {
   "PlanetType": [
-    "rocky",
     "terrestrial",
-    "oceanic",
-    "desert",
-    "jungle",
-    "arctic",
     "gas_giant",
     "ice_giant",
-    "volcanic"
+    "rocky",
+    "volcanic",
+    "oceanic",
+    "jungle",
+    "desert",
+    "arctic"
   ],
   "GalaxySize": [
     "small",

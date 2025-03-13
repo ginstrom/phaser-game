@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 
 from app.main import app
@@ -21,37 +21,49 @@ engine = create_engine(
 # Create test session factory
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-@pytest.fixture(scope="session", autouse=True)
-def setup_test_database():
-    """Set up the test database with tables and any required initial data."""
-    # Create all tables
+@pytest.fixture(scope="function")
+def db_session() -> Session:
+    """
+    Creates a fresh database session for a test.
+    """
     Base.metadata.create_all(bind=engine)
-    
-    # Override the database dependency
-    app.dependency_overrides[get_db] = override_get_db
-    
-    yield
-    
-    # Clean up after all tests
-    Base.metadata.drop_all(bind=engine)
-
-@pytest.fixture
-def client():
-    """Create a test client."""
-    return TestClient(app)
-
-@pytest.fixture
-def db_session():
-    """Create a test database session."""
-    db = TestingSessionLocal()
+    session = TestingSessionLocal()
     try:
-        yield db
+        yield session
     finally:
-        db.close() 
+        session.close()
+        Base.metadata.drop_all(bind=engine)
+
+@pytest.fixture
+def client(db_session: Session):
+    """
+    Create a test client with a fresh database session.
+    """
+    def override_get_db():
+        try:
+            yield db_session
+        finally:
+            db_session.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+    with TestClient(app) as test_client:
+        yield test_client
+    app.dependency_overrides.clear()
+
+@pytest.fixture
+def test_game_data():
+    """
+    Returns test game creation data.
+    """
+    return {
+        "player_name": "TestPlayer",
+        "difficulty": "normal",
+        "galaxy_size": "medium"
+    }
+
+@pytest.fixture
+def test_player_name() -> str:
+    """
+    Returns a test player name.
+    """
+    return "TestPlayer" 

@@ -15,7 +15,7 @@ from pathlib import Path
 Base = declarative_base()
 
 # Load shared enums from JSON
-ENUMS_PATH = Path(__file__).parent.parent.parent.parent / "config" / "enums.json"
+ENUMS_PATH = Path("/config/enums.json")
 with open(ENUMS_PATH) as f:
     SHARED_ENUMS = json.load(f)
 

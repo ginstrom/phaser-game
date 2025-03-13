@@ -3,20 +3,35 @@ from app.services.game_service import create_new_game, get_game
 from app.database.models import Game, Galaxy, StarSystem, Planet
 from app.models.game import GameCreate
 
+@pytest.fixture
+def game_create_data():
+    """Fixture providing standard game creation data."""
+    return {
+        "player_name": "TestPlayer",
+        "difficulty": "normal",
+        "galaxy_size": "medium"
+    }
+
+@pytest.fixture
+def test_game(db_session, game_create_data):
+    """Fixture providing a test game instance."""
+    return create_new_game(
+        db_session,
+        **game_create_data
+    )
+
 class TestGameCreation:
-    def test_create_new_game(self, db_session):
+    def test_create_new_game(self, db_session, game_create_data):
         """Test the game creation service."""
         game = create_new_game(
             db_session,
-            player_name="TestPlayer",
-            difficulty="normal",
-            galaxy_size="medium"
+            **game_create_data
         )
         
         # Verify game creation
-        assert game.player_name == "TestPlayer"
-        assert game.difficulty == "normal"
-        assert game.galaxy_size == "medium"
+        assert game.player_name == game_create_data["player_name"]
+        assert game.difficulty == game_create_data["difficulty"]
+        assert game.galaxy_size == game_create_data["galaxy_size"]
         
         # Verify player resources through the game state
         game_dict = game.to_dict()
@@ -24,13 +39,11 @@ class TestGameCreation:
         assert game_dict["player"]["resources"]["energy"] == 200
         assert game_dict["player"]["resources"]["credits"] == 1000
 
-    def test_galaxy_generation(self, db_session):
+    def test_galaxy_generation(self, db_session, game_create_data):
         """Test galaxy generation logic."""
         game = create_new_game(
             db_session,
-            player_name="TestPlayer",
-            difficulty="normal",
-            galaxy_size="medium"
+            **game_create_data
         )
         
         game_dict = game.to_dict()
@@ -58,25 +71,18 @@ class TestGameCreation:
                 assert planet["resources"]["exotics"] >= 0
 
 class TestGameLoading:
-    def test_load_existing_game(self, db_session):
+    def test_load_existing_game(self, db_session, test_game):
         """Test loading an existing game."""
-        # First create a game
-        original_game = create_new_game(
-            db_session,
-            player_name="TestPlayer",
-            difficulty="normal",
-            galaxy_size="medium"
-        )
-        game_id = original_game.id
+        game_id = test_game.id
         
         # Then load it
         loaded_game = get_game(db_session, game_id)
         
         assert loaded_game is not None
         assert loaded_game.id == game_id
-        assert loaded_game.player_name == "TestPlayer"
-        assert loaded_game.difficulty == "normal"
-        assert loaded_game.galaxy_size == "medium"
+        assert loaded_game.player_name == test_game.player_name
+        assert loaded_game.difficulty == test_game.difficulty
+        assert loaded_game.galaxy_size == test_game.galaxy_size
 
     def test_load_nonexistent_game(self, db_session):
         """Test loading a game that doesn't exist."""
@@ -84,16 +90,9 @@ class TestGameLoading:
         assert loaded_game is None
 
 class TestGameMechanics:
-    def test_system_discovery(self, db_session):
+    def test_system_discovery(self, db_session, test_game):
         """Test system discovery mechanics."""
-        game = create_new_game(
-            db_session,
-            player_name="TestPlayer",
-            difficulty="normal",
-            galaxy_size="medium"
-        )
-        
-        game_dict = game.to_dict()
+        game_dict = test_game.to_dict()
         # Get a system that isn't the starting system
         unexplored_system = next(
             system for system in game_dict["galaxy"]["systems"]
@@ -104,16 +103,9 @@ class TestGameMechanics:
         assert not unexplored_system["explored"]
         assert unexplored_system["discovery_level"] == 0
 
-    def test_planet_colonization(self, db_session):
+    def test_planet_colonization(self, db_session, test_game):
         """Test planet colonization mechanics."""
-        game = create_new_game(
-            db_session,
-            player_name="TestPlayer",
-            difficulty="normal",
-            galaxy_size="medium"
-        )
-        
-        game_dict = game.to_dict()
+        game_dict = test_game.to_dict()
         # Find a suitable planet to colonize
         planet = next(
             planet for system in game_dict["galaxy"]["systems"]
