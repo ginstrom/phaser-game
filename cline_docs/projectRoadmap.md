@@ -15,7 +15,7 @@
   - [x] Connect frontend to backend
 - [~] Implement data store for game state
   - [x] Configure PostgreSQL database in docker-compose
-  - [ ] Create database models and schema
+  - [x] Create database models and schema using synchronous SQLAlchemy
   - [ ] Implement database migrations
   - [ ] Update services to use the database
 - [ ] Create basic game mechanics (movement, resources, etc.)
