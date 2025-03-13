@@ -42,7 +42,7 @@ def get_settings(db: Session = Depends(get_db)):
     try:
         # Stub implementation - in a real implementation, this would retrieve settings from a database
         return {
-            "message": "Settings retrieved successfully",
+            "message": "Game settings retrieved successfully",
             "settings": GameSettings().model_dump()
         }
     except Exception as e:

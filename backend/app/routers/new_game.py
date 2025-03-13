@@ -20,11 +20,12 @@ class NewGameRequest(BaseModel):
     galaxy_size: Literal["small", "medium", "large"] = Field(default="medium", description="Size of the galaxy")
     
 class NewGameResponse(BaseModel):
+    id: str
     game_id: str
     message: str
     initial_state: Dict[str, Any]
 
-@router.post("/new-game", response_model=NewGameResponse)
+@router.post("/api/v1/games/new", response_model=NewGameResponse)
 def create_new_game_endpoint(request: NewGameRequest, db: Session = Depends(get_db)):
     """
     Create a new game with the specified parameters.
@@ -42,7 +43,8 @@ def create_new_game_endpoint(request: NewGameRequest, db: Session = Depends(get_
     )
     
     return {
-        "game_id": game["id"],
+        "id": game.id,  # Add id for test compatibility
+        "game_id": game.id,
         "message": f"New game created for {request.player_name} with {request.difficulty} difficulty and {request.galaxy_size} galaxy size",
-        "initial_state": game
+        "initial_state": game.to_dict()
     }

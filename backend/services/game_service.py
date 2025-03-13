@@ -3,7 +3,7 @@ import string
 from typing import Dict, List, Any, Optional
 import math
 
-from backend.models.game import (
+from app.models.game import (
     GameState,
     Player,
     Galaxy,
