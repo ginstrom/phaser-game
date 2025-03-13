@@ -31,56 +31,55 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
+    working_dir: /backend
     command: python -m pytest
     volumes:
-      - ./backend:/app
+      - ./backend:/backend
       - ./config:/config
     environment:
       - ENVIRONMENT=test
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/phaser_game_test_db
-    depends_on:
-      - db
+      - PYTHONPATH=/backend
 
   backend-verbose:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
+    working_dir: /backend
     command: python -m pytest -v
     volumes:
-      - ./backend:/app
+      - ./backend:/backend
       - ./config:/config
     environment:
       - ENVIRONMENT=test
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/phaser_game_test_db
-    depends_on:
-      - db
+      - PYTHONPATH=/backend
 
   backend-coverage:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
+    working_dir: /backend
     command: python -m pytest --cov=app
     volumes:
-      - ./backend:/app
+      - ./backend:/backend
       - ./config:/config
     environment:
       - ENVIRONMENT=test
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/phaser_game_test_db
-    depends_on:
-      - db
+      - PYTHONPATH=/backend
 
   backend-api:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
+    working_dir: /backend
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
+      - ./backend:/backend
       - ./config:/config
     environment:
       - ENVIRONMENT=test
+      - PYTHONPATH=/backend
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/phaser_game_test_db
     depends_on:
       db:
@@ -90,11 +89,13 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
+    working_dir: /backend
     volumes:
-      - ./backend:/app
+      - ./backend:/backend
       - ./config:/config
     environment:
       - ENVIRONMENT=test
+      - PYTHONPATH=/backend
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/phaser_game_test_db
       - API_URL=http://backend-api:8000/api/v1
     depends_on:

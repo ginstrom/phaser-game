@@ -19,5 +19,17 @@
     "easy",
     "normal",
     "hard"
+  ],
+  "ResearchArea": [
+    "weapons",
+    "shields",
+    "propulsion",
+    "economics"
+  ],
+  "PerkAttribute": [
+    "research_efficiency",
+    "combat_efficiency",
+    "economic_efficiency",
+    "diplomatic_influence"
   ]
 }
