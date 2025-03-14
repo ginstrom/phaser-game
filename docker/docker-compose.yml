@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8000"
+    volumes:
+      - ../backend:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=spacegame.settings
+      - DEBUG=1
+    command: python manage.py runserver 0.0.0.0:8000
+
+  backend-shell:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    volumes:
+      - ../backend:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=spacegame.settings
+      - DEBUG=1
+    command: /bin/bash 
