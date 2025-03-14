@@ -1,4 +1,4 @@
-.PHONY: help backend-shell backend
+.PHONY: help backend-shell backend test
 
 # Default target
 .DEFAULT_GOAL := help
@@ -13,4 +13,15 @@ backend-shell: ## Open an interactive shell in the backend container
 	docker compose -f docker/docker-compose.yml run --rm backend-shell
 
 backend: ## Run the Django development server
-	docker compose -f docker/docker-compose.yml up backend 
+	docker compose -f docker/docker-compose.yml up backend
+
+test: ## Run all tests (backend and frontend)
+	@echo "Running all tests..."
+	@make test-backend
+	@echo "Frontend tests not implemented yet"
+
+test-backend: ## Run backend tests
+	docker compose -f docker/docker-compose.dev.yml run --rm backend-test
+
+test-frontend: ## Run frontend tests (not implemented)
+	@echo "Frontend tests not implemented yet" 
