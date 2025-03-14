@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  backend-shell:
+    build:
+      context: ../backend
+      dockerfile: ../docker/Dockerfile
+    volumes:
+      - ../backend:/app
+    working_dir: /app
+    command: /bin/bash
+    stdin_open: true  # equivalent to docker run -i
+    tty: true        # equivalent to docker run -t 
