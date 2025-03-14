@@ -28,4 +28,11 @@
 - Python 3.11
 - PostgreSQL 16
 - Development server running on port 8080
-- Test environment using in-memory SQLite 
+- Test environment using in-memory SQLite
+
+## March 14, 2025
+- Added celestial app for managing celestial entities (stars, planets)
+- Improved docker-compose configuration with database health checks
+  - Added healthcheck for PostgreSQL database
+  - Modified backend services to wait for database health
+  - Fixed startup sequence issues 

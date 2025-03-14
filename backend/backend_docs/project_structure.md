@@ -1,7 +1,7 @@
 # Project Structure
 
 ## Overview
-The backend is a Django-based REST API server that manages the game state and business logic for the space conquest game.
+The backend is a Django application organized into several apps, each handling specific functionality.
 
 ## Directory Structure
 ```
@@ -33,3 +33,11 @@ backend/
 - Make commands available for common tasks:
   - `make backend` - Run the development server
   - `make backend-shell` - Open a shell in the backend container 
+
+## Apps
+
+### Celestial
+Located in `backend/celestial/`
+- Manages celestial entities like stars and planets
+- Provides models and API endpoints for space-based game elements
+- Handles celestial object relationships and properties 
