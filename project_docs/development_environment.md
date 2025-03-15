@@ -111,7 +111,12 @@ The project uses two docker-compose files:
 
 ## Next Steps
 
-1. Implement frontend development environment
-2. Add frontend testing infrastructure
-3. Set up CI/CD pipeline
-4. Add API documentation 
+[] Implement API for celestial app
+[] Create units app
+[] Implement API for units app
+[] Create empire app
+[] Implement API for empire app
+[] Create research app
+[] Implement API for research app
+[] Create API documentation
+[] Create skeleton pixi.js front-end
