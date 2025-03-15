@@ -10,9 +10,11 @@ phaser-game/
 │   └── requirements.txt
 ├── docker/           # Docker configuration files
 │   ├── Dockerfile
-│   └── docker-compose.dev.yml
-├── frontend/         # Frontend application (to be added)
-└── Makefile         # Build and development commands
+│   ├── docker-compose.yml     # Main docker-compose configuration
+│   └── docker-compose.dev.yml # Development and testing configuration
+├── project_docs/     # Project documentation
+├── Makefile         # Build and development commands
+└── .cursorrules     # Project-specific development rules
 ```
 
 ## Prerequisites
@@ -37,6 +39,10 @@ The backend is a Django application with the following key components:
 
 - `make help` - Display available make commands
 - `make backend-shell` - Open an interactive shell in the backend container
+- `make backend` - Run the Django development server
+- `make test` - Run all tests (backend and frontend)
+- `make test-backend` - Run backend tests only
+- `make test-frontend` - Run frontend tests (not implemented yet)
 
 #### Backend Container
 
@@ -48,26 +54,36 @@ The backend container provides a development environment with:
 
 To start development:
 
-1. Open a backend shell:
+1. Start the backend server:
+   ```bash
+   make backend
+   ```
+
+2. For development tasks, open a backend shell:
    ```bash
    make backend-shell
    ```
 
-2. The shell will be in the `/app` directory where you can run Django commands:
+3. The shell will be in the `/app` directory where you can run Django commands:
    ```bash
-   # Create a new Django project
-   django-admin startproject backend .
-
    # Run migrations
    python manage.py migrate
 
-   # Start the development server
-   python manage.py runserver 0.0.0.0:8000
+   # Create a superuser
+   python manage.py createsuperuser
    ```
 
-### Frontend Development
+### Testing
 
-Frontend development setup will be added in a future update.
+The project uses pytest for backend testing. To run tests:
+
+```bash
+# Run all tests
+make test
+
+# Run only backend tests
+make test-backend
+```
 
 ## Docker Configuration
 
@@ -80,16 +96,22 @@ The backend Dockerfile (`docker/Dockerfile`) provides:
 - Non-root user for security
 - Development server configuration
 
-### Development Docker Compose
+### Docker Compose Files
 
-The development docker-compose file (`docker/docker-compose.dev.yml`) provides:
-- Backend shell service for development
-- Volume mounting for live code changes
-- Interactive shell access
+The project uses two docker-compose files:
+
+1. `docker/docker-compose.yml` - Main configuration for development:
+   - Backend service for running the Django server
+   - Backend shell service for development
+   - Volume mounting for live code changes
+
+2. `docker/docker-compose.dev.yml` - Development and testing configuration:
+   - Test environment setup
+   - Additional development tools
 
 ## Next Steps
 
-1. Set up the Django project structure
-2. Configure database settings
-3. Set up frontend development environment
-4. Add testing infrastructure 
+1. Implement frontend development environment
+2. Add frontend testing infrastructure
+3. Set up CI/CD pipeline
+4. Add API documentation 
