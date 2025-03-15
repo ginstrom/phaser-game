@@ -15,6 +15,7 @@
    - Test validation constraints
    - Test string representation
    - Test any enums or choices
+   - Write teardown/cleanup code to remove any data added to the db by tests.
 2. Run tests using make command:
    ```bash
    make backend-shell python manage.py test <app-name>.tests.test_models
