@@ -2,8 +2,9 @@
 Test cases for celestial models.
 """
 from django.test import TestCase
+from django.core.exceptions import ValidationError
 from decimal import Decimal
-from ..models import Planet
+from ..models import Planet, Star
 
 
 class PlanetModelTest(TestCase):
@@ -60,4 +61,23 @@ class PlanetModelTest(TestCase):
         
         # Refresh from database to ensure we test what's actually stored
         planet.refresh_from_db()
-        self.assertEqual(planet.mineral_production, test_value) 
+        self.assertEqual(planet.mineral_production, test_value)
+
+class StarModelTest(TestCase):
+    def test_create_star(self):
+        """Test creating a star with valid type"""
+        star = Star.objects.create(star_type='blue')
+        self.assertEqual(star.star_type, 'blue')
+        self.assertEqual(str(star), 'Blue Star 1')
+
+    def test_create_star_invalid_type(self):
+        """Test creating a star with invalid type raises error"""
+        with self.assertRaises(ValidationError):
+            star = Star(star_type='invalid')
+            star.full_clean()
+
+    def test_star_types_exist(self):
+        """Test all required star types are available"""
+        expected_types = {'blue', 'white', 'yellow', 'orange', 'brown'}
+        actual_types = {choice[0] for choice in Star.StarType.choices}
+        self.assertEqual(expected_types, actual_types) 

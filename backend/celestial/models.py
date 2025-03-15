@@ -45,3 +45,23 @@ class Planet(models.Model):
 
     class Meta:
         app_label = 'celestial'
+
+class Star(models.Model):
+    class StarType(models.TextChoices):
+        BLUE = 'blue', 'Blue'
+        WHITE = 'white', 'White'
+        YELLOW = 'yellow', 'Yellow'
+        ORANGE = 'orange', 'Orange'
+        BROWN = 'brown', 'Brown'
+
+    star_type = models.CharField(
+        max_length=10,
+        choices=StarType.choices,
+        help_text="The type of star"
+    )
+
+    def __str__(self):
+        return f"{self.star_type.capitalize()} Star {self.id}"
+
+    class Meta:
+        app_label = 'celestial'
