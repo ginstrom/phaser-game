@@ -138,3 +138,53 @@ The model includes comprehensive test coverage:
 - Decimal precision maintenance
 - String representation
 - Orbit validation 
+
+## System
+
+A star system in the galaxy. Each system has a unique position in the galaxy grid and contains exactly one star. The system can have up to MAX_ORBITS (5) planets and/or asteroid belts, with each orbit being occupied by at most one celestial body.
+
+### Fields
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| x | integer | X coordinate in the galaxy | Required |
+| y | integer | Y coordinate in the galaxy | Required |
+| star | OneToOneField | The star at the center of this system | Required |
+
+### Relationships
+
+- `star`: One-to-one relationship with Star model
+- `planets`: One-to-many relationship with Planet model
+- `asteroid_belts`: One-to-many relationship with AsteroidBelt model
+
+### Constraints
+
+- The combination of x and y coordinates must be unique (no two systems can occupy the same position)
+- Each system must have exactly one star
+- The total number of planets and asteroid belts cannot exceed MAX_ORBITS (5)
+- Each orbit (1 to MAX_ORBITS) can be occupied by either a planet or an asteroid belt, but not both
+
+### Methods
+
+- `clean()`: Validates the system constraints regarding orbit usage
+- `save()`: Ensures the system constraints are validated before and after saving
+
+### Example Usage
+
+```python
+# Create a new system
+star = Star.objects.create(star_type='yellow')
+system = System.objects.create(x=1, y=1, star=star)
+
+# Add a planet to orbit 1
+planet = Planet.objects.create(system=system, orbit=1)
+
+# Add an asteroid belt to orbit 2
+belt = AsteroidBelt.objects.create(system=system, orbit=2)
+
+# This will raise ValidationError (duplicate orbit)
+planet2 = Planet.objects.create(system=system, orbit=2)  # Error!
+
+# This will raise ValidationError (exceeds MAX_ORBITS)
+for i in range(1, 7):
+    Planet.objects.create(system=system, orbit=i)  # Error on 6th planet! 

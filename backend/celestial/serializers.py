@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Planet, Star, AsteroidBelt
+from .models import Planet, Star, AsteroidBelt, System
 
 
 class PlanetSerializer(serializers.ModelSerializer):
@@ -24,6 +24,7 @@ class PlanetSerializer(serializers.ModelSerializer):
             'organic_storage_capacity',
             'radioactive_storage_capacity',
             'exotic_storage_capacity',
+            'orbit',
         ]
 
 class StarSerializer(serializers.ModelSerializer):
@@ -45,4 +46,29 @@ class AsteroidBeltSerializer(serializers.ModelSerializer):
             'organic_production',
             'radioactive_production',
             'exotic_production',
-        ] 
+            'orbit',
+        ]
+
+class SystemSerializer(serializers.ModelSerializer):
+    star = StarSerializer()
+    planets = PlanetSerializer(many=True, read_only=True)
+    asteroid_belts = AsteroidBeltSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = System
+        fields = ['id', 'x', 'y', 'star', 'planets', 'asteroid_belts']
+
+    def create(self, validated_data):
+        star_data = validated_data.pop('star')
+        star = Star.objects.create(**star_data)
+        system = System.objects.create(star=star, **validated_data)
+        return system
+
+    def update(self, instance, validated_data):
+        if 'star' in validated_data:
+            star_data = validated_data.pop('star')
+            star = instance.star
+            for attr, value in star_data.items():
+                setattr(star, attr, value)
+            star.save()
+        return super().update(instance, validated_data) 

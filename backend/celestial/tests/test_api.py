@@ -5,7 +5,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from decimal import Decimal
-from ..models import Planet, Star, AsteroidBelt
+from django.core.exceptions import ValidationError
+from ..models import Planet, Star, AsteroidBelt, System
 
 
 class PlanetAPITest(APITestCase):
@@ -201,4 +202,168 @@ class AsteroidBeltAPITest(APITestCase):
         """Test deleting an asteroid belt"""
         response = self.client.delete(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(AsteroidBelt.objects.count(), 0) 
+        self.assertEqual(AsteroidBelt.objects.count(), 0)
+
+class SystemAPITest(APITestCase):
+    def setUp(self):
+        """Set up test data"""
+        self.star = Star.objects.create(star_type='yellow')
+        self.system = System.objects.create(
+            x=1,
+            y=1,
+            star=self.star
+        )
+        self.list_url = reverse('system-list')
+        self.detail_url = reverse('system-detail', args=[self.system.id])
+        self.add_planet_url = reverse('system-add-planet', args=[self.system.id])
+        self.add_asteroid_belt_url = reverse('system-add-asteroid-belt', args=[self.system.id])
+
+    def tearDown(self):
+        """Clean up test data"""
+        System.objects.all().delete()
+        Star.objects.all().delete()
+        Planet.objects.all().delete()
+        AsteroidBelt.objects.all().delete()
+
+    def test_list_systems(self):
+        """Test retrieving a list of systems"""
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['x'], 1)
+        self.assertEqual(response.data[0]['y'], 1)
+        self.assertEqual(response.data[0]['star']['star_type'], 'yellow')
+
+    def test_create_system(self):
+        """Test creating a new system"""
+        data = {
+            'x': 2,
+            'y': 2,
+            'star': {'star_type': 'blue'}
+        }
+        response = self.client.post(self.list_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(System.objects.count(), 2)
+        self.assertEqual(response.data['x'], 2)
+        self.assertEqual(response.data['y'], 2)
+        self.assertEqual(response.data['star']['star_type'], 'blue')
+
+    def test_create_system_duplicate_coordinates(self):
+        """Test creating a system with duplicate coordinates fails"""
+        data = {
+            'x': 1,
+            'y': 1,
+            'star': {'star_type': 'blue'}
+        }
+        response = self.client.post(self.list_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_retrieve_system(self):
+        """Test retrieving a single system"""
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['x'], 1)
+        self.assertEqual(response.data['y'], 1)
+        self.assertEqual(response.data['star']['star_type'], 'yellow')
+
+    def test_update_system(self):
+        """Test updating a system"""
+        data = {
+            'x': 3,
+            'y': 3,
+            'star': {'star_type': 'white'}
+        }
+        response = self.client.put(self.detail_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['x'], 3)
+        self.assertEqual(response.data['y'], 3)
+        self.assertEqual(response.data['star']['star_type'], 'white')
+
+    def test_delete_system(self):
+        """Test deleting a system"""
+        response = self.client.delete(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(System.objects.count(), 0)
+
+    def test_add_planet(self):
+        """Test adding a planet to a system"""
+        data = {
+            'mineral_production': '80.50',
+            'organic_production': '30.25',
+            'radioactive_production': '65.75',
+            'exotic_production': '45.25',
+            'mineral_storage_capacity': '160.50',
+            'organic_storage_capacity': '210.75',
+            'radioactive_storage_capacity': '185.25',
+            'exotic_storage_capacity': '135.75',
+            'orbit': 1
+        }
+        response = self.client.post(self.add_planet_url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(self.system.planets.count(), 1)
+        self.assertEqual(self.system.planets.first().orbit, 1)
+
+    def test_add_asteroid_belt(self):
+        """Test adding an asteroid belt to a system"""
+        data = {
+            'mineral_production': '80.50',
+            'organic_production': '30.25',
+            'radioactive_production': '65.75',
+            'exotic_production': '45.25',
+            'orbit': 2
+        }
+        response = self.client.post(self.add_asteroid_belt_url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(self.system.asteroid_belts.count(), 1)
+        self.assertEqual(self.system.asteroid_belts.first().orbit, 2)
+
+    def test_max_orbits_constraint(self):
+        """Test that adding more than MAX_ORBITS celestial bodies fails"""
+        # Add MAX_ORBITS planets
+        for i in range(1, System.MAX_ORBITS + 1):
+            data = {
+                'mineral_production': '80.50',
+                'organic_production': '30.25',
+                'radioactive_production': '65.75',
+                'exotic_production': '45.25',
+                'mineral_storage_capacity': '160.50',
+                'organic_storage_capacity': '210.75',
+                'radioactive_storage_capacity': '185.25',
+                'exotic_storage_capacity': '135.75',
+                'orbit': i
+            }
+            response = self.client.post(self.add_planet_url, data)
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Try to add one more planet
+        data['orbit'] = System.MAX_ORBITS + 1
+        response = self.client.post(self.add_planet_url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_duplicate_orbit_constraint(self):
+        """Test that adding a celestial body to an occupied orbit fails"""
+        # Add a planet
+        planet_data = {
+            'mineral_production': '80.50',
+            'organic_production': '30.25',
+            'radioactive_production': '65.75',
+            'exotic_production': '45.25',
+            'mineral_storage_capacity': '160.50',
+            'organic_storage_capacity': '210.75',
+            'radioactive_storage_capacity': '185.25',
+            'exotic_storage_capacity': '135.75',
+            'orbit': 1
+        }
+        response = self.client.post(self.add_planet_url, planet_data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Try to add an asteroid belt in the same orbit
+        belt_data = {
+            'mineral_production': '80.50',
+            'organic_production': '30.25',
+            'radioactive_production': '65.75',
+            'exotic_production': '45.25',
+            'orbit': 1
+        }
+        response = self.client.post(self.add_asteroid_belt_url, belt_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST) 

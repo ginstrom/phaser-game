@@ -206,3 +206,135 @@ All resource values are decimal numbers with 2 decimal places precision.
 | radioactive_production | decimal | Base radioactive production per turn | 50.00 |
 | exotic_production | decimal | Base exotic production per turn | 50.00 |
 | orbit | integer | Orbital position from star (1 being closest) | 1 | 
+
+## Systems API
+
+### List Systems
+`GET /api/systems/`
+
+Returns a list of all star systems in the galaxy.
+
+Response:
+```json
+[
+    {
+        "id": 1,
+        "x": 1,
+        "y": 1,
+        "star": {
+            "id": 1,
+            "star_type": "yellow"
+        },
+        "planets": [
+            {
+                "id": 1,
+                "mineral_production": "50.00",
+                "organic_production": "50.00",
+                "radioactive_production": "50.00",
+                "exotic_production": "50.00",
+                "mineral_storage_capacity": "100.00",
+                "organic_storage_capacity": "100.00",
+                "radioactive_storage_capacity": "100.00",
+                "exotic_storage_capacity": "100.00",
+                "orbit": 1
+            }
+        ],
+        "asteroid_belts": [
+            {
+                "id": 1,
+                "mineral_production": "50.00",
+                "organic_production": "50.00",
+                "radioactive_production": "50.00",
+                "exotic_production": "50.00",
+                "orbit": 2
+            }
+        ]
+    }
+]
+```
+
+### Create System
+`POST /api/systems/`
+
+Creates a new star system.
+
+Request:
+```json
+{
+    "x": 1,
+    "y": 1,
+    "star": {
+        "star_type": "yellow"
+    }
+}
+```
+
+### Retrieve System
+`GET /api/systems/{id}/`
+
+Returns details of a specific star system.
+
+### Update System
+`PUT /api/systems/{id}/`
+
+Updates a star system.
+
+Request:
+```json
+{
+    "x": 2,
+    "y": 2,
+    "star": {
+        "star_type": "blue"
+    }
+}
+```
+
+### Delete System
+`DELETE /api/systems/{id}/`
+
+Deletes a star system.
+
+### Add Planet to System
+`POST /api/systems/{id}/add_planet/`
+
+Adds a planet to a star system.
+
+Request:
+```json
+{
+    "mineral_production": "80.50",
+    "organic_production": "30.25",
+    "radioactive_production": "65.75",
+    "exotic_production": "45.25",
+    "mineral_storage_capacity": "160.50",
+    "organic_storage_capacity": "210.75",
+    "radioactive_storage_capacity": "185.25",
+    "exotic_storage_capacity": "135.75",
+    "orbit": 1
+}
+```
+
+### Add Asteroid Belt to System
+`POST /api/systems/{id}/add_asteroid_belt/`
+
+Adds an asteroid belt to a star system.
+
+Request:
+```json
+{
+    "mineral_production": "80.50",
+    "organic_production": "30.25",
+    "radioactive_production": "65.75",
+    "exotic_production": "45.25",
+    "orbit": 2
+}
+```
+
+### System Constraints
+- Each system must have unique x,y coordinates in the galaxy
+- Each system has exactly one star
+- Each system can have up to MAX_ORBITS (5) planets and/or asteroid belts
+- Each orbit (1 to MAX_ORBITS) can be occupied by either a planet or an asteroid belt, but not both
+- Attempting to add a celestial body to an occupied orbit will result in a 400 Bad Request error
+- Attempting to add more than MAX_ORBITS celestial bodies will result in a 400 Bad Request error 

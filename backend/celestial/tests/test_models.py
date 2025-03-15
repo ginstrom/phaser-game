@@ -1,10 +1,11 @@
 """
 Test cases for celestial models.
 """
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.core.exceptions import ValidationError
 from decimal import Decimal
-from ..models import Planet, Star, AsteroidBelt
+from ..models import Planet, Star, AsteroidBelt, System
+from django.db.utils import IntegrityError
 
 
 class PlanetModelTest(TestCase):
@@ -167,4 +168,67 @@ class AsteroidBeltModelTest(TestCase):
         """Test that negative orbit values are not allowed"""
         belt = AsteroidBelt(orbit=-1)
         with self.assertRaises(ValidationError):
-            belt.full_clean() 
+            belt.full_clean()
+
+
+class SystemModelTests(TransactionTestCase):
+    def setUp(self):
+        self.star = Star.objects.create(star_type=Star.StarType.YELLOW)
+        self.system = System.objects.create(
+            x=1,
+            y=1,
+            star=self.star
+        )
+
+    def test_system_creation(self):
+        """Test that a system can be created with valid data"""
+        self.assertEqual(self.system.x, 1)
+        self.assertEqual(self.system.y, 1)
+        self.assertEqual(self.system.star, self.star)
+        self.assertEqual(str(self.system), "System at (1, 1)")
+
+    def test_unique_coordinates(self):
+        """Test that two systems cannot occupy the same coordinates"""
+        star2 = Star.objects.create(star_type=Star.StarType.BLUE)
+        with self.assertRaises(IntegrityError):
+            System.objects.create(
+                x=1,
+                y=1,
+                star=star2
+            )
+
+    def test_max_orbits_constraint(self):
+        """Test that a system cannot have more than MAX_ORBITS occupied orbits"""
+        # Create MAX_ORBITS planets
+        for i in range(1, System.MAX_ORBITS + 1):
+            Planet.objects.create(
+                system=self.system,
+                orbit=i
+            )
+        
+        # Try to add one more planet
+        with self.assertRaises(ValidationError):
+            planet = Planet.objects.create(
+                system=self.system,
+                orbit=System.MAX_ORBITS + 1
+            )
+            self.system.clean()
+
+    def test_mixed_orbits(self):
+        """Test that a system can have both planets and asteroid belts"""
+        Planet.objects.create(system=self.system, orbit=1)
+        Planet.objects.create(system=self.system, orbit=2)
+        AsteroidBelt.objects.create(system=self.system, orbit=3)
+        
+        self.system.clean()  # Should not raise any errors
+        
+        # Try to add a planet in an occupied orbit
+        with self.assertRaises(ValidationError):
+            Planet.objects.create(system=self.system, orbit=3)
+            self.system.clean()
+
+    def tearDown(self):
+        System.objects.all().delete()
+        Star.objects.all().delete()
+        Planet.objects.all().delete()
+        AsteroidBelt.objects.all().delete() 

@@ -72,4 +72,18 @@
 - Improved docker-compose configuration with database health checks
   - Added healthcheck for PostgreSQL database
   - Modified backend services to wait for database health
-  - Fixed startup sequence issues 
+  - Fixed startup sequence issues
+
+## 2024-03-15
+- Added System model with:
+  - Unique x,y coordinates in galaxy
+  - One-to-one relationship with Star
+  - One-to-many relationships with Planet and AsteroidBelt
+  - MAX_ORBITS (5) constraint for total celestial bodies
+  - Validation for unique orbit usage
+- Added System API endpoints:
+  - CRUD operations for systems
+  - Add planet to system
+  - Add asteroid belt to system
+- Added comprehensive tests for System model and API
+- Updated documentation for System model and API endpoints 
