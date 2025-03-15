@@ -1,5 +1,18 @@
 # Revision History
 
+## 2024-03-15 - Planet Model and Test Organization
+- Added Planet model with resource mechanics
+  - Production fields for mineral, organic, radioactive, and exotic resources
+  - Storage capacity fields for each resource type
+  - Used FixedPointField for precise decimal storage
+- Reorganized tests into dedicated test directories
+  - Moved tests from test.py to tests/ directory
+  - Split into test_config.py and test_models.py
+  - Added comprehensive test coverage for Planet model
+- Enhanced Makefile
+  - Modified backend-shell to accept direct command arguments
+  - Improved command passing for development tasks
+
 ## 2024-03-14 - Test Configuration Setup
 - Added test settings with in-memory SQLite database
 - Created docker-compose.dev.yml for development and testing
