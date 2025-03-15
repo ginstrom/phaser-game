@@ -7,6 +7,10 @@
   - Implemented REST API endpoints
   - Added comprehensive test coverage
   - Updated documentation
+- Created development process documentation
+  - Documented model addition workflow
+  - Added testing and migration procedures
+  - Included best practices and reminders
 
 ## Current Status
 - Basic celestial models (Star, Planet) are in place
@@ -15,15 +19,16 @@
 - Docker environment is properly configured
 
 ## Next Steps
-1. Implement relationship between Star and Planet models
+1. Review `development_process.md` before starting next model implementation
+2. Implement relationship between Star and Planet models
    - Add foreign key from Planet to Star
    - Update API endpoints to handle relationships
    - Add nested serialization
-2. Add system coordinates for celestial bodies
+3. Add system coordinates for celestial bodies
    - Implement coordinate system
    - Add position fields to models
    - Update API to handle spatial queries
-3. Add game mechanics
+4. Add game mechanics
    - Implement resource production calculations
    - Add turn-based mechanics
    - Create game state management
@@ -46,4 +51,5 @@
 - Keep following test-driven development practices
 - Maintain documentation as features are added
 - Consider performance implications for spatial queries
-- Plan for future scaling of game mechanics 
+- Plan for future scaling of game mechanics
+- Always review development_process.md before adding new models 
