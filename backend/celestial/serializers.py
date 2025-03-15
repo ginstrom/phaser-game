@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Planet
+from .models import Planet, Star
 
 
 class PlanetSerializer(serializers.ModelSerializer):
@@ -24,4 +24,9 @@ class PlanetSerializer(serializers.ModelSerializer):
             'organic_storage_capacity',
             'radioactive_storage_capacity',
             'exotic_storage_capacity',
-        ] 
+        ]
+
+class StarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Star
+        fields = ['id', 'star_type'] 

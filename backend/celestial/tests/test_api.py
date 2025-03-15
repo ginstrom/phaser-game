@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from decimal import Decimal
-from ..models import Planet
+from ..models import Planet, Star
 
 
 class PlanetAPITest(APITestCase):
@@ -67,4 +67,53 @@ class PlanetAPITest(APITestCase):
         """Test deleting a planet"""
         response = self.client.delete(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Planet.objects.count(), 0) 
+        self.assertEqual(Planet.objects.count(), 0)
+
+class StarAPITest(APITestCase):
+    def setUp(self):
+        """Set up test data"""
+        self.star = Star.objects.create(star_type='blue')
+        self.list_url = reverse('star-list')
+        self.detail_url = reverse('star-detail', args=[self.star.id])
+
+    def test_list_stars(self):
+        """Test retrieving a list of stars"""
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['star_type'], 'blue')
+
+    def test_create_star(self):
+        """Test creating a new star"""
+        data = {'star_type': 'yellow'}
+        response = self.client.post(self.list_url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Star.objects.count(), 2)
+        self.assertEqual(response.data['star_type'], 'yellow')
+
+    def test_create_star_invalid_type(self):
+        """Test creating a star with invalid type fails"""
+        data = {'star_type': 'invalid'}
+        response = self.client.post(self.list_url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_retrieve_star(self):
+        """Test retrieving a single star"""
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['star_type'], 'blue')
+
+    def test_update_star(self):
+        """Test updating a star"""
+        data = {'star_type': 'white'}
+        response = self.client.patch(self.detail_url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['star_type'], 'white')
+        self.star.refresh_from_db()
+        self.assertEqual(self.star.star_type, 'white')
+
+    def test_delete_star(self):
+        """Test deleting a star"""
+        response = self.client.delete(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Star.objects.count(), 0) 
