@@ -221,3 +221,135 @@ computer_players = Player.objects.filter(player_type=Player.PlayerType.COMPUTER)
 - Uses Django's TextChoices for player type enumeration
 - Implements string representation for admin interface and debugging
 - Includes app_label meta for proper app organization 
+
+## Race
+
+The Race model represents different playable races in the game.
+
+### Fields
+
+- `id` (AutoField): Primary key
+- `name` (CharField): Unique name of the race
+  - max_length: 100
+  - unique: True
+
+### Usage Example
+
+```python
+# Create a new race
+race = Race.objects.create(name="Humans")
+
+# Get all races
+all_races = Race.objects.all()
+
+# Get a specific race
+human_race = Race.objects.get(name="Humans")
+
+# Update a race
+human_race.name = "Updated Race Name"
+human_race.save()
+
+# Delete a race
+human_race.delete()
+```
+
+### Implementation Details
+
+The Race model enforces unique names through a database constraint. This ensures that no two races can have the same name. The model provides a string representation that returns the race name for easy identification in admin interfaces and debugging. 
+
+## Empire
+
+The Empire model represents a player's empire in the game, including its race, controlled planets and asteroid belts, and resource storage.
+
+### Fields
+
+#### Basic Information
+- `id` (AutoField): Primary key
+- `name` (CharField): Name of the empire
+  - max_length: 100
+- `player` (ForeignKey): Reference to the Player who owns this empire
+  - on_delete: CASCADE
+  - related_name: 'empires'
+- `race` (ForeignKey): Reference to the Race of this empire
+  - on_delete: PROTECT
+  - related_name: 'empires'
+
+#### Celestial Body Relationships
+- `planets` (ManyToManyField): Planets controlled by this empire
+  - related_name: 'empire'
+  - blank: True
+- `asteroid_belts` (ManyToManyField): Asteroid belts controlled by this empire
+  - related_name: 'empire'
+  - blank: True
+
+#### Resource Storage
+- `mineral_storage` (IntegerField): Current mineral storage
+  - default: 0
+- `organic_storage` (IntegerField): Current organic storage
+  - default: 0
+- `radioactive_storage` (IntegerField): Current radioactive storage
+  - default: 0
+- `exotic_storage` (IntegerField): Current exotic storage
+  - default: 0
+
+### Properties
+
+The Empire model provides several properties that calculate the total resource capacities from all controlled planets:
+
+- `mineral_capacity`: Total mineral storage capacity from all planets
+- `organic_capacity`: Total organic storage capacity from all planets
+- `radioactive_capacity`: Total radioactive storage capacity from all planets
+- `exotic_capacity`: Total exotic storage capacity from all planets
+
+### Usage Example
+
+```python
+from play.models import Empire, Player, Race
+from celestial.models import Planet, AsteroidBelt
+
+# Create prerequisites
+player = Player.objects.create(player_type=Player.PlayerType.HUMAN)
+race = Race.objects.create(name="Test Race")
+
+# Create an empire
+empire = Empire.objects.create(
+    name="Test Empire",
+    player=player,
+    race=race
+)
+
+# Add planets and asteroid belts
+planet1 = Planet.objects.get(id=1)
+planet2 = Planet.objects.get(id=2)
+asteroid_belt = AsteroidBelt.objects.get(id=1)
+
+empire.planets.add(planet1, planet2)
+empire.asteroid_belts.add(asteroid_belt)
+
+# Update resource storage
+empire.mineral_storage = 100
+empire.organic_storage = 200
+empire.save()
+
+# Get resource capacities
+print(f"Mineral Capacity: {empire.mineral_capacity}")
+print(f"Organic Capacity: {empire.organic_capacity}")
+print(f"Radioactive Capacity: {empire.radioactive_capacity}")
+print(f"Exotic Capacity: {empire.exotic_capacity}")
+```
+
+### Implementation Details
+- Uses Django's ManyToManyField for flexible relationships with planets and asteroid belts
+- Implements property methods to calculate total resource capacities
+- Provides string representation in the format "Empire Name (Race Name)"
+- Includes app_label meta for proper app organization
+
+### Testing
+The model includes comprehensive test coverage for:
+- Empire creation with basic attributes
+- Relationships with planets and asteroid belts
+- Resource storage management
+- Resource capacity calculations
+- String representation
+
+# ... existing code ... 

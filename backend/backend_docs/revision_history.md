@@ -86,4 +86,24 @@
   - Add planet to system
   - Add asteroid belt to system
 - Added comprehensive tests for System model and API
-- Updated documentation for System model and API endpoints 
+- Updated documentation for System model and API endpoints
+
+## [2024-03-15] Added Race Model and API
+- Added Race model with unique name field
+- Implemented Race API endpoints (CRUD operations)
+- Added comprehensive test coverage for model and API
+- Updated documentation for Race model and API endpoints
+- Features:
+  - Unique race names
+  - Full CRUD operations via REST API
+  - Validation for duplicate names
+
+## 2025-03-15
+
+### Empire Model Implementation
+- Added Empire model with relationships to Player and Race models
+- Added support for managing planets and asteroid belts
+- Implemented resource storage and capacity tracking
+- Added API endpoints for Empire CRUD operations
+- Added comprehensive tests for model and API
+- Updated documentation 
