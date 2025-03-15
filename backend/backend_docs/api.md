@@ -132,3 +132,69 @@ Base URL: `/api/stars/`
 | Field | Type | Description | Allowed Values |
 |-------|------|-------------|----------------|
 | star_type | string | The type of star | blue, white, yellow, orange, brown | 
+
+## AsteroidBelt Resource
+
+Base URL: `/api/asteroid-belts/`
+
+### List Asteroid Belts
+- **Method**: GET
+- **URL**: `/api/asteroid-belts/`
+- **Response**: List of asteroid belt objects
+```json
+[
+    {
+        "id": 1,
+        "mineral_production": "75.50",
+        "organic_production": "25.25",
+        "radioactive_production": "60.75",
+        "exotic_production": "40.25"
+    }
+]
+```
+
+### Create Asteroid Belt
+- **Method**: POST
+- **URL**: `/api/asteroid-belts/`
+- **Body**: Asteroid Belt object
+```json
+{
+    "mineral_production": "80.50",
+    "organic_production": "30.25",
+    "radioactive_production": "65.75",
+    "exotic_production": "45.25"
+}
+```
+- **Response**: Created asteroid belt object with ID
+
+### Retrieve Asteroid Belt
+- **Method**: GET
+- **URL**: `/api/asteroid-belts/{id}/`
+- **Response**: Single asteroid belt object
+
+### Update Asteroid Belt
+- **Method**: PATCH/PUT
+- **URL**: `/api/asteroid-belts/{id}/`
+- **Body**: Partial (PATCH) or complete (PUT) asteroid belt object
+```json
+{
+    "mineral_production": "90.50"
+}
+```
+- **Response**: Updated asteroid belt object
+
+### Delete Asteroid Belt
+- **Method**: DELETE
+- **URL**: `/api/asteroid-belts/{id}/`
+- **Response**: 204 No Content
+
+### Field Specifications
+
+All resource values are decimal numbers with 2 decimal places precision.
+
+| Field | Type | Description | Default |
+|-------|------|-------------|----------|
+| mineral_production | decimal | Base mineral production per turn | 50.00 |
+| organic_production | decimal | Base organic production per turn | 50.00 |
+| radioactive_production | decimal | Base radioactive production per turn | 50.00 |
+| exotic_production | decimal | Base exotic production per turn | 50.00 | 

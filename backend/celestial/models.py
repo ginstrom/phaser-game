@@ -65,3 +65,28 @@ class Star(models.Model):
 
     class Meta:
         app_label = 'celestial'
+
+class AsteroidBelt(models.Model):
+    # Resource Production Fields
+    mineral_production = FixedPointField(
+        default=50,
+        help_text="Base mineral production per turn"
+    )
+    organic_production = FixedPointField(
+        default=50,
+        help_text="Base organic production per turn"
+    )
+    radioactive_production = FixedPointField(
+        default=50,
+        help_text="Base radioactive production per turn"
+    )
+    exotic_production = FixedPointField(
+        default=50,
+        help_text="Base exotic production per turn"
+    )
+
+    def __str__(self):
+        return f"Asteroid Belt {self.id}"
+
+    class Meta:
+        app_label = 'celestial'

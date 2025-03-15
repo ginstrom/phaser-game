@@ -4,7 +4,7 @@ Test cases for celestial models.
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from decimal import Decimal
-from ..models import Planet, Star
+from ..models import Planet, Star, AsteroidBelt
 
 
 class PlanetModelTest(TestCase):
@@ -80,4 +80,44 @@ class StarModelTest(TestCase):
         """Test all required star types are available"""
         expected_types = {'blue', 'white', 'yellow', 'orange', 'brown'}
         actual_types = {choice[0] for choice in Star.StarType.choices}
-        self.assertEqual(expected_types, actual_types) 
+        self.assertEqual(expected_types, actual_types)
+
+class AsteroidBeltModelTest(TestCase):
+    def test_create_asteroid_belt_default_values(self):
+        """Test creating an asteroid belt with default values"""
+        belt = AsteroidBelt.objects.create()
+        
+        # Test production values
+        self.assertEqual(belt.mineral_production, Decimal('50'))
+        self.assertEqual(belt.organic_production, Decimal('50'))
+        self.assertEqual(belt.radioactive_production, Decimal('50'))
+        self.assertEqual(belt.exotic_production, Decimal('50'))
+
+    def test_create_asteroid_belt_custom_values(self):
+        """Test creating an asteroid belt with custom values"""
+        belt = AsteroidBelt.objects.create(
+            mineral_production=Decimal('75.5'),
+            organic_production=Decimal('25.25'),
+            radioactive_production=Decimal('60.75'),
+            exotic_production=Decimal('40.25')
+        )
+        
+        # Test production values
+        self.assertEqual(belt.mineral_production, Decimal('75.5'))
+        self.assertEqual(belt.organic_production, Decimal('25.25'))
+        self.assertEqual(belt.radioactive_production, Decimal('60.75'))
+        self.assertEqual(belt.exotic_production, Decimal('40.25'))
+
+    def test_string_representation(self):
+        """Test the string representation of an AsteroidBelt"""
+        belt = AsteroidBelt.objects.create()
+        self.assertEqual(str(belt), f"Asteroid Belt {belt.id}")
+
+    def test_field_precision(self):
+        """Test that fields maintain their decimal precision"""
+        test_value = Decimal('42.125')  # Test with 3 decimal places
+        belt = AsteroidBelt.objects.create(mineral_production=test_value)
+        
+        # Refresh from database to ensure we test what's actually stored
+        belt.refresh_from_db()
+        self.assertEqual(belt.mineral_production, test_value) 

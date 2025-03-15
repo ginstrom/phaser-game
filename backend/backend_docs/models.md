@@ -83,4 +83,46 @@ The model includes comprehensive test coverage:
 - Default value initialization
 - Custom value creation and retrieval
 - Decimal precision maintenance
+- String representation
+
+### AsteroidBelt
+Represents an asteroid belt in the game world with resource production capabilities.
+
+#### Fields
+
+##### Resource Production
+All production fields use `FixedPointField` for precise decimal storage. Default value is 50.
+
+- `mineral_production`: Base mineral production per turn
+- `organic_production`: Base organic production per turn
+- `radioactive_production`: Base radioactive production per turn
+- `exotic_production`: Base exotic production per turn
+
+#### Usage Example
+```python
+from celestial.models import AsteroidBelt
+
+# Create an asteroid belt with default values (production=50)
+default_belt = AsteroidBelt.objects.create()
+
+# Create an asteroid belt with custom values
+custom_belt = AsteroidBelt.objects.create(
+    mineral_production=75.5,
+    organic_production=25.25,
+    radioactive_production=60.75,
+    exotic_production=40.25
+)
+```
+
+#### Implementation Details
+- All resource values are stored using `FixedPointField` which maintains precise decimal values without floating-point errors
+- Values are stored internally as integers with a scale factor of 1000 (e.g., 50.5 is stored as 50500)
+- Unlike planets, asteroid belts do not have storage capacity
+- The model provides string representation in the format "Asteroid Belt {id}"
+
+#### Testing
+The model includes comprehensive test coverage:
+- Default value initialization
+- Custom value creation and retrieval
+- Decimal precision maintenance
 - String representation 

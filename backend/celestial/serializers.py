@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Planet, Star
+from .models import Planet, Star, AsteroidBelt
 
 
 class PlanetSerializer(serializers.ModelSerializer):
@@ -29,4 +29,20 @@ class PlanetSerializer(serializers.ModelSerializer):
 class StarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Star
-        fields = ['id', 'star_type'] 
+        fields = ['id', 'star_type']
+
+class AsteroidBeltSerializer(serializers.ModelSerializer):
+    mineral_production = serializers.DecimalField(max_digits=10, decimal_places=2)
+    organic_production = serializers.DecimalField(max_digits=10, decimal_places=2)
+    radioactive_production = serializers.DecimalField(max_digits=10, decimal_places=2)
+    exotic_production = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        model = AsteroidBelt
+        fields = [
+            'id',
+            'mineral_production',
+            'organic_production',
+            'radioactive_production',
+            'exotic_production',
+        ] 

@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from decimal import Decimal
-from ..models import Planet, Star
+from ..models import Planet, Star, AsteroidBelt
 
 
 class PlanetAPITest(APITestCase):
@@ -116,4 +116,57 @@ class StarAPITest(APITestCase):
         """Test deleting a star"""
         response = self.client.delete(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Star.objects.count(), 0) 
+        self.assertEqual(Star.objects.count(), 0)
+
+class AsteroidBeltAPITest(APITestCase):
+    def setUp(self):
+        """Set up test data"""
+        self.asteroid_belt = AsteroidBelt.objects.create(
+            mineral_production=Decimal('75.5'),
+            organic_production=Decimal('25.25'),
+            radioactive_production=Decimal('60.75'),
+            exotic_production=Decimal('40.25')
+        )
+        self.list_url = reverse('asteroidbelt-list')
+        self.detail_url = reverse('asteroidbelt-detail', args=[self.asteroid_belt.id])
+
+    def test_list_asteroid_belts(self):
+        """Test retrieving a list of asteroid belts"""
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['mineral_production'], '75.50')
+
+    def test_create_asteroid_belt(self):
+        """Test creating a new asteroid belt"""
+        data = {
+            'mineral_production': '80.50',
+            'organic_production': '30.25',
+            'radioactive_production': '65.75',
+            'exotic_production': '45.25'
+        }
+        response = self.client.post(self.list_url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(AsteroidBelt.objects.count(), 2)
+        self.assertEqual(response.data['mineral_production'], '80.50')
+
+    def test_retrieve_asteroid_belt(self):
+        """Test retrieving a single asteroid belt"""
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['mineral_production'], '75.50')
+
+    def test_update_asteroid_belt(self):
+        """Test updating an asteroid belt"""
+        data = {'mineral_production': '90.50'}
+        response = self.client.patch(self.detail_url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['mineral_production'], '90.50')
+        self.asteroid_belt.refresh_from_db()
+        self.assertEqual(self.asteroid_belt.mineral_production, Decimal('90.50'))
+
+    def test_delete_asteroid_belt(self):
+        """Test deleting an asteroid belt"""
+        response = self.client.delete(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(AsteroidBelt.objects.count(), 0) 
