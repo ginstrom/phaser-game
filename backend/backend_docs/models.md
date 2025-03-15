@@ -2,6 +2,36 @@
 
 ## Celestial Models
 
+### Star
+Represents a star in the game world with its type classification.
+
+#### Fields
+
+##### Star Type
+- `star_type`: The type of star (choices: blue, white, yellow, orange, brown)
+
+#### Usage Example
+```python
+from celestial.models import Star
+
+# Create a blue star
+blue_star = Star.objects.create(star_type='blue')
+
+# Create a yellow star
+yellow_star = Star.objects.create(star_type='yellow')
+```
+
+#### Implementation Details
+- Star type is stored as a CharField with choices
+- The model provides string representation in the format "[Type] Star [id]" (e.g., "Blue Star 1")
+
+#### Testing
+The model includes test coverage for:
+- Star creation with valid types
+- Validation of invalid star types
+- String representation
+- Available star type choices
+
 ### Planet
 Represents a planet in the game world with resource production and storage capabilities.
 

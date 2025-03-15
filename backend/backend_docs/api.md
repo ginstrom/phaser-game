@@ -76,4 +76,59 @@ All resource values are decimal numbers with 2 decimal places precision.
 | mineral_storage_capacity | decimal | Maximum mineral storage capacity | 100.00 |
 | organic_storage_capacity | decimal | Maximum organic storage capacity | 100.00 |
 | radioactive_storage_capacity | decimal | Maximum radioactive storage capacity | 100.00 |
-| exotic_storage_capacity | decimal | Maximum exotic storage capacity | 100.00 | 
+| exotic_storage_capacity | decimal | Maximum exotic storage capacity | 100.00 |
+
+## Star Resource
+
+Base URL: `/api/stars/`
+
+### List Stars
+- **Method**: GET
+- **URL**: `/api/stars/`
+- **Response**: List of star objects
+```json
+[
+    {
+        "id": 1,
+        "star_type": "blue"
+    }
+]
+```
+
+### Create Star
+- **Method**: POST
+- **URL**: `/api/stars/`
+- **Body**: Star object
+```json
+{
+    "star_type": "yellow"
+}
+```
+- **Response**: Created star object with ID
+
+### Retrieve Star
+- **Method**: GET
+- **URL**: `/api/stars/{id}/`
+- **Response**: Single star object
+
+### Update Star
+- **Method**: PATCH/PUT
+- **URL**: `/api/stars/{id}/`
+- **Body**: Partial (PATCH) or complete (PUT) star object
+```json
+{
+    "star_type": "white"
+}
+```
+- **Response**: Updated star object
+
+### Delete Star
+- **Method**: DELETE
+- **URL**: `/api/stars/{id}/`
+- **Response**: 204 No Content
+
+### Field Specifications
+
+| Field | Type | Description | Allowed Values |
+|-------|------|-------------|----------------|
+| star_type | string | The type of star | blue, white, yellow, orange, brown | 
