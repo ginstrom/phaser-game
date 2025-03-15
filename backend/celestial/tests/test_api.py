@@ -19,10 +19,15 @@ class PlanetAPITest(APITestCase):
             mineral_storage_capacity=Decimal('150.5'),
             organic_storage_capacity=Decimal('200.75'),
             radioactive_storage_capacity=Decimal('175.25'),
-            exotic_storage_capacity=Decimal('125.75')
+            exotic_storage_capacity=Decimal('125.75'),
+            orbit=3
         )
         self.list_url = reverse('planet-list')
         self.detail_url = reverse('planet-detail', args=[self.planet.id])
+
+    def tearDown(self):
+        """Clean up test data"""
+        Planet.objects.all().delete()
 
     def test_list_planets(self):
         """Test retrieving a list of planets"""
@@ -30,6 +35,7 @@ class PlanetAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['mineral_production'], '75.50')
+        self.assertEqual(response.data[0]['orbit'], 3)
 
     def test_create_planet(self):
         """Test creating a new planet"""
@@ -41,27 +47,35 @@ class PlanetAPITest(APITestCase):
             'mineral_storage_capacity': '160.50',
             'organic_storage_capacity': '210.75',
             'radioactive_storage_capacity': '185.25',
-            'exotic_storage_capacity': '135.75'
+            'exotic_storage_capacity': '135.75',
+            'orbit': 2
         }
         response = self.client.post(self.list_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Planet.objects.count(), 2)
         self.assertEqual(response.data['mineral_production'], '80.50')
+        self.assertEqual(response.data['orbit'], 2)
 
     def test_retrieve_planet(self):
         """Test retrieving a single planet"""
         response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['mineral_production'], '75.50')
+        self.assertEqual(response.data['orbit'], 3)
 
     def test_update_planet(self):
         """Test updating a planet"""
-        data = {'mineral_production': '90.50'}
+        data = {
+            'mineral_production': '90.50',
+            'orbit': 4
+        }
         response = self.client.patch(self.detail_url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['mineral_production'], '90.50')
+        self.assertEqual(response.data['orbit'], 4)
         self.planet.refresh_from_db()
         self.assertEqual(self.planet.mineral_production, Decimal('90.50'))
+        self.assertEqual(self.planet.orbit, 4)
 
     def test_delete_planet(self):
         """Test deleting a planet"""
@@ -75,6 +89,10 @@ class StarAPITest(APITestCase):
         self.star = Star.objects.create(star_type='blue')
         self.list_url = reverse('star-list')
         self.detail_url = reverse('star-detail', args=[self.star.id])
+
+    def tearDown(self):
+        """Clean up test data"""
+        Star.objects.all().delete()
 
     def test_list_stars(self):
         """Test retrieving a list of stars"""
@@ -121,14 +139,19 @@ class StarAPITest(APITestCase):
 class AsteroidBeltAPITest(APITestCase):
     def setUp(self):
         """Set up test data"""
-        self.asteroid_belt = AsteroidBelt.objects.create(
+        self.belt = AsteroidBelt.objects.create(
             mineral_production=Decimal('75.5'),
             organic_production=Decimal('25.25'),
             radioactive_production=Decimal('60.75'),
-            exotic_production=Decimal('40.25')
+            exotic_production=Decimal('40.25'),
+            orbit=4
         )
         self.list_url = reverse('asteroidbelt-list')
-        self.detail_url = reverse('asteroidbelt-detail', args=[self.asteroid_belt.id])
+        self.detail_url = reverse('asteroidbelt-detail', args=[self.belt.id])
+
+    def tearDown(self):
+        """Clean up test data"""
+        AsteroidBelt.objects.all().delete()
 
     def test_list_asteroid_belts(self):
         """Test retrieving a list of asteroid belts"""
@@ -136,6 +159,7 @@ class AsteroidBeltAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['mineral_production'], '75.50')
+        self.assertEqual(response.data[0]['orbit'], 4)
 
     def test_create_asteroid_belt(self):
         """Test creating a new asteroid belt"""
@@ -143,27 +167,35 @@ class AsteroidBeltAPITest(APITestCase):
             'mineral_production': '80.50',
             'organic_production': '30.25',
             'radioactive_production': '65.75',
-            'exotic_production': '45.25'
+            'exotic_production': '45.25',
+            'orbit': 2
         }
         response = self.client.post(self.list_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(AsteroidBelt.objects.count(), 2)
         self.assertEqual(response.data['mineral_production'], '80.50')
+        self.assertEqual(response.data['orbit'], 2)
 
     def test_retrieve_asteroid_belt(self):
         """Test retrieving a single asteroid belt"""
         response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['mineral_production'], '75.50')
+        self.assertEqual(response.data['orbit'], 4)
 
     def test_update_asteroid_belt(self):
         """Test updating an asteroid belt"""
-        data = {'mineral_production': '90.50'}
+        data = {
+            'mineral_production': '90.50',
+            'orbit': 5
+        }
         response = self.client.patch(self.detail_url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['mineral_production'], '90.50')
-        self.asteroid_belt.refresh_from_db()
-        self.assertEqual(self.asteroid_belt.mineral_production, Decimal('90.50'))
+        self.assertEqual(response.data['orbit'], 5)
+        self.belt.refresh_from_db()
+        self.assertEqual(self.belt.mineral_production, Decimal('90.50'))
+        self.assertEqual(self.belt.orbit, 5)
 
     def test_delete_asteroid_belt(self):
         """Test deleting an asteroid belt"""

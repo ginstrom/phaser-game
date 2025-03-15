@@ -1,5 +1,13 @@
 # Revision History
 
+## 2024-03-15 - Added Orbit Field to Celestial Bodies
+- Added orbit field to Planet and AsteroidBelt models
+  - Implemented positive integer validation
+  - Updated API endpoints to handle orbit field
+  - Added comprehensive test coverage for orbit field
+  - Updated documentation with orbit field details
+  - Added test cleanup code to all test classes
+
 ## 2024-03-15 - AsteroidBelt Model Implementation
 - Added AsteroidBelt model for resource production
   - Implemented production fields for mineral, organic, radioactive, and exotic resources

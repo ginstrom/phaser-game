@@ -53,11 +53,14 @@ All storage capacity fields use `FixedPointField`. Default value is 100.
 - `radioactive_storage_capacity`: Maximum radioactive storage capacity
 - `exotic_storage_capacity`: Maximum exotic storage capacity
 
+##### Orbital Position
+- `orbit`: The orbital position from the star (1 being closest), must be a positive integer
+
 #### Usage Example
 ```python
 from celestial.models import Planet
 
-# Create a planet with default values (production=50, storage=100)
+# Create a planet with default values (production=50, storage=100, orbit=1)
 default_planet = Planet.objects.create()
 
 # Create a planet with custom values
@@ -69,7 +72,8 @@ custom_planet = Planet.objects.create(
     mineral_storage_capacity=150.5,
     organic_storage_capacity=200.75,
     radioactive_storage_capacity=175.25,
-    exotic_storage_capacity=125.75
+    exotic_storage_capacity=125.75,
+    orbit=3
 )
 ```
 
@@ -77,6 +81,7 @@ custom_planet = Planet.objects.create(
 - All resource values are stored using `FixedPointField` which maintains precise decimal values without floating-point errors
 - Values are stored internally as integers with a scale factor of 1000 (e.g., 50.5 is stored as 50500)
 - The model provides string representation in the format "Planet {id}"
+- Orbit must be a positive integer (validated before saving)
 
 #### Testing
 The model includes comprehensive test coverage:
@@ -84,6 +89,7 @@ The model includes comprehensive test coverage:
 - Custom value creation and retrieval
 - Decimal precision maintenance
 - String representation
+- Orbit validation
 
 ### AsteroidBelt
 Represents an asteroid belt in the game world with resource production capabilities.
@@ -98,11 +104,14 @@ All production fields use `FixedPointField` for precise decimal storage. Default
 - `radioactive_production`: Base radioactive production per turn
 - `exotic_production`: Base exotic production per turn
 
+##### Orbital Position
+- `orbit`: The orbital position from the star (1 being closest), must be a positive integer
+
 #### Usage Example
 ```python
 from celestial.models import AsteroidBelt
 
-# Create an asteroid belt with default values (production=50)
+# Create an asteroid belt with default values (production=50, orbit=1)
 default_belt = AsteroidBelt.objects.create()
 
 # Create an asteroid belt with custom values
@@ -110,7 +119,8 @@ custom_belt = AsteroidBelt.objects.create(
     mineral_production=75.5,
     organic_production=25.25,
     radioactive_production=60.75,
-    exotic_production=40.25
+    exotic_production=40.25,
+    orbit=4
 )
 ```
 
@@ -119,10 +129,12 @@ custom_belt = AsteroidBelt.objects.create(
 - Values are stored internally as integers with a scale factor of 1000 (e.g., 50.5 is stored as 50500)
 - Unlike planets, asteroid belts do not have storage capacity
 - The model provides string representation in the format "Asteroid Belt {id}"
+- Orbit must be a positive integer (validated before saving)
 
 #### Testing
 The model includes comprehensive test coverage:
 - Default value initialization
 - Custom value creation and retrieval
 - Decimal precision maintenance
-- String representation 
+- String representation
+- Orbit validation 

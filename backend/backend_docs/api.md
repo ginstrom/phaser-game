@@ -19,7 +19,8 @@ Base URL: `/api/planets/`
         "mineral_storage_capacity": "150.50",
         "organic_storage_capacity": "200.75",
         "radioactive_storage_capacity": "175.25",
-        "exotic_storage_capacity": "125.75"
+        "exotic_storage_capacity": "125.75",
+        "orbit": 3
     }
 ]
 ```
@@ -37,7 +38,8 @@ Base URL: `/api/planets/`
     "mineral_storage_capacity": "160.50",
     "organic_storage_capacity": "210.75",
     "radioactive_storage_capacity": "185.25",
-    "exotic_storage_capacity": "135.75"
+    "exotic_storage_capacity": "135.75",
+    "orbit": 2
 }
 ```
 - **Response**: Created planet object with ID
@@ -53,7 +55,8 @@ Base URL: `/api/planets/`
 - **Body**: Partial (PATCH) or complete (PUT) planet object
 ```json
 {
-    "mineral_production": "90.50"
+    "mineral_production": "90.50",
+    "orbit": 4
 }
 ```
 - **Response**: Updated planet object
@@ -77,6 +80,7 @@ All resource values are decimal numbers with 2 decimal places precision.
 | organic_storage_capacity | decimal | Maximum organic storage capacity | 100.00 |
 | radioactive_storage_capacity | decimal | Maximum radioactive storage capacity | 100.00 |
 | exotic_storage_capacity | decimal | Maximum exotic storage capacity | 100.00 |
+| orbit | integer | Orbital position from star (1 being closest) | 1 |
 
 ## Star Resource
 
@@ -148,7 +152,8 @@ Base URL: `/api/asteroid-belts/`
         "mineral_production": "75.50",
         "organic_production": "25.25",
         "radioactive_production": "60.75",
-        "exotic_production": "40.25"
+        "exotic_production": "40.25",
+        "orbit": 4
     }
 ]
 ```
@@ -162,7 +167,8 @@ Base URL: `/api/asteroid-belts/`
     "mineral_production": "80.50",
     "organic_production": "30.25",
     "radioactive_production": "65.75",
-    "exotic_production": "45.25"
+    "exotic_production": "45.25",
+    "orbit": 2
 }
 ```
 - **Response**: Created asteroid belt object with ID
@@ -178,7 +184,8 @@ Base URL: `/api/asteroid-belts/`
 - **Body**: Partial (PATCH) or complete (PUT) asteroid belt object
 ```json
 {
-    "mineral_production": "90.50"
+    "mineral_production": "90.50",
+    "orbit": 5
 }
 ```
 - **Response**: Updated asteroid belt object
@@ -197,4 +204,5 @@ All resource values are decimal numbers with 2 decimal places precision.
 | mineral_production | decimal | Base mineral production per turn | 50.00 |
 | organic_production | decimal | Base organic production per turn | 50.00 |
 | radioactive_production | decimal | Base radioactive production per turn | 50.00 |
-| exotic_production | decimal | Base exotic production per turn | 50.00 | 
+| exotic_production | decimal | Base exotic production per turn | 50.00 |
+| orbit | integer | Orbital position from star (1 being closest) | 1 | 
