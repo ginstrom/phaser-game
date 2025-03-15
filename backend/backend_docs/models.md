@@ -188,3 +188,36 @@ planet2 = Planet.objects.create(system=system, orbit=2)  # Error!
 # This will raise ValidationError (exceeds MAX_ORBITS)
 for i in range(1, 7):
     Planet.objects.create(system=system, orbit=i)  # Error on 6th planet! 
+```
+
+## Player Model
+
+### Overview
+The Player model represents a player in the game, which can be either a human player or a computer-controlled player.
+
+### Fields
+- `id` (AutoField): Primary key
+- `player_type` (CharField): Type of player
+  - Choices: "human" or "computer"
+  - Default: "human"
+  - Max length: 10 characters
+
+### Usage Example
+```python
+from play.models import Player
+
+# Create a human player (default)
+human_player = Player.objects.create()
+
+# Create a computer player
+computer_player = Player.objects.create(player_type=Player.PlayerType.COMPUTER)
+
+# Query players by type
+human_players = Player.objects.filter(player_type=Player.PlayerType.HUMAN)
+computer_players = Player.objects.filter(player_type=Player.PlayerType.COMPUTER)
+```
+
+### Implementation Details
+- Uses Django's TextChoices for player type enumeration
+- Implements string representation for admin interface and debugging
+- Includes app_label meta for proper app organization 

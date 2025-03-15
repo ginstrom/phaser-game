@@ -338,3 +338,82 @@ Request:
 - Each orbit (1 to MAX_ORBITS) can be occupied by either a planet or an asteroid belt, but not both
 - Attempting to add a celestial body to an occupied orbit will result in a 400 Bad Request error
 - Attempting to add more than MAX_ORBITS celestial bodies will result in a 400 Bad Request error 
+
+## Player API
+
+### Endpoints
+
+#### List Players
+- **URL**: `/api/play/players/`
+- **Method**: GET
+- **Response**: List of player objects
+```json
+[
+    {
+        "id": 1,
+        "player_type": "human"
+    },
+    {
+        "id": 2,
+        "player_type": "computer"
+    }
+]
+```
+
+#### Create Player
+- **URL**: `/api/play/players/`
+- **Method**: POST
+- **Data**:
+```json
+{
+    "player_type": "human"  // or "computer"
+}
+```
+- **Response**: Created player object
+```json
+{
+    "id": 1,
+    "player_type": "human"
+}
+```
+
+#### Get Player
+- **URL**: `/api/play/players/{id}/`
+- **Method**: GET
+- **Response**: Player object
+```json
+{
+    "id": 1,
+    "player_type": "human"
+}
+```
+
+#### Update Player
+- **URL**: `/api/play/players/{id}/`
+- **Method**: PUT
+- **Data**:
+```json
+{
+    "player_type": "computer"
+}
+```
+- **Response**: Updated player object
+```json
+{
+    "id": 1,
+    "player_type": "computer"
+}
+```
+
+#### Delete Player
+- **URL**: `/api/play/players/{id}/`
+- **Method**: DELETE
+- **Response**: 204 No Content
+
+### Field Specifications
+
+#### Player
+- `id` (integer, read-only): Unique identifier for the player
+- `player_type` (string, required): Type of player
+  - Allowed values: "human", "computer"
+  - Default: "human" 
