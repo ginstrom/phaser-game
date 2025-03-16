@@ -1,19 +1,29 @@
 from django.db import transaction
+from enum import Enum
 from play.models import Player, Race, Empire, Game
 from celestial.models import System, Star
 
-class GalaxySize:
+class GalaxySize(str, Enum):
     TINY = "tiny"
     SMALL = "small"
     MEDIUM = "medium"
     LARGE = "large"
 
-    SYSTEM_COUNTS = {
-        TINY: 2,
-        SMALL: 5,
-        MEDIUM: 10,
-        LARGE: 15
-    }
+    @classmethod
+    def choices(cls):
+        return [size.value for size in cls]
+
+    @property
+    def system_count(self):
+        return GALAXY_SIZE_SYSTEM_COUNTS[self]
+
+# Move system counts to a separate dict to keep the enum clean
+GALAXY_SIZE_SYSTEM_COUNTS = {
+    GalaxySize.TINY: 2,
+    GalaxySize.SMALL: 5,
+    GalaxySize.MEDIUM: 10,
+    GalaxySize.LARGE: 15
+}
 
 def create_star_systems(game, count):
     """Create the specified number of star systems for the game"""
@@ -55,16 +65,11 @@ def start_game(data):
         data (dict): Dictionary containing:
             - player_empire_name (str): Name for the human player's empire
             - computer_empire_count (int): Number of computer empires
-            - galaxy_size (str): One of 'tiny', 'small', 'medium', 'large'
+            - galaxy_size (GalaxySize): Size of the galaxy
             
     Returns:
         Game: The newly created game instance
     """
-    # Validate galaxy size
-    galaxy_size = data['galaxy_size'].lower()
-    if galaxy_size not in GalaxySize.SYSTEM_COUNTS:
-        raise ValueError(f"Invalid galaxy size: {galaxy_size}")
-    
     # Get or create default race (can be expanded later)
     race, _ = Race.objects.get_or_create(name="Human")
     
@@ -72,8 +77,8 @@ def start_game(data):
     game = Game.objects.create(turn=1)
     
     # Create star systems based on galaxy size
-    system_count = GalaxySize.SYSTEM_COUNTS[galaxy_size]
-    create_star_systems(game, system_count)
+    galaxy_size = data['galaxy_size']
+    create_star_systems(game, galaxy_size.system_count)
     
     # Create human player and empire
     human_player = Player.objects.create(player_type=Player.PlayerType.HUMAN)
