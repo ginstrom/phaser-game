@@ -389,3 +389,38 @@ game.save()
 - Systems within a game must have unique coordinates
 - Deleting a game cascades to its empires and systems
 - Game validation is performed through the clean() method 
+
+## Game Start Module
+
+### GalaxySize Enum
+
+Defines valid galaxy sizes and their corresponding system counts.
+
+```python
+class GalaxySize(str, Enum):
+    TINY = "tiny"      # 2 systems
+    SMALL = "small"    # 5 systems
+    MEDIUM = "medium"  # 10 systems
+    LARGE = "large"    # 15 systems
+```
+
+#### Methods
+- `choices()`: Returns list of valid galaxy size values for use in DRF serializers
+- `system_count`: Property that returns the number of systems for this galaxy size
+
+#### Usage Example
+```python
+# Create a game with a specific galaxy size
+size = GalaxySize.MEDIUM
+game = start_game({
+    'player_empire_name': 'My Empire',
+    'computer_empire_count': 3,
+    'galaxy_size': size
+})
+
+# Get system count for a size
+system_count = size.system_count  # Returns 10 for MEDIUM
+
+# Get all valid choices for API
+valid_choices = GalaxySize.choices()  # Returns ['tiny', 'small', 'medium', 'large']
+``` 

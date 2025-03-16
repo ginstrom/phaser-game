@@ -419,3 +419,47 @@ Request:
 
 #### Delete Player
 - **URL**: `/api/play/players/{id}/`
+
+## Game Start Endpoint
+
+### POST /api/games/start/
+
+Start a new game with specified parameters.
+
+#### Request Body
+```json
+{
+    "player_empire_name": "string",
+    "computer_empire_count": "integer",
+    "galaxy_size": "string (one of: tiny, small, medium, large)"
+}
+```
+
+#### Response
+- Success (201 Created):
+```json
+{
+    "id": "integer",
+    "turn": 1,
+    "empires": ["integer array of empire IDs"],
+    "systems": ["integer array of system IDs"]
+}
+```
+
+- Error (400 Bad Request):
+```json
+{
+    "galaxy_size": ["Invalid choice. Valid choices are: tiny, small, medium, large"],
+    "player_empire_name": ["This field is required"],
+    "computer_empire_count": ["This field is required"]
+}
+```
+
+#### Notes
+- Galaxy sizes determine the number of star systems:
+  - tiny: 2 systems
+  - small: 5 systems
+  - medium: 10 systems
+  - large: 15 systems
+- The game will be created with the specified number of computer empires plus one human empire
+- All empires start with basic resources and one home system
