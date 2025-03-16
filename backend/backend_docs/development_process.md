@@ -99,3 +99,12 @@
    - API implementation
    - Tests
    - Documentation
+
+## Keeping Documentation up to Date
+Perform your documentation tasks before starting work, and after you are finished.
+
+## Wrapping Up
+
+When you are asked to wrap up, please:
+- Update your documentation
+- Commit your changes to git in logical groupings
