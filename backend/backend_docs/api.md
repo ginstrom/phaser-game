@@ -590,3 +590,71 @@ The `resource_capacities` object is a read-only field that provides the total re
 - `organic_capacity`: Sum of `organic_storage_capacity` from all planets
 - `radioactive_capacity`: Sum of `radioactive_storage_capacity` from all planets
 - `exotic_capacity`: Sum of `exotic_storage_capacity` from all planets 
+
+## Game API
+
+### Endpoints
+
+#### GET /api/games/
+List all games.
+
+Response:
+```json
+[
+    {
+        "id": 1,
+        "turn": 1,
+        "empires": [1, 2],
+        "systems": [1, 2]
+    }
+]
+```
+
+#### POST /api/games/
+Create a new game.
+
+Request: Empty body (game starts at turn 1)
+
+Response:
+```json
+{
+    "id": 1,
+    "turn": 1,
+    "empires": [],
+    "systems": []
+}
+```
+
+#### GET /api/games/{id}/
+Get details of a specific game.
+
+Response:
+```json
+{
+    "id": 1,
+    "turn": 1,
+    "empires": [1, 2],
+    "systems": [1, 2]
+}
+```
+
+#### POST /api/games/{id}/end_turn/
+End the current turn and start the next one.
+
+Response:
+```json
+{
+    "status": "turn ended",
+    "new_turn": 2
+}
+```
+
+#### DELETE /api/games/{id}/
+Delete a game.
+
+Response: 204 No Content
+
+### Validation
+- A game must have at least 2 empires
+- A game must have at least 2 star systems
+- Systems within a game must have unique coordinates 

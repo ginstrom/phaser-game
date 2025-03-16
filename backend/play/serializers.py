@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Player, Race, Empire
+from .models import Player, Race, Empire, Game
+from celestial.models import System
 
 
 class PlayerSerializer(serializers.ModelSerializer):
@@ -36,3 +37,41 @@ class EmpireSerializer(serializers.ModelSerializer):
             'radioactive_capacity': obj.radioactive_capacity,
             'exotic_capacity': obj.exotic_capacity
         }
+
+
+class GameSerializer(serializers.ModelSerializer):
+    empires = serializers.PrimaryKeyRelatedField(
+        many=True,
+        read_only=True,
+        help_text="The empires participating in this game"
+    )
+    systems = serializers.PrimaryKeyRelatedField(
+        many=True,
+        read_only=True,
+        help_text="The star systems in this game"
+    )
+
+    class Meta:
+        model = Game
+        fields = ['id', 'turn', 'empires', 'systems']
+        read_only_fields = ['id']
+
+    def validate(self, data):
+        """
+        Validate that game has minimum required empires and systems.
+        Note: This validation only runs on updates since empires and systems
+        are added after game creation.
+        """
+        if self.instance:  # Only validate on update
+            # Get the instance with current data
+            instance = self.instance
+            
+            # Validate minimum number of empires
+            if instance.empires.count() < 2:
+                raise serializers.ValidationError('Game must have at least 2 empires.')
+            
+            # Validate minimum number of systems
+            if instance.systems.count() < 2:
+                raise serializers.ValidationError('Game must have at least 2 star systems.')
+        
+        return data

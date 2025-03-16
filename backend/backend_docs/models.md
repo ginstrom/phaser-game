@@ -352,4 +352,40 @@ The model includes comprehensive test coverage for:
 - Resource capacity calculations
 - String representation
 
-# ... existing code ... 
+## Game Model
+
+### Fields
+- `turn` (PositiveIntegerField): Current turn number of the game, starts at 1
+- `empires` (Reverse relation): Empires participating in this game
+- `systems` (Reverse relation): Star systems in this game
+
+### Relationships
+- One-to-Many with Empire: Each game has multiple empires
+- One-to-Many with System: Each game has multiple star systems
+
+### Validation Rules
+- Must have at least 2 empires
+- Must have at least 2 star systems
+
+### Usage Example
+```python
+# Create a new game
+game = Game.objects.create(turn=1)
+
+# Add empires to the game
+empire1 = Empire.objects.create(name="Empire 1", player=player1, race=race1, game=game)
+empire2 = Empire.objects.create(name="Empire 2", player=player2, race=race2, game=game)
+
+# Add systems to the game
+system1 = System.objects.create(x=0, y=0, star=star1, game=game)
+system2 = System.objects.create(x=1, y=1, star=star2, game=game)
+
+# End turn
+game.turn += 1
+game.save()
+```
+
+### Implementation Details
+- Systems within a game must have unique coordinates
+- Deleting a game cascades to its empires and systems
+- Game validation is performed through the clean() method 

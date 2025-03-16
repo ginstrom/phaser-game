@@ -25,9 +25,19 @@ class System(models.Model):
         help_text="The star at the center of this system"
     )
 
+    # Game relationship
+    game = models.ForeignKey(
+        'play.Game',
+        on_delete=models.CASCADE,
+        related_name='systems',
+        help_text="The game this system belongs to",
+        null=True,
+        blank=True
+    )
+
     class Meta:
         app_label = 'celestial'
-        unique_together = ['x', 'y']  # Ensure no two systems occupy the same position
+        unique_together = ['game', 'x', 'y']  # Ensure no two systems in the same game occupy the same position
 
     def __str__(self):
         return f"System at ({self.x}, {self.y})"

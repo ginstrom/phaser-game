@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from decimal import Decimal
 from ..models import Planet, Star, AsteroidBelt, System
 from django.db.utils import IntegrityError
+from play.models import Game
 
 
 class PlanetModelTest(TestCase):
@@ -188,14 +189,23 @@ class SystemModelTests(TransactionTestCase):
         self.assertEqual(str(self.system), "System at (1, 1)")
 
     def test_unique_coordinates(self):
-        """Test that two systems cannot occupy the same coordinates"""
+        """Test that two systems cannot occupy the same coordinates in the same game"""
+        # Create a game
+        game = Game.objects.create(turn=1)
+        
+        # Create first system
+        star1 = Star.objects.create(star_type=Star.StarType.YELLOW)
+        system1 = System.objects.create(x=0, y=0, star=star1, game=game)
+        
+        # Try to create another system with same coordinates in same game
         star2 = Star.objects.create(star_type=Star.StarType.BLUE)
         with self.assertRaises(IntegrityError):
-            System.objects.create(
-                x=1,
-                y=1,
-                star=star2
-            )
+            System.objects.create(x=0, y=0, star=star2, game=game)
+            
+        # Should be able to create system with same coordinates in different game
+        game2 = Game.objects.create(turn=1)
+        star3 = Star.objects.create(star_type=Star.StarType.WHITE)
+        System.objects.create(x=0, y=0, star=star3, game=game2)  # Should not raise error
 
     def test_max_orbits_constraint(self):
         """Test that a system cannot have more than MAX_ORBITS occupied orbits"""

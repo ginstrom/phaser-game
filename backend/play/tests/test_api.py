@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from play.models import Player, Race, Empire
+from play.models import Player, Race, Empire, Game
 from celestial.models import Planet, AsteroidBelt, System, Star
 
 
@@ -267,3 +267,102 @@ class EmpireAPITests(APITestCase):
         Race.objects.all().delete()
         System.objects.all().delete()  # This will cascade delete planets and asteroid belts
         Star.objects.all().delete()
+
+
+class GameAPITest(APITestCase):
+    def setUp(self):
+        """Set up test data"""
+        # Create players
+        self.player1 = Player.objects.create(player_type=Player.PlayerType.HUMAN)
+        self.player2 = Player.objects.create(player_type=Player.PlayerType.COMPUTER)
+        
+        # Create race
+        self.race = Race.objects.create(name="Test Race")
+        
+        # Create game
+        self.game = Game.objects.create(turn=1)
+        
+        # Create empires
+        self.empire1 = Empire.objects.create(
+            name="Empire 1",
+            player=self.player1,
+            race=self.race,
+            game=self.game
+        )
+        self.empire2 = Empire.objects.create(
+            name="Empire 2",
+            player=self.player2,
+            race=self.race,
+            game=self.game
+        )
+        
+        # Create systems
+        star1 = Star.objects.create(star_type=Star.StarType.YELLOW)
+        star2 = Star.objects.create(star_type=Star.StarType.BLUE)
+        
+        self.system1 = System.objects.create(
+            x=0, y=0,
+            star=star1,
+            game=self.game
+        )
+        self.system2 = System.objects.create(
+            x=1, y=1,
+            star=star2,
+            game=self.game
+        )
+
+    def test_create_game(self):
+        """Test creating a new game"""
+        url = reverse('game-list')
+        response = self.client.post(url, {})
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Game.objects.count(), 2)  # Including the one from setUp
+        self.assertEqual(response.data['turn'], 1)
+
+    def test_list_games(self):
+        """Test listing all games"""
+        url = reverse('game-list')
+        response = self.client.get(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+    def test_get_game_detail(self):
+        """Test getting details of a specific game"""
+        url = reverse('game-detail', args=[self.game.id])
+        response = self.client.get(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['turn'], 1)
+        self.assertEqual(len(response.data['empires']), 2)
+        self.assertEqual(len(response.data['systems']), 2)
+
+    def test_end_turn(self):
+        """Test ending a turn"""
+        url = reverse('game-end-turn', args=[self.game.id])
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['new_turn'], 2)
+        
+        # Verify turn was updated in database
+        self.game.refresh_from_db()
+        self.assertEqual(self.game.turn, 2)
+
+    def test_delete_game(self):
+        """Test deleting a game"""
+        url = reverse('game-detail', args=[self.game.id])
+        response = self.client.delete(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Game.objects.count(), 0)
+
+    def tearDown(self):
+        """Clean up test data"""
+        System.objects.all().delete()
+        Star.objects.all().delete()
+        Empire.objects.all().delete()
+        Game.objects.all().delete()
+        Player.objects.all().delete()
+        Race.objects.all().delete()
