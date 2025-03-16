@@ -75,3 +75,12 @@ class GameSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('Game must have at least 2 star systems.')
         
         return data
+
+
+class StartGameSerializer(serializers.Serializer):
+    player_empire_name = serializers.CharField(help_text="Name of the player's empire")
+    computer_empire_count = serializers.IntegerField(help_text="Number of AI opponents")
+    galaxy_size = serializers.ChoiceField(
+        choices=['SMALL', 'MEDIUM', 'LARGE'],
+        help_text="Size of the galaxy"
+    )
