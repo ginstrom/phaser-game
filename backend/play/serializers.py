@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Player, Race, Empire, Game
 from celestial.models import System
+from .start import GalaxySize
 
 
 class PlayerSerializer(serializers.ModelSerializer):
@@ -78,9 +79,31 @@ class GameSerializer(serializers.ModelSerializer):
 
 
 class StartGameSerializer(serializers.Serializer):
-    player_empire_name = serializers.CharField(help_text="Name of the player's empire")
-    computer_empire_count = serializers.IntegerField(help_text="Number of AI opponents")
-    galaxy_size = serializers.ChoiceField(
-        choices=['SMALL', 'MEDIUM', 'LARGE'],
-        help_text="Size of the galaxy"
+    player_empire_name = serializers.CharField(
+        help_text="Name of the player's empire",
+        required=True
     )
+    computer_empire_count = serializers.IntegerField(
+        help_text="Number of AI opponents",
+        required=True
+    )
+    galaxy_size = serializers.ChoiceField(
+        choices=GalaxySize.choices(),
+        help_text="Size of the galaxy (tiny, small, medium, large)",
+        required=True
+    )
+
+    def validate_galaxy_size(self, value):
+        try:
+            return GalaxySize(value.lower())
+        except ValueError:
+            raise serializers.ValidationError('Invalid galaxy size')
+
+    def validate(self, data):
+        if not data.get('player_empire_name'):
+            raise serializers.ValidationError({'player_empire_name': 'This field is required'})
+        if 'computer_empire_count' not in data:
+            raise serializers.ValidationError({'computer_empire_count': 'This field is required'})
+        if not data.get('galaxy_size'):
+            raise serializers.ValidationError({'galaxy_size': 'This field is required'})
+        return data
