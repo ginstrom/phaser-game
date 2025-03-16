@@ -107,3 +107,25 @@
 - Added API endpoints for Empire CRUD operations
 - Added comprehensive tests for model and API
 - Updated documentation 
+
+## Latest Changes
+
+### Game Model and System Coordinates (2024-03-21)
+- Fixed Game model validation to only run when explicitly called
+- Improved System coordinate uniqueness handling
+  - Added proper validation in SystemSerializer
+  - Fixed coordinate uniqueness checks within game context
+  - Added comprehensive test coverage for coordinate validation
+- Fixed test suite issues
+  - Added proper transaction handling in tests
+  - Improved test cleanup and data isolation
+  - Fixed empire-game relationship tests
+- Updated documentation to reflect changes
+
+### Game Model Added (2024-03-21)
+- Added Game model to track game state and turns
+- Added relationships from Empire and System to Game
+- Implemented game-scoped uniqueness for system coordinates
+- Added API endpoints for game management
+- Added comprehensive tests for model and API
+- Updated documentation 

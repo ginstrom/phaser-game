@@ -8,6 +8,9 @@
 - Implemented API endpoints for all models
 - Added comprehensive tests
 - Updated documentation
+- Fixed validation issues in Game model
+- Improved System coordinate uniqueness handling
+- Fixed test suite issues and improved test coverage
 
 ## Next Steps
 1. Implement turn processing system

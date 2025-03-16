@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Planet, Star, AsteroidBelt, System
+from play.models import Game
 
 
 class PlanetSerializer(serializers.ModelSerializer):
@@ -53,10 +54,38 @@ class SystemSerializer(serializers.ModelSerializer):
     star = StarSerializer()
     planets = PlanetSerializer(many=True, read_only=True)
     asteroid_belts = AsteroidBeltSerializer(many=True, read_only=True)
+    game = serializers.PrimaryKeyRelatedField(
+        queryset=Game.objects.all(),
+        required=False,
+        allow_null=True,
+        default=None
+    )
 
     class Meta:
         model = System
-        fields = ['id', 'x', 'y', 'star', 'planets', 'asteroid_belts']
+        fields = ['id', 'x', 'y', 'star', 'planets', 'asteroid_belts', 'game']
+
+    def validate(self, data):
+        """Validate that coordinates are unique within a game"""
+        x = data.get('x')
+        y = data.get('y')
+        game = data.get('game')
+
+        # Check if a system with these coordinates already exists in this game
+        existing = System.objects.filter(x=x, y=y)
+        if game is not None:
+            existing = existing.filter(game=game)
+        else:
+            existing = existing.filter(game__isnull=True)
+
+        if self.instance:
+            existing = existing.exclude(pk=self.instance.pk)
+
+        if existing.exists():
+            raise serializers.ValidationError(
+                {'coordinates': 'A system with these coordinates already exists in this game.'}
+            )
+        return data
 
     def create(self, validated_data):
         star_data = validated_data.pop('star')

@@ -242,6 +242,7 @@ class SystemAPITest(APITestCase):
             'star': {'star_type': 'blue'}
         }
         response = self.client.post(self.list_url, data, format='json')
+        print(f"Response data: {response.data}")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(System.objects.count(), 2)
         self.assertEqual(response.data['x'], 2)
