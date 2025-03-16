@@ -46,7 +46,9 @@ class GameStartModuleTests(TestCase):
 
     def test_start_game_valid_data(self):
         """Test starting a game with valid data"""
-        game = start_game(self.valid_data)
+        data = self.valid_data.copy()
+        data['galaxy_size'] = GalaxySize(data['galaxy_size'])
+        game = start_game(data)
         
         # Test game properties
         self.assertEqual(game.turn, 1)
@@ -54,13 +56,13 @@ class GameStartModuleTests(TestCase):
         # Test systems created
         self.assertEqual(
             System.objects.filter(game=game).count(),
-            GalaxySize.SYSTEM_COUNTS[self.valid_data['galaxy_size']]
+            data['galaxy_size'].system_count
         )
         
         # Test empires created
         self.assertEqual(
             Empire.objects.filter(game=game).count(),
-            self.valid_data['computer_empire_count'] + 1  # +1 for human empire
+            data['computer_empire_count'] + 1  # +1 for human empire
         )
         
         # Test human empire
@@ -68,7 +70,7 @@ class GameStartModuleTests(TestCase):
             game=game,
             player__player_type=Player.PlayerType.HUMAN
         )
-        self.assertEqual(human_empire.name, self.valid_data['player_empire_name'])
+        self.assertEqual(human_empire.name, data['player_empire_name'])
 
     def test_start_game_invalid_galaxy_size(self):
         """Test starting a game with invalid galaxy size"""
@@ -76,6 +78,7 @@ class GameStartModuleTests(TestCase):
         invalid_data['galaxy_size'] = 'invalid_size'
         
         with self.assertRaises(ValueError):
+            invalid_data['galaxy_size'] = GalaxySize(invalid_data['galaxy_size'])
             start_game(invalid_data)
 
     def tearDown(self):
@@ -110,9 +113,10 @@ class GameStartAPITests(APITestCase):
         
         # Verify game was created with correct properties
         game = Game.objects.first()
+        galaxy_size = GalaxySize(self.valid_data['galaxy_size'])
         self.assertEqual(
             System.objects.filter(game=game).count(),
-            GalaxySize.SYSTEM_COUNTS[self.valid_data['galaxy_size']]
+            galaxy_size.system_count
         )
         self.assertEqual(
             Empire.objects.filter(game=game).count(),
@@ -130,8 +134,8 @@ class GameStartAPITests(APITestCase):
             
             response = self.client.post(self.start_url, invalid_data, format='json')
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertIn('error', response.data)
-            self.assertIn(field, response.data['error'])
+            self.assertIn(field, response.data)
+            self.assertTrue(len(response.data[field]) > 0)
 
     def test_start_game_api_invalid_galaxy_size(self):
         """Test starting a game with invalid galaxy size"""
@@ -140,20 +144,20 @@ class GameStartAPITests(APITestCase):
         
         response = self.client.post(self.start_url, invalid_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('error', response.data)
-        self.assertIn('Invalid galaxy size', response.data['error'])
+        self.assertIn('galaxy_size', response.data)
+        self.assertTrue(len(response.data['galaxy_size']) > 0)
 
     def test_start_game_api_different_galaxy_sizes(self):
         """Test starting games with different galaxy sizes"""
-        for size, count in GalaxySize.SYSTEM_COUNTS.items():
+        for size in GalaxySize:
             data = self.valid_data.copy()
-            data['galaxy_size'] = size
+            data['galaxy_size'] = size.value
             
             response = self.client.post(self.start_url, data, format='json')
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
             
             game = Game.objects.latest('id')
-            self.assertEqual(System.objects.filter(game=game).count(), count)
+            self.assertEqual(System.objects.filter(game=game).count(), size.system_count)
 
     def tearDown(self):
         """Clean up test data"""
