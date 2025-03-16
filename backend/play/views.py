@@ -121,7 +121,7 @@ class GameViewSet(viewsets.ModelViewSet):
         serializer = StartGameSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(
-                {'error': 'Invalid data provided'},
+                serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
 
