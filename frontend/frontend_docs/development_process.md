@@ -15,7 +15,17 @@ frontend/
 └── tests/            # Test files
 ```
 
+## Game API
+
+The front end is programmed against a web API that is used for game logic and state management. You should keep the web API documentation at [backend/backend_docs/api.md](../../backend/backend_docs/api.md) in mind when developing game features.
+
 ## Development Workflow
+
+Throughout the devleopment process, it is essential to act in a step-by-step manner using chain of thought to plan out your actions.
+
+Work on incremental improvements, verifying and testing each step along the way. Always be ready to ask for more context when in doubt. Avoid making sweeping changes that affect many different areas.
+
+When creating new UI elements, refer to [ui_design.md](ui_design.md) to maintain consistency.
 
 ### 1. Planning Phase
 1. **Design First**
