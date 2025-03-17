@@ -1,12 +1,26 @@
 version: '3.8'
 
 services:
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    command: npm start
+
   backend:
     build:
       context: ../backend
       dockerfile: Dockerfile
     ports:
-      - "8080:8000"
+      - "8000:8000"
     volumes:
       - ../backend:/app
     environment:
