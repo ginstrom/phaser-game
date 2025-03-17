@@ -17,37 +17,42 @@
    - Established UI design system
    - Set up documentation structure
 
+4. **Backend Integration**
+   - Connected "New Game" button to backend API
+   - Fixed API endpoint routing (/api/play/games/start/)
+   - Implemented error handling and display
+   - Added game state transition to Galaxy scene
+
 ## Current State
 - Basic game structure is in place
 - Startup scene with menu is working
 - Development environment is fully configured
 - Documentation is established
+- Backend API integration is working
 
 ## Next Steps
 1. **Game Scene Development**
-   - Create game scene structure
-   - Implement basic game mechanics
-   - Add player controls
+   - Enhance galaxy scene with visual representation
+   - Implement star system display
+   - Add empire status display
+   - Implement turn controls
 
 2. **Asset Integration**
    - Create/source game assets
    - Implement asset loading system
    - Set up sprite management
 
-3. **Backend Integration**
-   - Connect "New Game" button to backend
-   - Implement game state management
-   - Add save/load functionality
-
-4. **Testing**
+3. **Testing**
    - Set up testing framework
    - Write unit tests for existing components
    - Implement integration tests
 
 ## Known Issues
-None at present. Initial setup is stable and working as expected.
+- TypeScript linter errors in NewGameScene.ts (non-blocking)
+- Need to improve error message display in UI
 
 ## Notes
 - Current UI theme is established and documented
 - Development workflow is documented and ready for team use
-- Docker environment is working correctly 
+- Docker environment is working correctly
+- API integration is complete and tested 
