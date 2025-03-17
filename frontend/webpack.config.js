@@ -55,7 +55,14 @@ module.exports = {
     compress: true,
     port: 8080,
     hot: true,
-    historyApiFallback: true
+    historyApiFallback: true,
+    proxy: {
+      '/api': {
+        target: process.env.API_URL || 'http://backend:8000',
+        secure: false,
+        changeOrigin: true
+      }
+    }
   },
   devtool: 'source-map'
 }; 

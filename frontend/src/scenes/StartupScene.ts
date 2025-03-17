@@ -81,8 +81,7 @@ export class StartupScene extends Phaser.Scene {
         });
 
         newGameText.on('pointerdown', () => {
-            // TODO: Implement new game logic
-            console.log('New Game clicked');
+            this.scene.start('NewGameScene');
         });
 
         this.menuItems.push(newGameText);
