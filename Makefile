@@ -13,7 +13,7 @@ backend-shell: ## Open an interactive shell in the backend container or run a co
 	docker compose -f docker/docker-compose.yml run --rm backend-shell $(filter-out $@,$(MAKECMDGOALS))
 
 frontend-shell: ## Open an interactive shell in the frontend container or run a command if arguments provided
-	docker compose -f docker/docker-compose.yml run --rm frontend sh
+	docker compose -f docker/docker-compose.yml run --rm frontend-shell $(filter-out $@,$(MAKECMDGOALS))
 
 %:
 	@:
