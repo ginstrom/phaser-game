@@ -7,7 +7,8 @@ const fs = require('fs');
 const plugins = [
   new CleanWebpackPlugin(),
   new HtmlWebpackPlugin({
-    template: './public/index.html'
+    template: './public/index.html',
+    inject: 'body'
   })
 ];
 
@@ -27,35 +28,34 @@ if (fs.existsSync(assetsPath) && fs.readdirSync(assetsPath).length > 0) {
 }
 
 module.exports = {
-  entry: './src/index.js',
+  entry: './src/index.ts',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].[contenthash].js',
-    publicPath: '/'
+    filename: 'bundle.js',
+    clean: true
   },
   module: {
     rules: [
       {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader'
-        }
+        test: /\.ts$/,
+        use: 'ts-loader',
+        exclude: /node_modules/
       }
     ]
+  },
+  resolve: {
+    extensions: ['.ts', '.js']
   },
   plugins,
   devServer: {
     static: {
-      directory: path.join(__dirname, 'dist')
+      directory: path.join(__dirname, 'dist'),
+      publicPath: '/'
     },
-    host: '0.0.0.0',
+    compress: true,
     port: 8080,
     hot: true,
-    historyApiFallback: true,
-    allowedHosts: 'all',
-    client: {
-      webSocketURL: 'ws://localhost:8080/ws'
-    }
-  }
+    historyApiFallback: true
+  },
+  devtool: 'source-map'
 }; 
