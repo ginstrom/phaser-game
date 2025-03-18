@@ -463,3 +463,23 @@ Start a new game with specified parameters.
   - large: 15 systems
 - The game will be created with the specified number of computer empires plus one human empire
 - All empires start with basic resources and one home system
+
+## Game API
+
+### End Turn
+- **Method**: POST
+- **URL**: `/api/play/games/{id}/end_turn/`
+- **Description**: End the current turn and start the next one
+- **Response**: Updated game object containing:
+  - Current turn number
+  - List of empires
+  - List of systems
+  - Other game state information
+```json
+{
+    "id": 1,
+    "turn": 2,
+    "empires": [...],
+    "systems": [...]
+}
+```
