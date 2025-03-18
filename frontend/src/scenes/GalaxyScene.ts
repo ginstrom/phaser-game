@@ -86,7 +86,7 @@ export class GalaxyScene extends Phaser.Scene {
     private async endTurn(): Promise<void> {
         console.log('Ending turn for game:', this.gameData);
         try {
-            const response = await fetch(`/api/play/games/${this.gameData.id}/end_turn/`, {
+            const response = await fetch(`/api/games/${this.gameData.id}/end_turn/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

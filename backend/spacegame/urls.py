@@ -23,8 +23,9 @@ from .views import HomeView
 urlpatterns = [
     path("", HomeView.as_view(), name="home"),
     path("admin/", admin.site.urls),
+    # API endpoints
     path("api/", include("celestial.urls")),
-    path("api/play/", include("play.urls")),
+    path("api/", include("play.urls")),
     # API Schema documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

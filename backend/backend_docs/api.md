@@ -12,11 +12,11 @@
 
 ## Game API
 
-Base URL: `/api/play/games/`
+Base URL: `/api/games/`
 
 ### List Games
 - **Method**: GET
-- **URL**: `/api/play/games/`
+- **URL**: `/api/games/`
 - **Response**: List of game objects
 ```json
 [
@@ -31,13 +31,13 @@ Base URL: `/api/play/games/`
 
 ### Create Game
 - **Method**: POST
-- **URL**: `/api/play/games/`
+- **URL**: `/api/games/`
 - **Body**: Empty object (game is created with default settings)
 - **Response**: Created game object
 
 ### Retrieve Game
 - **Method**: GET
-- **URL**: `/api/play/games/{id}/`
+- **URL**: `/api/games/{id}/`
 - **Response**: Game object
 ```json
 {
@@ -50,7 +50,7 @@ Base URL: `/api/play/games/`
 
 ### End Turn
 - **Method**: POST
-- **URL**: `/api/play/games/{id}/end_turn/`
+- **URL**: `/api/games/{id}/end_turn/`
 - **Description**: End the current turn and start the next one. This will:
   - Process resource production from planets and asteroid belts
   - Update empire resources
@@ -94,7 +94,7 @@ Base URL: `/api/play/games/`
 
 ### Delete Game
 - **Method**: DELETE
-- **URL**: `/api/play/games/{id}/`
+- **URL**: `/api/games/{id}/`
 - **Response**: 204 No Content
 
 ## API Endpoints
@@ -443,7 +443,7 @@ Request:
 ### Endpoints
 
 #### List Players
-- **URL**: `/api/play/players/`
+- **URL**: `/api/players/`
 - **Method**: GET
 - **Response**: List of player objects
 ```json
@@ -460,7 +460,7 @@ Request:
 ```
 
 #### Create Player
-- **URL**: `/api/play/players/`
+- **URL**: `/api/players/`
 - **Method**: POST
 - **Data**:
 ```json
@@ -477,7 +477,7 @@ Request:
 ```
 
 #### Get Player
-- **URL**: `/api/play/players/{id}/`
+- **URL**: `/api/players/{id}/`
 - **Method**: GET
 - **Response**: Player object
 ```json
@@ -488,7 +488,7 @@ Request:
 ```
 
 #### Update Player
-- **URL**: `/api/play/players/{id}/`
+- **URL**: `/api/players/{id}/`
 - **Method**: PUT
 - **Data**:
 ```json
@@ -505,7 +505,7 @@ Request:
 ```
 
 #### Delete Player
-- **URL**: `/api/play/players/{id}/`
+- **URL**: `/api/players/{id}/`
 
 ## Game Start Endpoint
 

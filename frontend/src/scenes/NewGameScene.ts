@@ -202,7 +202,7 @@ export class NewGameScene extends Phaser.Scene {
 
                 console.log('Sending game data:', gameData);
 
-                const response = await fetch('/api/play/games/start/', {
+                const response = await fetch('/api/games/start/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
