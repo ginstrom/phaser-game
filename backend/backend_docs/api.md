@@ -527,7 +527,7 @@ Start a new game with specified parameters.
 ```json
 {
     "id": "integer",
-    "turn": 1,
+    "turn": 1,  // First turn after game creation
     "empires": ["integer array of empire IDs"],
     "systems": ["integer array of system IDs"]
 }
@@ -550,3 +550,4 @@ Start a new game with specified parameters.
   - large: 15 systems
 - The game will be created with the specified number of computer empires plus one human empire
 - All empires start with basic resources and one home system
+- Games start at turn 0 and advance to turn 1 after initialization

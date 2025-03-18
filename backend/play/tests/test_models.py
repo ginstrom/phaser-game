@@ -163,7 +163,7 @@ class EmpireModelTests(TestCase):
 class GameModelTests(TestCase):
     def setUp(self):
         # Create a game
-        self.game = Game.objects.create(turn=1)
+        self.game = Game.objects.create(turn=0)
         
         # Create players
         self.player1 = Player.objects.create(player_type=Player.PlayerType.HUMAN)
@@ -205,10 +205,10 @@ class GameModelTests(TestCase):
 
     def test_game_creation(self):
         """Test that a game can be created with valid data"""
-        self.assertEqual(self.game.turn, 1)
+        self.assertEqual(self.game.turn, 0)
         self.assertEqual(self.game.empires.count(), 2)
         self.assertEqual(self.game.systems.count(), 2)
-        self.assertEqual(str(self.game), f"Game {self.game.id} (Turn 1)")
+        self.assertEqual(str(self.game), f"Game {self.game.id} (Turn 0)")
         
         # Validate should pass with 2 empires and 2 systems
         self.game.clean()

@@ -11,23 +11,27 @@
 - Fixed validation issues in Game model
 - Improved System coordinate uniqueness handling
 - Fixed test suite issues and improved test coverage
+- Implemented basic turn processing system
+  - Added turn.py module with process() function
+  - Changed game turn to start at 0
+  - Updated API endpoints to use turn processing
+  - Added comprehensive tests for turn processing
 
 ## Next Steps
-1. Implement turn processing system
-2. Add resource production calculations
-3. Add empire actions (colonize, build, research)
-4. Implement game state management
-5. Add victory conditions
+1. Add resource production calculations
+2. Add empire actions (colonize, build, research)
+3. Implement game state management
+4. Add victory conditions
 
 ## Plan of Action
-1. Design turn processing system
-   - Define turn phases
-   - Plan resource calculations
-   - Design action resolution order
-2. Implement turn processing
-   - Add turn model
-   - Add phase handlers
-   - Add resource production
+1. Design resource production system
+   - Define resource types and calculations
+   - Plan production modifiers
+   - Design storage mechanics
+2. Implement resource production
+   - Add production calculations
+   - Add storage management
+   - Add resource overflow handling
 3. Add empire actions
    - Design action system
    - Implement basic actions

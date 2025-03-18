@@ -79,7 +79,7 @@ class Empire(models.Model):
 
 class Game(models.Model):
     turn = models.PositiveIntegerField(
-        default=1,
+        default=0,
         help_text="Current turn number of the game"
     )
 

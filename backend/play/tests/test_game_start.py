@@ -51,7 +51,7 @@ class GameStartModuleTests(TestCase):
         game = start_game(data)
         
         # Test game properties
-        self.assertEqual(game.turn, 1)
+        self.assertEqual(game.turn, 0)
         
         # Test systems created
         self.assertEqual(

@@ -280,7 +280,7 @@ class GameAPITest(APITestCase):
         self.race = Race.objects.create(name="Test Race")
         
         # Create game
-        self.game = Game.objects.create(turn=1)
+        self.game = Game.objects.create(turn=0)
         
         # Create empires
         self.empire1 = Empire.objects.create(
@@ -318,7 +318,7 @@ class GameAPITest(APITestCase):
         
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Game.objects.count(), 2)  # Including the one from setUp
-        self.assertEqual(response.data['turn'], 1)
+        self.assertEqual(response.data['turn'], 0)
 
     def test_list_games(self):
         """Test listing all games"""
@@ -334,7 +334,7 @@ class GameAPITest(APITestCase):
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['turn'], 1)
+        self.assertEqual(response.data['turn'], 0)
         self.assertEqual(len(response.data['empires']), 2)
         self.assertEqual(len(response.data['systems']), 2)
 
@@ -344,11 +344,11 @@ class GameAPITest(APITestCase):
         response = self.client.post(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['turn'], 2)
+        self.assertEqual(response.data['turn'], 1)
         
         # Verify turn was updated in database
         self.game.refresh_from_db()
-        self.assertEqual(self.game.turn, 2)
+        self.assertEqual(self.game.turn, 1)
 
     def test_delete_game(self):
         """Test deleting a game"""

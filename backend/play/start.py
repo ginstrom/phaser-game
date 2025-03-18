@@ -74,7 +74,7 @@ def start_game(data):
     race, _ = Race.objects.get_or_create(name="Human")
     
     # Create game
-    game = Game.objects.create(turn=1)
+    game = Game.objects.create(turn=0)
     
     # Create star systems based on galaxy size
     galaxy_size = data['galaxy_size']

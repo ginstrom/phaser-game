@@ -12,6 +12,7 @@ from .serializers import (
     StartGameSerializer
 )
 from .start import start_game, GalaxySize
+from .turn import process
 
 # Create your views here.
 
@@ -81,8 +82,8 @@ class GameViewSet(viewsets.ModelViewSet):
     serializer_class = GameSerializer
 
     def perform_create(self, serializer):
-        """Create a new game starting at turn 1"""
-        serializer.save(turn=1)
+        """Create a new game starting at turn 0"""
+        serializer.save(turn=0)
 
     @extend_schema(
         description='End the current turn and start the next one',
@@ -93,10 +94,7 @@ class GameViewSet(viewsets.ModelViewSet):
     def end_turn(self, request, pk=None):
         """End the current turn and start the next one"""
         game = self.get_object()
-        game.turn += 1
-        game.save()
-        
-        # Run any end-of-turn processing here
+        game = process(game)
         
         serializer = self.get_serializer(game)
         return Response(serializer.data)
@@ -130,6 +128,7 @@ class GameViewSet(viewsets.ModelViewSet):
 
         try:
             game = start_game(serializer.validated_data)
+            game = process(game)  # Process first turn
             response_serializer = self.get_serializer(game)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         except ValueError as e:
