@@ -1,9 +1,31 @@
+"""Serializers for celestial bodies in the game API.
+
+This module provides serializers for converting celestial models to/from JSON:
+
+**Serializers:**
+- :serializer:`celestial.PlanetSerializer`: Handles planet resource fields
+- :serializer:`celestial.StarSerializer`: Handles star type selection
+- :serializer:`celestial.AsteroidBeltSerializer`: Handles asteroid belt resources
+- :serializer:`celestial.SystemSerializer`: Handles nested celestial objects
+"""
+
 from rest_framework import serializers
 from .models import Planet, Star, AsteroidBelt, System
 from play.models import Game
 
 
 class PlanetSerializer(serializers.ModelSerializer):
+    """Serializer for Planet model.
+    
+    **Fields:**
+    - Resource production rates (decimal, 2 places)
+    - Storage capacities (decimal, 2 places)
+    - Orbital position
+    
+    **Validation:**
+    - All decimal fields use 2 decimal places
+    - Maximum 10 digits for decimal fields
+    """
     mineral_production = serializers.DecimalField(max_digits=10, decimal_places=2)
     organic_production = serializers.DecimalField(max_digits=10, decimal_places=2)
     radioactive_production = serializers.DecimalField(max_digits=10, decimal_places=2)
@@ -28,12 +50,30 @@ class PlanetSerializer(serializers.ModelSerializer):
             'orbit',
         ]
 
+
 class StarSerializer(serializers.ModelSerializer):
+    """Serializer for Star model.
+    
+    **Fields:**
+    - ID
+    - Star type (blue, white, yellow, orange, brown)
+    """
     class Meta:
         model = Star
         fields = ['id', 'star_type']
 
+
 class AsteroidBeltSerializer(serializers.ModelSerializer):
+    """Serializer for AsteroidBelt model.
+    
+    **Fields:**
+    - Resource production rates (decimal, 2 places)
+    - Orbital position
+    
+    **Validation:**
+    - All decimal fields use 2 decimal places
+    - Maximum 10 digits for decimal fields
+    """
     mineral_production = serializers.DecimalField(max_digits=10, decimal_places=2)
     organic_production = serializers.DecimalField(max_digits=10, decimal_places=2)
     radioactive_production = serializers.DecimalField(max_digits=10, decimal_places=2)
@@ -50,7 +90,21 @@ class AsteroidBeltSerializer(serializers.ModelSerializer):
             'orbit',
         ]
 
+
 class SystemSerializer(serializers.ModelSerializer):
+    """Serializer for System model.
+    
+    **Fields:**
+    - Coordinates (x, y)
+    - Nested star serializer
+    - Nested planet serializer (many)
+    - Nested asteroid belt serializer (many)
+    - Game relationship
+    
+    **Validation:**
+    - Unique coordinates within a game
+    - Proper nesting of celestial objects
+    """
     star = StarSerializer()
     planets = PlanetSerializer(many=True, read_only=True)
     asteroid_belts = AsteroidBeltSerializer(many=True, read_only=True)
@@ -66,7 +120,13 @@ class SystemSerializer(serializers.ModelSerializer):
         fields = ['id', 'x', 'y', 'star', 'planets', 'asteroid_belts', 'game']
 
     def validate(self, data):
-        """Validate that coordinates are unique within a game"""
+        """Ensure system coordinates are unique within a game.
+        
+        **Validation:**
+        - Check for existing system at same coordinates
+        - Consider game context (null or specific game)
+        - Exclude current instance when updating
+        """
         x = data.get('x')
         y = data.get('y')
         game = data.get('game')
@@ -88,12 +148,25 @@ class SystemSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        """Create a system with its star.
+        
+        **Process:**
+        1. Extract star data
+        2. Create star
+        3. Create system with star
+        """
         star_data = validated_data.pop('star')
         star = Star.objects.create(**star_data)
         system = System.objects.create(star=star, **validated_data)
         return system
 
     def update(self, instance, validated_data):
+        """Update a system and its star.
+        
+        **Process:**
+        1. Update star if star data provided
+        2. Update system fields
+        """
         if 'star' in validated_data:
             star_data = validated_data.pop('star')
             star = instance.star

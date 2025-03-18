@@ -177,8 +177,8 @@ class EmpireAPITests(APITestCase):
         """Test creating a new empire"""
         data = {
             'name': 'New Empire',
-            'player': self.player.id,
-            'race': self.race.id,
+            'player_id': self.player.id,
+            'race_id': self.race.id,
         }
         response = self.client.post(self.empire_list_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -191,8 +191,8 @@ class EmpireAPITests(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], 'Test Empire')
-        self.assertEqual(response.data['player'], self.player.id)
-        self.assertEqual(response.data['race'], self.race.id)
+        self.assertEqual(response.data['player']['id'], self.player.id)
+        self.assertEqual(response.data['race']['id'], self.race.id)
         
         # Check resource capacities
         self.assertEqual(response.data['resource_capacities']['mineral_capacity'], 400)
@@ -205,8 +205,8 @@ class EmpireAPITests(APITestCase):
         url = reverse('empire-detail', args=[self.empire.id])
         data = {
             'name': 'Updated Empire',
-            'player': self.player.id,
-            'race': self.race.id,
+            'player_id': self.player.id,
+            'race_id': self.race.id,
             'mineral_storage': 100,
             'organic_storage': 200,
             'radioactive_storage': 300,
@@ -232,8 +232,8 @@ class EmpireAPITests(APITestCase):
         url = reverse('empire-detail', args=[self.empire.id])
         data = {
             'name': self.empire.name,
-            'player': self.player.id,
-            'race': self.race.id,
+            'player_id': self.player.id,
+            'race_id': self.race.id,
             'planets': [self.planet1.id]  # Remove planet2
         }
         response = self.client.put(url, data, format='json')
@@ -252,8 +252,8 @@ class EmpireAPITests(APITestCase):
         url = reverse('empire-detail', args=[self.empire.id])
         data = {
             'name': self.empire.name,
-            'player': self.player.id,
-            'race': self.race.id,
+            'player_id': self.player.id,
+            'race_id': self.race.id,
             'asteroid_belts': []  # Remove all asteroid belts
         }
         response = self.client.put(url, data, format='json')

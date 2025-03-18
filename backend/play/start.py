@@ -1,9 +1,29 @@
+"""Game initialization and setup module.
+
+This module handles the creation and setup of new games, including:
+- Galaxy generation with star systems
+- Empire creation for human and computer players
+- Initial game state setup
+- Validation of game parameters
+
+The module provides functions to create the initial game state and ensures
+all required components are properly initialized.
+"""
+
 from django.db import transaction
 from enum import Enum
 from play.models import Player, Race, Empire, Game
 from celestial.models import System, Star
 
 class GalaxySize(str, Enum):
+    """Enumeration of available galaxy sizes and their properties.
+    
+    Each size determines the number of star systems in the galaxy:
+    - TINY: 2 systems
+    - SMALL: 5 systems
+    - MEDIUM: 10 systems
+    - LARGE: 15 systems
+    """
     TINY = "tiny"
     SMALL = "small"
     MEDIUM = "medium"
@@ -11,10 +31,20 @@ class GalaxySize(str, Enum):
 
     @classmethod
     def choices(cls):
+        """Get list of valid galaxy size choices.
+        
+        Returns:
+            list: List of valid galaxy size values
+        """
         return [size.value for size in cls]
 
     @property
     def system_count(self):
+        """Get the number of star systems for this galaxy size.
+        
+        Returns:
+            int: Number of star systems
+        """
         return GALAXY_SIZE_SYSTEM_COUNTS[self]
 
 # Move system counts to a separate dict to keep the enum clean
@@ -26,7 +56,19 @@ GALAXY_SIZE_SYSTEM_COUNTS = {
 }
 
 def create_star_systems(game, count):
-    """Create the specified number of star systems for the game"""
+    """Create the specified number of star systems for the game.
+    
+    Args:
+        game (Game): The game instance to create systems for
+        count (int): Number of star systems to create
+        
+    Returns:
+        list: List of created System instances
+        
+    Note:
+        Currently uses a simple placement algorithm with fixed spacing.
+        Future versions may implement more sophisticated galaxy generation.
+    """
     systems = []
     for i in range(count):
         # Simple placement - can be improved with more sophisticated algorithms
@@ -43,7 +85,16 @@ def create_star_systems(game, count):
     return systems
 
 def create_computer_empires(game, count, race):
-    """Create the specified number of computer empires"""
+    """Create the specified number of computer-controlled empires.
+    
+    Args:
+        game (Game): The game instance to create empires for
+        count (int): Number of computer empires to create
+        race (Race): The race to use for the computer empires
+        
+    Returns:
+        list: List of created Empire instances
+    """
     empires = []
     for i in range(count):
         player = Player.objects.create(player_type=Player.PlayerType.COMPUTER)
@@ -58,8 +109,14 @@ def create_computer_empires(game, count, race):
 
 @transaction.atomic
 def start_game(data):
-    """
-    Initialize a new game with the specified parameters
+    """Initialize a new game with the specified parameters.
+    
+    This function handles the complete game initialization process:
+    1. Creates a new game instance
+    2. Generates the galaxy with star systems
+    3. Creates the human player's empire
+    4. Creates computer-controlled empires
+    5. Validates the game state
     
     Args:
         data (dict): Dictionary containing:
@@ -69,6 +126,10 @@ def start_game(data):
             
     Returns:
         Game: The newly created game instance
+        
+    Raises:
+        ValueError: If galaxy_size is invalid
+        ValidationError: If game state is invalid after creation
     """
     # Get or create default race (can be expanded later)
     race, _ = Race.objects.get_or_create(name="Human")
