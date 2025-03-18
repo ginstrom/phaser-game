@@ -10,6 +10,93 @@
   - Key 4X gameplay features
   - Links to API documentation and endpoints
 
+## Game API
+
+Base URL: `/api/play/games/`
+
+### List Games
+- **Method**: GET
+- **URL**: `/api/play/games/`
+- **Response**: List of game objects
+```json
+[
+    {
+        "id": 1,
+        "turn": 1,
+        "empires": [...],
+        "systems": [...]
+    }
+]
+```
+
+### Create Game
+- **Method**: POST
+- **URL**: `/api/play/games/`
+- **Body**: Empty object (game is created with default settings)
+- **Response**: Created game object
+
+### Retrieve Game
+- **Method**: GET
+- **URL**: `/api/play/games/{id}/`
+- **Response**: Game object
+```json
+{
+    "id": 1,
+    "turn": 1,
+    "empires": [...],
+    "systems": [...]
+}
+```
+
+### End Turn
+- **Method**: POST
+- **URL**: `/api/play/games/{id}/end_turn/`
+- **Description**: End the current turn and start the next one. This will:
+  - Process resource production from planets and asteroid belts
+  - Update empire resources
+  - Process any pending actions
+  - Increment the turn counter
+- **Response**: Updated game object containing:
+  - Current turn number
+  - List of empires with updated resources
+  - List of systems with updated production
+  - Other game state information
+```json
+{
+    "id": 1,
+    "turn": 2,
+    "empires": [
+        {
+            "id": 1,
+            "name": "Human Empire",
+            "mineral_storage": "150.00",
+            "organic_storage": "200.00",
+            "radioactive_storage": "175.00",
+            "exotic_storage": "125.00"
+        }
+    ],
+    "systems": [
+        {
+            "id": 1,
+            "x": 0,
+            "y": 0,
+            "star": {...},
+            "planets": [...],
+            "asteroid_belts": [...]
+        }
+    ]
+}
+```
+- **Error Responses**:
+  - 404 Not Found: Game with specified ID does not exist
+  - 400 Bad Request: Game is in an invalid state for ending turn
+  - 403 Forbidden: Player does not have permission to end turn
+
+### Delete Game
+- **Method**: DELETE
+- **URL**: `/api/play/games/{id}/`
+- **Response**: 204 No Content
+
 ## API Endpoints
 
 ## Planet Resource
@@ -463,23 +550,3 @@ Start a new game with specified parameters.
   - large: 15 systems
 - The game will be created with the specified number of computer empires plus one human empire
 - All empires start with basic resources and one home system
-
-## Game API
-
-### End Turn
-- **Method**: POST
-- **URL**: `/api/play/games/{id}/end_turn/`
-- **Description**: End the current turn and start the next one
-- **Response**: Updated game object containing:
-  - Current turn number
-  - List of empires
-  - List of systems
-  - Other game state information
-```json
-{
-    "id": 1,
-    "turn": 2,
-    "empires": [...],
-    "systems": [...]
-}
-```
