@@ -344,7 +344,7 @@ class GameAPITest(APITestCase):
         response = self.client.post(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['new_turn'], 2)
+        self.assertEqual(response.data['turn'], 2)
         
         # Verify turn was updated in database
         self.game.refresh_from_db()

@@ -86,7 +86,8 @@ class GameViewSet(viewsets.ModelViewSet):
 
     @extend_schema(
         description='End the current turn and start the next one',
-        responses={200: {'properties': {'status': {'type': 'string'}, 'new_turn': {'type': 'integer'}}}}
+        request=None,
+        responses={200: GameSerializer}
     )
     @action(detail=True, methods=['post'])
     def end_turn(self, request, pk=None):
@@ -97,16 +98,18 @@ class GameViewSet(viewsets.ModelViewSet):
         
         # Run any end-of-turn processing here
         
-        return Response({
-            'status': 'turn ended',
-            'new_turn': game.turn
-        })
+        serializer = self.get_serializer(game)
+        return Response(serializer.data)
 
     @extend_schema(
         description='Start a new game with the specified parameters',
         request=StartGameSerializer,
         responses={
-            201: GameSerializer,
+            201: {
+                'type': 'object',
+                'description': 'Game successfully created',
+                '$ref': '#/components/schemas/Game'
+            },
             400: {
                 'type': 'object',
                 'properties': {
