@@ -83,7 +83,7 @@ class GameStartModuleTests(TestCase):
         game = start_game(self.valid_data)
         
         # Test game properties
-        self.assertEqual(game.turn, 0)
+        self.assertEqual(game.turn, 1)
         
         # Test systems created
         # For TINY galaxy (2 systems) with 3 empires (1 human + 2 computer),
@@ -323,7 +323,7 @@ class GameStartAPITests(APITestCase):
         game = Game.objects.get(id=response.data['id'])
         
         # Test game properties
-        self.assertEqual(game.turn, 0)
+        self.assertEqual(game.turn, 1)
         
         # Test systems created
         # For TINY galaxy (2 systems) with 3 empires (1 human + 2 computer),

@@ -13,6 +13,7 @@ all required components are properly initialized.
 from django.db import transaction
 from enum import Enum
 from play.models import Player, Race, Empire, Game
+from play import turn
 from celestial.models import System, Star, Planet, AsteroidBelt
 
 class GalaxySize(str, Enum):
@@ -245,8 +246,10 @@ def start_game(data):
     
     # Assign colony planets to all empires
     assign_colony_planets(game)
-    
+
     # Validate game (ensures minimum requirements are met)
     game.clean()
+
+    game = turn.process(game)
     
     return game 
