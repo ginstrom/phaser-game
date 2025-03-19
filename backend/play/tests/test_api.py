@@ -1,6 +1,6 @@
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 from play.models import Player, Race, Empire, Game
 from celestial.models import Planet, AsteroidBelt, System, Star
 
@@ -159,16 +159,21 @@ class EmpireAPITests(APITestCase):
             race=self.race
         )
         
-        # Add planets and asteroid belt to empire
-        self.empire.planets.add(self.planet1, self.planet2)
-        self.empire.asteroid_belts.add(self.asteroid_belt)
+        # Assign planets and asteroid belt to empire
+        self.planet1.empire = self.empire
+        self.planet1.save()
+        self.planet2.empire = self.empire
+        self.planet2.save()
+        self.asteroid_belt.empire = self.empire
+        self.asteroid_belt.save()
         
-        # URL for empire endpoints
-        self.empire_list_url = reverse('empire-list')
+        # Set up API client
+        self.client = APIClient()
+        self.url = reverse('empire-list')
 
     def test_list_empires(self):
         """Test retrieving a list of empires"""
-        response = self.client.get(self.empire_list_url)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['name'], 'Test Empire')
@@ -180,7 +185,7 @@ class EmpireAPITests(APITestCase):
             'player_id': self.player.id,
             'race_id': self.race.id,
         }
-        response = self.client.post(self.empire_list_url, data, format='json')
+        response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Empire.objects.count(), 2)
         self.assertEqual(response.data['name'], 'New Empire')
@@ -234,12 +239,12 @@ class EmpireAPITests(APITestCase):
             'name': self.empire.name,
             'player_id': self.player.id,
             'race_id': self.race.id,
-            'planets': [self.planet1.id]  # Remove planet2
+            'planet_ids': [self.planet1.id]  # Remove planet2
         }
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['planets']), 1)
-        self.assertEqual(response.data['planets'][0], self.planet1.id)
+        self.assertEqual(response.data['planets'][0]['id'], self.planet1.id)
         
         # Check updated resource capacities
         self.assertEqual(response.data['resource_capacities']['mineral_capacity'], 100)
@@ -254,7 +259,7 @@ class EmpireAPITests(APITestCase):
             'name': self.empire.name,
             'player_id': self.player.id,
             'race_id': self.race.id,
-            'asteroid_belts': []  # Remove all asteroid belts
+            'asteroid_belt_ids': []  # Remove all asteroid belts
         }
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

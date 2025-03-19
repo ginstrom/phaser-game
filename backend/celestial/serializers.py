@@ -49,18 +49,7 @@ class PlanetSerializer(serializers.ModelSerializer):
             'exotic_storage_capacity',
             'orbit',
         ]
-
-
-class StarSerializer(serializers.ModelSerializer):
-    """Serializer for Star model.
-    
-    **Fields:**
-    - ID
-    - Star type (blue, white, yellow, orange, brown)
-    """
-    class Meta:
-        model = Star
-        fields = ['id', 'star_type']
+        read_only_fields = ['id']
 
 
 class AsteroidBeltSerializer(serializers.ModelSerializer):
@@ -89,6 +78,19 @@ class AsteroidBeltSerializer(serializers.ModelSerializer):
             'exotic_production',
             'orbit',
         ]
+        read_only_fields = ['id']
+
+
+class StarSerializer(serializers.ModelSerializer):
+    """Serializer for Star model.
+    
+    **Fields:**
+    - Star type (enum)
+    """
+    class Meta:
+        model = Star
+        fields = ['id', 'star_type']
+        read_only_fields = ['id']
 
 
 class SystemSerializer(serializers.ModelSerializer):
@@ -96,28 +98,17 @@ class SystemSerializer(serializers.ModelSerializer):
     
     **Fields:**
     - Coordinates (x, y)
-    - Nested star serializer
-    - Nested planet serializer (many)
-    - Nested asteroid belt serializer (many)
-    - Game relationship
-    
-    **Validation:**
-    - Unique coordinates within a game
-    - Proper nesting of celestial objects
+    - Star information
+    - Planets and asteroid belts
     """
     star = StarSerializer()
     planets = PlanetSerializer(many=True, read_only=True)
     asteroid_belts = AsteroidBeltSerializer(many=True, read_only=True)
-    game = serializers.PrimaryKeyRelatedField(
-        queryset=Game.objects.all(),
-        required=False,
-        allow_null=True,
-        default=None
-    )
 
     class Meta:
         model = System
-        fields = ['id', 'x', 'y', 'star', 'planets', 'asteroid_belts', 'game']
+        fields = ['id', 'x', 'y', 'star', 'planets', 'asteroid_belts']
+        read_only_fields = ['id']
 
     def validate(self, data):
         """Ensure system coordinates are unique within a game.
