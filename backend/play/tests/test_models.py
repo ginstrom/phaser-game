@@ -98,9 +98,13 @@ class EmpireModelTests(TestCase):
             race=self.race
         )
         
-        # Add planets and asteroid belt to empire
-        self.empire.planets.add(self.planet1, self.planet2)
-        self.empire.asteroid_belts.add(self.asteroid_belt)
+        # Assign planets and asteroid belt to empire
+        self.planet1.empire = self.empire
+        self.planet1.save()
+        self.planet2.empire = self.empire
+        self.planet2.save()
+        self.asteroid_belt.empire = self.empire
+        self.asteroid_belt.save()
 
     def test_create_empire(self):
         """Test creating an empire with basic attributes"""

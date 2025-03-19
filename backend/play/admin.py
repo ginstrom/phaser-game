@@ -28,13 +28,9 @@ class EmpireAdmin(admin.ModelAdmin):
     list_filter = ('player__player_type', 'race', 'game')
     search_fields = ('name', 'race__name', 'player__player_type')
     raw_id_fields = ('player', 'race', 'game')
-    filter_horizontal = ('planets', 'asteroid_belts')
     fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'player', 'race', 'game')
-        }),
-        ('Territory', {
-            'fields': ('planets', 'asteroid_belts')
         }),
         ('Resource Storage', {
             'fields': (

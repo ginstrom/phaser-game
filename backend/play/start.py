@@ -146,6 +146,41 @@ def create_computer_empires(game, count, race):
         empires.append(empire)
     return empires
 
+def assign_colony_planets(game):
+    """Assign colony planets to each empire in the game.
+    
+    If there are more empires than systems with planets, creates additional systems
+    to ensure each empire gets its own colony planet.
+    
+    Args:
+        game (Game): The game instance to assign colonies for
+    """
+    # Get all empires in the game
+    empires = list(Empire.objects.filter(game=game))
+    total_empires = len(empires)
+    
+    # Get all systems with planets
+    systems = list(System.objects.filter(game=game))
+    total_systems = len(systems)
+    
+    # Calculate how many additional systems we need
+    systems_needed = max(total_empires - total_systems, 0)
+    
+    # Create additional systems if needed
+    if systems_needed > 0:
+        for i in range(systems_needed):
+            x = (total_systems + i) * 2  # Continue the spacing pattern
+            y = (total_systems + i) * 2
+            system = create_star_system(game, x, y)
+            systems.append(system)
+    
+    # Assign one planet to each empire
+    for i, empire in enumerate(empires):
+        system = systems[i]
+        planet = system.planets.first()
+        planet.empire = empire
+        planet.save()
+
 @transaction.atomic
 def start_game(data):
     """Initialize a new game with the specified parameters.
@@ -155,21 +190,38 @@ def start_game(data):
     2. Generates the galaxy with star systems
     3. Creates the human player's empire
     4. Creates computer-controlled empires
-    5. Validates the game state
+    5. Assigns colony planets to each empire
+    6. Validates the game state
     
     Args:
         data (dict): Dictionary containing:
             - player_empire_name (str): Name for the human player's empire
             - computer_empire_count (int): Number of computer empires
-            - galaxy_size (GalaxySize): Size of the galaxy
+            - galaxy_size (str): Size of the galaxy (must be a valid GalaxySize value)
             
     Returns:
         Game: The newly created game instance
         
     Raises:
-        ValueError: If galaxy_size is invalid
+        ValueError: If galaxy_size is invalid or required fields are missing
         ValidationError: If game state is invalid after creation
     """
+    # Validate required fields
+    required_fields = ['player_empire_name', 'computer_empire_count', 'galaxy_size']
+    for field in required_fields:
+        if field not in data:
+            raise ValueError(f'Missing required field: {field}')
+
+    # Validate and convert galaxy size
+    try:
+        galaxy_size = GalaxySize(data['galaxy_size'])
+    except ValueError:
+        raise ValueError(f'Invalid galaxy size: {data["galaxy_size"]}')
+
+    # Validate computer empire count
+    if data['computer_empire_count'] < 0:
+        raise ValueError('Computer empire count must be non-negative')
+
     # Get or create default race (can be expanded later)
     race, _ = Race.objects.get_or_create(name="Human")
     
@@ -177,8 +229,7 @@ def start_game(data):
     game = Game.objects.create(turn=0)
     
     # Create star systems based on galaxy size
-    galaxy_size = data['galaxy_size']
-    create_star_systems(game, galaxy_size.system_count)
+    create_star_systems(game, GALAXY_SIZE_SYSTEM_COUNTS[galaxy_size])
     
     # Create human player and empire
     human_player = Player.objects.create(player_type=Player.PlayerType.HUMAN)
@@ -191,6 +242,9 @@ def start_game(data):
     
     # Create computer empires
     create_computer_empires(game, data['computer_empire_count'], race)
+    
+    # Assign colony planets to all empires
+    assign_colony_planets(game)
     
     # Validate game (ensures minimum requirements are met)
     game.clean()

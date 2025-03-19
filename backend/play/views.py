@@ -142,8 +142,7 @@ class GameViewSet(viewsets.ModelViewSet):
         This action:
         1. Validates the game creation parameters
         2. Creates a new game with the specified configuration
-        3. Processes the first turn
-        4. Returns the created game
+        3. Returns the created game
         
         Args:
             request: The HTTP request containing game parameters
@@ -163,7 +162,6 @@ class GameViewSet(viewsets.ModelViewSet):
 
         try:
             game = start_game(serializer.validated_data)
-            game = process(game)  # Process first turn
             response_serializer = self.get_serializer(game)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         except ValueError as e:

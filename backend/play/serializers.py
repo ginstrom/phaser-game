@@ -12,7 +12,8 @@ These serializers handle data validation, transformation, and API response forma
 
 from rest_framework import serializers
 from .models import Player, Race, Empire, Game
-from celestial.models import System
+from celestial.models import System, Planet, AsteroidBelt
+from celestial.serializers import PlanetSerializer, AsteroidBeltSerializer
 from .start import GalaxySize
 
 
@@ -58,6 +59,24 @@ class EmpireSerializer(serializers.ModelSerializer):
         write_only=True,
         help_text="The race of this empire"
     )
+    planets = PlanetSerializer(many=True, read_only=True)
+    planet_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Planet.objects.all(),
+        source='planets',
+        many=True,
+        write_only=True,
+        required=False,
+        help_text="The planets controlled by this empire"
+    )
+    asteroid_belts = AsteroidBeltSerializer(many=True, read_only=True)
+    asteroid_belt_ids = serializers.PrimaryKeyRelatedField(
+        queryset=AsteroidBelt.objects.all(),
+        source='asteroid_belts',
+        many=True,
+        write_only=True,
+        required=False,
+        help_text="The asteroid belts controlled by this empire"
+    )
     resource_capacities = serializers.SerializerMethodField(
         help_text="Total resource storage capacities from all controlled planets"
     )
@@ -66,8 +85,9 @@ class EmpireSerializer(serializers.ModelSerializer):
         model = Empire
         fields = [
             'id', 'name', 'player', 'player_id', 'race', 'race_id', 'game',
-            'planets', 'asteroid_belts', 'mineral_storage', 'organic_storage',
-            'radioactive_storage', 'exotic_storage', 'resource_capacities'
+            'planets', 'planet_ids', 'asteroid_belts', 'asteroid_belt_ids',
+            'mineral_storage', 'organic_storage', 'radioactive_storage',
+            'exotic_storage', 'resource_capacities'
         ]
         read_only_fields = ['id']
 
@@ -86,6 +106,45 @@ class EmpireSerializer(serializers.ModelSerializer):
             'radioactive_capacity': obj.radioactive_capacity,
             'exotic_capacity': obj.exotic_capacity
         }
+
+    def update(self, instance, validated_data):
+        """Update an empire instance.
+        
+        Args:
+            instance (Empire): The empire instance to update
+            validated_data (dict): The validated data to update with
+            
+        Returns:
+            Empire: The updated empire instance
+        """
+        # Handle planets and asteroid belts separately
+        planets = validated_data.pop('planets', None)
+        asteroid_belts = validated_data.pop('asteroid_belts', None)
+        
+        # Update other fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Update planets if provided
+        if planets is not None:
+            for planet in instance.planets.all():
+                planet.empire = None
+                planet.save()
+            for planet in planets:
+                planet.empire = instance
+                planet.save()
+        
+        # Update asteroid belts if provided
+        if asteroid_belts is not None:
+            for belt in instance.asteroid_belts.all():
+                belt.empire = None
+                belt.save()
+            for belt in asteroid_belts:
+                belt.empire = instance
+                belt.save()
+        
+        return instance
 
 
 class GameSerializer(serializers.ModelSerializer):

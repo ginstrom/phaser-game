@@ -117,6 +117,7 @@ class Planet(models.Model):
     
     **Relationships:**
     - Many-to-one with :model:`celestial.System`
+    - Many-to-one with :model:`play.Empire` (owner)
     
     **Fields:**
     - Resource production rates (mineral, organic, radioactive, exotic)
@@ -129,6 +130,16 @@ class Planet(models.Model):
         on_delete=models.CASCADE,
         related_name='planets',
         help_text="The system this planet belongs to",
+        null=True,
+        blank=True
+    )
+
+    # Empire relationship (owner)
+    empire = models.ForeignKey(
+        'play.Empire',
+        on_delete=models.SET_NULL,
+        related_name='owned_planets',
+        help_text="The empire that owns this planet",
         null=True,
         blank=True
     )
@@ -219,6 +230,7 @@ class AsteroidBelt(models.Model):
     
     **Relationships:**
     - Many-to-one with :model:`celestial.System`
+    - Many-to-one with :model:`play.Empire` (owner)
     
     **Fields:**
     - Resource production rates (mineral, organic, radioactive, exotic)
@@ -230,6 +242,16 @@ class AsteroidBelt(models.Model):
         on_delete=models.CASCADE,
         related_name='asteroid_belts',
         help_text="The system this asteroid belt belongs to",
+        null=True,
+        blank=True
+    )
+
+    # Empire relationship (owner)
+    empire = models.ForeignKey(
+        'play.Empire',
+        on_delete=models.SET_NULL,
+        related_name='owned_asteroid_belts',
+        help_text="The empire that owns this asteroid belt",
         null=True,
         blank=True
     )

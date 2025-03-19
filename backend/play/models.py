@@ -56,16 +56,14 @@ class Empire(models.Model):
     
     An empire is the main organizational unit for players, containing:
     - Resources and storage
-    - Controlled planets and asteroid belts
     - Player and race associations
+    - Game association
     
     Attributes:
         name (str): The name of the empire
         player (Player): The player controlling this empire
         race (Race): The race/species of this empire
         game (Game): The game this empire belongs to
-        planets (ManyToManyField): The planets controlled by this empire
-        asteroid_belts (ManyToManyField): The asteroid belts controlled by this empire
         mineral_storage (int): Current mineral resource storage
         organic_storage (int): Current organic resource storage
         radioactive_storage (int): Current radioactive resource storage
@@ -82,8 +80,6 @@ class Empire(models.Model):
         null=True,
         blank=True
     )
-    planets = models.ManyToManyField(Planet, related_name='empire', blank=True)
-    asteroid_belts = models.ManyToManyField(AsteroidBelt, related_name='empire', blank=True)
     
     # Resource storage values
     mineral_storage = models.IntegerField(default=0)
@@ -93,6 +89,24 @@ class Empire(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.race.name})"
+
+    @property
+    def planets(self):
+        """Get all planets owned by this empire.
+        
+        Returns:
+            QuerySet: All planets owned by this empire
+        """
+        return Planet.objects.filter(empire=self)
+
+    @property
+    def asteroid_belts(self):
+        """Get all asteroid belts owned by this empire.
+        
+        Returns:
+            QuerySet: All asteroid belts owned by this empire
+        """
+        return self.owned_asteroid_belts.all()
 
     @property
     def mineral_capacity(self):
