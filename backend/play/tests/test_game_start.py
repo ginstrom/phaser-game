@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from play.models import Player, Race, Empire, Game
 from celestial.models import System, Star
-from play.start import start_game, create_star_systems, create_computer_empires, GalaxySize
+from play.start import start_game, create_star_systems, create_computer_empires, GalaxySize, create_star_system
 
 class GameStartModuleTests(TestCase):
     def setUp(self):
@@ -15,6 +15,19 @@ class GameStartModuleTests(TestCase):
             'computer_empire_count': 2,
             'galaxy_size': 'tiny'
         }
+
+    def test_create_star_system(self):
+        """Test creating a single star system"""
+        game = Game.objects.create(turn=1)
+        x, y = 10, 20
+        
+        system = create_star_system(game, x, y)
+        
+        self.assertEqual(system.x, x)
+        self.assertEqual(system.y, y)
+        self.assertEqual(system.game, game)
+        self.assertEqual(system.star.star_type, Star.StarType.YELLOW)
+        self.assertEqual(System.objects.filter(game=game).count(), 1)
 
     def test_create_star_systems(self):
         """Test creating star systems for a game"""

@@ -55,6 +55,26 @@ GALAXY_SIZE_SYSTEM_COUNTS = {
     GalaxySize.LARGE: 15
 }
 
+def create_star_system(game, x, y):
+    """Create a single star system at the specified coordinates.
+    
+    Args:
+        game (Game): The game instance to create the system for
+        x (int): X coordinate for the system
+        y (int): Y coordinate for the system
+        
+    Returns:
+        System: The created star system instance
+    """
+    star = Star.objects.create(star_type=Star.StarType.YELLOW)
+    system = System.objects.create(
+        game=game,
+        star=star,
+        x=x,
+        y=y
+    )
+    return system
+
 def create_star_systems(game, count):
     """Create the specified number of star systems for the game.
     
@@ -74,13 +94,7 @@ def create_star_systems(game, count):
         # Simple placement - can be improved with more sophisticated algorithms
         x = i * 2  # Simple spacing
         y = i * 2
-        star = Star.objects.create(star_type=Star.StarType.YELLOW)
-        system = System.objects.create(
-            game=game,
-            star=star,
-            x=x,
-            y=y
-        )
+        system = create_star_system(game, x, y)
         systems.append(system)
     return systems
 

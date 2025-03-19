@@ -1,5 +1,13 @@
 # Revision History
 
+## 2024-03-21 - Refactored Star System Creation
+- Extracted star system creation logic into separate function
+  - Created create_star_system function for single system creation
+  - Updated create_star_systems to use new function
+  - Added comprehensive test coverage for new function
+  - Improved code modularity and reusability
+  - Updated documentation to reflect changes
+
 ## 2024-03-15 - Added Orbit Field to Celestial Bodies
 - Added orbit field to Planet and AsteroidBelt models
   - Implemented positive integer validation
