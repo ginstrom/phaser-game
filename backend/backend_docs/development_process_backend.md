@@ -105,6 +105,63 @@ Perform your documentation tasks before starting work, and after you are finishe
 
 ## Wrapping Up
 
-When you are asked to wrap up, please:
-- Update your documentation
-- Commit your changes to git in logical groupings
+When you are asked to wrap up, follow these steps in order:
+
+1. Run Tests
+   ```bash
+   make backend-shell python manage.py test <app-name>.tests.<test_file>
+   ```
+   - Verify all tests pass
+   - Fix any failing tests before proceeding
+
+2. Update Documentation
+   - Update revision history in `backend/backend_docs/revision_history.md`
+     - Add a new entry at the top with today's date
+     - Include a clear title describing the feature/change
+     - List all major changes and improvements
+     - Note any important implementation details
+   - Update relevant documentation files (models.md, api.md, etc.)
+   - Update current_task.md if needed
+
+3. Stage Changes
+   ```bash
+   git add <modified-files>
+   ```
+   - Stage all modified files
+   - Group related changes together
+   - Include all documentation updates
+
+4. Commit Changes
+   ```bash
+   git commit -m "<type>: <description>"
+   ```
+   - Use conventional commit types (feat, fix, refactor, etc.)
+   - Write clear, descriptive commit messages
+   - Include relevant issue numbers if applicable
+
+5. Verify Changes
+   - Review the commit to ensure all changes are included
+   - Check that documentation is complete and accurate
+   - Ensure no sensitive data or temporary files were committed
+
+### Example Wrap-up
+```bash
+# 1. Run tests
+make backend-shell python manage.py test play.tests.test_game_start
+
+# 2. Stage changes
+git add backend/play/start.py
+git add backend/play/tests/test_game_start.py
+git add backend/backend_docs/revision_history.md
+
+# 3. Commit changes
+git commit -m "feat: add terran planet and asteroid belt to star system creation"
+```
+
+### Important Notes
+- Always run tests before committing
+- Keep documentation up to date with code changes
+- Use meaningful commit messages
+- Group related changes together
+- Review changes before committing
+- Follow the established commit message format
