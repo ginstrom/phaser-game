@@ -22,6 +22,7 @@ from .views import HomeView
 
 urlpatterns = [
     path("", HomeView.as_view(), name="home"),
+    path("admin/doc/", include("django.contrib.admindocs.urls")),
     path("admin/", admin.site.urls),
     # API endpoints
     path("api/", include("celestial.urls")),
