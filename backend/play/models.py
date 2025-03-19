@@ -12,6 +12,8 @@ These models form the foundation of the game's data structure and business logic
 from django.db import models
 from django.core.exceptions import ValidationError
 from celestial.models import Planet, AsteroidBelt, System
+from core.fields import FixedPointField
+from django.db.models import Sum
 
 # Create your models here.
 
@@ -64,10 +66,10 @@ class Empire(models.Model):
         player (Player): The player controlling this empire
         race (Race): The race/species of this empire
         game (Game): The game this empire belongs to
-        mineral_storage (int): Current mineral resource storage
-        organic_storage (int): Current organic resource storage
-        radioactive_storage (int): Current radioactive resource storage
-        exotic_storage (int): Current exotic resource storage
+        mineral_storage (FixedPoint): Current mineral resource storage
+        organic_storage (FixedPoint): Current organic resource storage
+        radioactive_storage (FixedPoint): Current radioactive resource storage
+        exotic_storage (FixedPoint): Current exotic resource storage
     """
     name = models.CharField(max_length=100)
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='empires')
@@ -82,10 +84,10 @@ class Empire(models.Model):
     )
     
     # Resource storage values
-    mineral_storage = models.IntegerField(default=0)
-    organic_storage = models.IntegerField(default=0)
-    radioactive_storage = models.IntegerField(default=0)
-    exotic_storage = models.IntegerField(default=0)
+    mineral_storage = FixedPointField(default=0)
+    organic_storage = FixedPointField(default=0)
+    radioactive_storage = FixedPointField(default=0)
+    exotic_storage = FixedPointField(default=0)
 
     def __str__(self):
         return f"{self.name} ({self.race.name})"
@@ -113,36 +115,40 @@ class Empire(models.Model):
         """Calculate total mineral storage capacity from all controlled planets.
         
         Returns:
-            int: Total mineral storage capacity
+            FixedPoint: Total mineral storage capacity
         """
-        return sum(planet.mineral_storage_capacity for planet in self.planets.all())
+        result = self.planets.aggregate(total=Sum('mineral_storage_capacity'))
+        return result['total'] or 0
 
     @property
     def organic_capacity(self):
         """Calculate total organic storage capacity from all controlled planets.
         
         Returns:
-            int: Total organic storage capacity
+            FixedPoint: Total organic storage capacity
         """
-        return sum(planet.organic_storage_capacity for planet in self.planets.all())
+        result = self.planets.aggregate(total=Sum('organic_storage_capacity'))
+        return result['total'] or 0
 
     @property
     def radioactive_capacity(self):
         """Calculate total radioactive storage capacity from all controlled planets.
         
         Returns:
-            int: Total radioactive storage capacity
+            FixedPoint: Total radioactive storage capacity
         """
-        return sum(planet.radioactive_storage_capacity for planet in self.planets.all())
+        result = self.planets.aggregate(total=Sum('radioactive_storage_capacity'))
+        return result['total'] or 0
 
     @property
     def exotic_capacity(self):
         """Calculate total exotic storage capacity from all controlled planets.
         
         Returns:
-            int: Total exotic storage capacity
+            FixedPoint: Total exotic storage capacity
         """
-        return sum(planet.exotic_storage_capacity for planet in self.planets.all())
+        result = self.planets.aggregate(total=Sum('exotic_storage_capacity'))
+        return result['total'] or 0
 
     class Meta:
         app_label = 'play'

@@ -173,3 +173,10 @@ Benefits:
 - Better API documentation with DRF Spectacular
 - Cleaner code with encapsulated system count logic
 - More maintainable galaxy size handling 
+
+## 2024-03-XX - Add Resource Production and Storage
+- Added resource production calculation in turn processing
+- Implemented storage capacity system for empires
+- Updated Empire model to use FixedPointField for resource storage
+- Added comprehensive tests for turn processing and resource calculations
+- Optimized resource calculations using Django's aggregation 
