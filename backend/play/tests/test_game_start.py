@@ -23,11 +23,32 @@ class GameStartModuleTests(TestCase):
         
         system = create_star_system(game, x, y)
         
+        # Test system properties
         self.assertEqual(system.x, x)
         self.assertEqual(system.y, y)
         self.assertEqual(system.game, game)
         self.assertEqual(system.star.star_type, Star.StarType.YELLOW)
         self.assertEqual(System.objects.filter(game=game).count(), 1)
+        
+        # Test planet creation
+        planet = system.planets.first()
+        self.assertEqual(planet.orbit, 1)
+        self.assertEqual(planet.mineral_production, 75)
+        self.assertEqual(planet.organic_production, 75)
+        self.assertEqual(planet.radioactive_production, 25)
+        self.assertEqual(planet.exotic_production, 25)
+        self.assertEqual(planet.mineral_storage_capacity, 150)
+        self.assertEqual(planet.organic_storage_capacity, 150)
+        self.assertEqual(planet.radioactive_storage_capacity, 100)
+        self.assertEqual(planet.exotic_storage_capacity, 100)
+        
+        # Test asteroid belt creation
+        asteroid_belt = system.asteroid_belts.first()
+        self.assertEqual(asteroid_belt.orbit, 2)
+        self.assertEqual(asteroid_belt.mineral_production, 100)
+        self.assertEqual(asteroid_belt.organic_production, 25)
+        self.assertEqual(asteroid_belt.radioactive_production, 75)
+        self.assertEqual(asteroid_belt.exotic_production, 50)
 
     def test_create_star_systems(self):
         """Test creating star systems for a game"""

@@ -13,7 +13,7 @@ all required components are properly initialized.
 from django.db import transaction
 from enum import Enum
 from play.models import Player, Race, Empire, Game
-from celestial.models import System, Star
+from celestial.models import System, Star, Planet, AsteroidBelt
 
 class GalaxySize(str, Enum):
     """Enumeration of available galaxy sizes and their properties.
@@ -73,6 +73,31 @@ def create_star_system(game, x, y):
         x=x,
         y=y
     )
+    
+    # Add a terran planet in orbit 1
+    Planet.objects.create(
+        system=system,
+        orbit=1,
+        mineral_production=75,
+        organic_production=75,
+        radioactive_production=25,
+        exotic_production=25,
+        mineral_storage_capacity=150,
+        organic_storage_capacity=150,
+        radioactive_storage_capacity=100,
+        exotic_storage_capacity=100
+    )
+    
+    # Add an asteroid belt in orbit 2
+    AsteroidBelt.objects.create(
+        system=system,
+        orbit=2,
+        mineral_production=100,
+        organic_production=25,
+        radioactive_production=75,
+        exotic_production=50
+    )
+    
     return system
 
 def create_star_systems(game, count):

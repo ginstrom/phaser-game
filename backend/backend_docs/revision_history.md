@@ -1,5 +1,13 @@
 # Revision History
 
+## 2024-03-21 - Enhanced Star System Creation
+- Added automatic celestial body creation to star systems
+  - Added terran planet in orbit 1 with balanced resource production
+  - Added asteroid belt in orbit 2 with mineral-rich production
+  - Updated tests to verify celestial body creation
+  - Improved system initialization with more realistic starting conditions
+  - Updated documentation to reflect changes
+
 ## 2024-03-21 - Refactored Star System Creation
 - Extracted star system creation logic into separate function
   - Created create_star_system function for single system creation
