@@ -237,6 +237,26 @@ class SystemModelTests(TransactionTestCase):
             Planet.objects.create(system=self.system, orbit=3)
             self.system.clean()
 
+    def test_orbit_uniqueness(self):
+        """Test that planets and asteroid belts cannot share the same orbit"""
+        # Create a planet in orbit 1
+        planet = Planet.objects.create(system=self.system, orbit=1)
+        
+        # Try to create an asteroid belt in the same orbit
+        with self.assertRaises(ValidationError):
+            belt = AsteroidBelt.objects.create(system=self.system, orbit=1)
+            self.system.clean()
+        
+        # Try to create another planet in the same orbit
+        with self.assertRaises(ValidationError):
+            planet2 = Planet.objects.create(system=self.system, orbit=1)
+            self.system.clean()
+        
+        # Verify we can create entities in different orbits
+        belt = AsteroidBelt.objects.create(system=self.system, orbit=2)
+        planet2 = Planet.objects.create(system=self.system, orbit=3)
+        self.system.clean()  # Should not raise any errors
+
     def tearDown(self):
         System.objects.all().delete()
         Star.objects.all().delete()
