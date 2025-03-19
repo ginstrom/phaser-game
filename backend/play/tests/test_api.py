@@ -343,6 +343,66 @@ class GameAPITest(APITestCase):
         self.assertEqual(len(response.data['empires']), 2)
         self.assertEqual(len(response.data['systems']), 2)
 
+    def test_get_game_systems(self):
+        """Test getting all systems for a game"""
+        url = reverse('game-systems', args=[self.game.id])
+        response = self.client.get(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        
+        # Check first system
+        system1 = response.data[0]
+        self.assertEqual(system1['x'], 0)
+        self.assertEqual(system1['y'], 0)
+        self.assertEqual(system1['star']['star_type'], 'yellow')
+        
+        # Check second system
+        system2 = response.data[1]
+        self.assertEqual(system2['x'], 1)
+        self.assertEqual(system2['y'], 1)
+        self.assertEqual(system2['star']['star_type'], 'blue')
+
+    def test_get_game_systems_empty(self):
+        """Test getting systems for a game with no systems"""
+        # Create a new game with no systems
+        empty_game = Game.objects.create(turn=0)
+        url = reverse('game-systems', args=[empty_game.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
+
+    def test_get_game_systems_nonexistent(self):
+        """Test getting systems for a nonexistent game"""
+        url = reverse('game-systems', args=[999])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_game_empires(self):
+        """Test getting empires for a game"""
+        url = reverse('game-empires', args=[self.game.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        empire_names = [empire['name'] for empire in response.data]
+        self.assertIn(self.empire1.name, empire_names)
+        self.assertIn(self.empire2.name, empire_names)
+
+    def test_get_game_empires_empty(self):
+        """Test getting empires for a game with no empires"""
+        # Create a new game with no empires
+        empty_game = Game.objects.create(turn=0)
+        url = reverse('game-empires', args=[empty_game.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
+
+    def test_get_game_empires_nonexistent(self):
+        """Test getting empires for a nonexistent game"""
+        url = reverse('game-empires', args=[999])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_end_turn(self):
         """Test ending a turn"""
         url = reverse('game-end-turn', args=[self.game.id])

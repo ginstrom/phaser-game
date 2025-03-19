@@ -97,6 +97,28 @@ Base URL: `/api/games/`
 - **URL**: `/api/games/{id}/`
 - **Response**: 204 No Content
 
+### List Game Empires
+- **Method**: GET
+- **URL**: `/api/games/{id}/empires/`
+- **Description**: Get all empires in a specific game
+- **Response**: List of empire objects
+```json
+[
+    {
+        "id": 1,
+        "name": "Human Empire",
+        "player": 1,
+        "race": 1,
+        "mineral_storage": "100.00",
+        "organic_storage": "150.00",
+        "radioactive_storage": "125.00",
+        "exotic_storage": "75.00"
+    }
+]
+```
+- **Error Responses**:
+  - 404 Not Found: Game with specified ID does not exist
+
 ## API Endpoints
 
 ## Planet Resource

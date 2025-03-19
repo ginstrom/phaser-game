@@ -1,5 +1,21 @@
 # Revision History
 
+## 2024-03-21: Added Game Empires Endpoint
+
+### Changes
+- Added new `/api/games/{id}/empires/` endpoint to list all empires in a game
+- Added comprehensive test coverage for the new endpoint
+- Updated API documentation with endpoint details
+- All tests passing
+
+### Implementation Details
+- Added empires action to GameViewSet
+- Added test cases for:
+  - Getting empires for a game with multiple empires
+  - Getting empires for a game with no empires
+  - Getting empires for a nonexistent game
+- Updated API documentation with request/response examples
+
 ## 2024-03-21: Fixed API Serialization Issues
 
 ### Changes

@@ -23,6 +23,7 @@ from .serializers import (
     GameSerializer,
     StartGameSerializer
 )
+from celestial.serializers import SystemSerializer
 from .start import start_game, GalaxySize
 from .turn import process
 
@@ -90,6 +91,46 @@ class GameViewSet(viewsets.ModelViewSet):
             serializer: The serializer instance containing the game data
         """
         serializer.save(turn=0)
+
+    @extend_schema(
+        description='Get all systems in this game',
+        responses={200: SystemSerializer(many=True)}
+    )
+    @action(detail=True, methods=['get'])
+    def systems(self, request, pk=None):
+        """Get all systems in this game.
+        
+        Args:
+            request: The HTTP request
+            pk: The game ID
+            
+        Returns:
+            Response: List of systems in the game
+        """
+        game = self.get_object()
+        systems = game.systems.all()
+        serializer = SystemSerializer(systems, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        description='Get all empires in this game',
+        responses={200: EmpireSerializer(many=True)}
+    )
+    @action(detail=True, methods=['get'])
+    def empires(self, request, pk=None):
+        """Get all empires in this game.
+        
+        Args:
+            request: The HTTP request
+            pk: The game ID
+            
+        Returns:
+            Response: List of empires in the game
+        """
+        game = self.get_object()
+        empires = game.empires.all()
+        serializer = EmpireSerializer(empires, many=True)
+        return Response(serializer.data)
 
     @extend_schema(
         description='End the current turn and start the next one',
