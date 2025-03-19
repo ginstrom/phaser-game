@@ -79,36 +79,34 @@ class System(models.Model):
         - No duplicate orbital positions allowed
         """
         if self.pk:  # Only validate orbits if the system has been saved
-            # Count total orbits used
+            # Get all used orbits
             used_orbits = set()
             
             # Check planets
-            planet_orbits = self.planets.values_list('orbit', flat=True)
+            planet_orbits = set(self.planets.values_list('orbit', flat=True))
             used_orbits.update(planet_orbits)
             
             # Check asteroid belts
-            asteroid_orbits = self.asteroid_belts.values_list('orbit', flat=True)
+            asteroid_orbits = set(self.asteroid_belts.values_list('orbit', flat=True))
             used_orbits.update(asteroid_orbits)
             
             # Validate total number of orbits
             if len(used_orbits) > self.MAX_ORBITS:
                 raise ValidationError(f'System cannot have more than {self.MAX_ORBITS} occupied orbits.')
             
-            # Validate no duplicate orbits
-            if len(used_orbits) < (len(planet_orbits) + len(asteroid_orbits)):
+            # Validate no duplicate orbits between planets and asteroid belts
+            if planet_orbits & asteroid_orbits:  # Check for intersection
                 raise ValidationError('Each orbit can only be occupied by one celestial body.')
 
     def save(self, *args, **kwargs):
         """Save the system and validate orbital positions.
         
         **Process:**
-        1. Run clean() to validate
-        2. Save to database
-        3. Run clean() again to validate relationships
+        1. Save to database
+        2. Run clean() to validate relationships
         """
-        self.clean()
         super().save(*args, **kwargs)
-        self.clean()  # Run clean again after save to validate orbits
+        self.clean()  # Run clean after save to validate orbits
 
 # Create your models here.
 
@@ -189,6 +187,27 @@ class Planet(models.Model):
 
     def __str__(self):
         return f"Planet {self.id}"
+
+    def clean(self):
+        """Validate orbital position.
+        
+        **Validation:**
+        - Orbit must be unique within the system
+        - Orbit cannot be shared with asteroid belts
+        """
+        if self.system and self.orbit:
+            # Check for other planets in the same orbit
+            if Planet.objects.filter(system=self.system, orbit=self.orbit).exclude(pk=self.pk).exists():
+                raise ValidationError(f'Orbit {self.orbit} is already occupied by another planet in this system.')
+            
+            # Check for asteroid belts in the same orbit
+            if AsteroidBelt.objects.filter(system=self.system, orbit=self.orbit).exists():
+                raise ValidationError(f'Orbit {self.orbit} is already occupied by an asteroid belt in this system.')
+
+    def save(self, *args, **kwargs):
+        """Save the planet and validate orbital position."""
+        self.clean()
+        super().save(*args, **kwargs)
 
     class Meta:
         app_label = 'celestial'
@@ -283,6 +302,27 @@ class AsteroidBelt(models.Model):
 
     def __str__(self):
         return f"Asteroid Belt {self.id}"
+
+    def clean(self):
+        """Validate orbital position.
+        
+        **Validation:**
+        - Orbit must be unique within the system
+        - Orbit cannot be shared with planets
+        """
+        if self.system and self.orbit:
+            # Check for planets in the same orbit
+            if Planet.objects.filter(system=self.system, orbit=self.orbit).exists():
+                raise ValidationError(f'Orbit {self.orbit} is already occupied by a planet in this system.')
+            
+            # Check for other asteroid belts in the same orbit
+            if AsteroidBelt.objects.filter(system=self.system, orbit=self.orbit).exclude(pk=self.pk).exists():
+                raise ValidationError(f'Orbit {self.orbit} is already occupied by another asteroid belt in this system.')
+
+    def save(self, *args, **kwargs):
+        """Save the asteroid belt and validate orbital position."""
+        self.clean()
+        super().save(*args, **kwargs)
 
     class Meta:
         app_label = 'celestial'
