@@ -50,7 +50,7 @@ Base URL: `/api/games/`
 
 ### End Turn
 - **Method**: POST
-- **URL**: `/api/games/{id}/end_turn/`
+- **URL**: `/api/games/{id}/end-turn/`
 - **Description**: End the current turn and start the next one. This will:
   - Process resource production from planets and asteroid belts
   - Update empire resources
@@ -573,3 +573,95 @@ Start a new game with specified parameters.
 - The game will be created with the specified number of computer empires plus one human empire
 - All empires start with basic resources and one home system
 - Games start at turn 0 and advance to turn 1 after initialization
+
+## Empire API
+
+### Endpoints
+
+#### List Empires
+- **URL**: `/api/empires/`
+- **Method**: GET
+- **Response**: List of empire objects
+```json
+[
+    {
+        "id": 1,
+        "name": "Human Empire",
+        "player": 1,
+        "race": 1,
+        "mineral_storage": "100.00",
+        "organic_storage": "150.00",
+        "radioactive_storage": "125.00",
+        "exotic_storage": "75.00"
+    }
+]
+```
+
+#### Create Empire
+- **URL**: `/api/empires/`
+- **Method**: POST
+- **Data**:
+```json
+{
+    "name": "Human Empire",
+    "player_id": 1,
+    "race_id": 1
+}
+```
+- **Response**: Created empire object
+
+#### Get Empire
+- **URL**: `/api/empires/{id}/`
+- **Method**: GET
+- **Response**: Empire object
+
+#### Update Empire
+- **URL**: `/api/empires/{id}/`
+- **Method**: PUT
+- **Data**: Empire object
+- **Response**: Updated empire object
+
+#### Delete Empire
+- **URL**: `/api/empires/{id}/`
+- **Method**: DELETE
+- **Response**: 204 No Content
+
+#### Get Empire Planets
+- **URL**: `/api/empires/{id}/planets/`
+- **Method**: GET
+- **Description**: Get all planets belonging to this empire
+- **Response**: List of planet objects
+```json
+[
+    {
+        "id": 1,
+        "orbit": 1,
+        "mineral_production": "50.00",
+        "organic_production": "50.00",
+        "radioactive_production": "50.00",
+        "exotic_production": "50.00",
+        "mineral_storage_capacity": "100.00",
+        "organic_storage_capacity": "100.00",
+        "radioactive_storage_capacity": "100.00",
+        "exotic_storage_capacity": "100.00"
+    }
+]
+```
+
+#### Get Empire Asteroid Belts
+- **URL**: `/api/empires/{id}/asteroid-belts/`
+- **Method**: GET
+- **Description**: Get all asteroid belts belonging to this empire
+- **Response**: List of asteroid belt objects
+```json
+[
+    {
+        "id": 1,
+        "orbit": 2,
+        "mineral_production": "50.00",
+        "organic_production": "50.00",
+        "radioactive_production": "50.00",
+        "exotic_production": "50.00"
+    }
+]
+```
