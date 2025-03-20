@@ -101,7 +101,7 @@ class EmpireViewSet(viewsets.ModelViewSet):
         description='Get all asteroid belts belonging to this empire',
         responses={200: AsteroidBeltSerializer(many=True)}
     )
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get'], url_path='asteroid-belts')
     def asteroid_belts(self, request, pk=None):
         """Get all asteroid belts belonging to this empire.
         
