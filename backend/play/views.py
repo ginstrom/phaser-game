@@ -181,7 +181,7 @@ class GameViewSet(viewsets.ModelViewSet):
         request=None,
         responses={200: GameSerializer}
     )
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], url_path='end-turn')
     def end_turn(self, request, pk=None):
         """End the current turn and start the next one.
         
