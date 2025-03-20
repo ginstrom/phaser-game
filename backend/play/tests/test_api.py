@@ -265,6 +265,77 @@ class EmpireAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['asteroid_belts']), 0)
 
+    def test_get_empire_planets(self):
+        """Test getting all planets belonging to an empire"""
+        url = reverse('empire-planets', args=[self.empire.id])
+        response = self.client.get(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        
+        # Verify planet data
+        planet_orbits = [planet['orbit'] for planet in response.data]
+        self.assertIn(self.planet1.orbit, planet_orbits)
+        self.assertIn(self.planet2.orbit, planet_orbits)
+
+    def test_get_empire_planets_empty(self):
+        """Test getting planets for an empire with no planets"""
+        # Create a new empire with no planets
+        empty_empire = Empire.objects.create(
+            name="Empty Empire",
+            player=self.player,
+            race=self.race
+        )
+        
+        url = reverse('empire-planets', args=[empty_empire.id])
+        response = self.client.get(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
+
+    def test_get_empire_asteroid_belts(self):
+        """Test getting all asteroid belts belonging to an empire"""
+        url = reverse('empire-asteroid-belts', args=[self.empire.id])
+        response = self.client.get(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        
+        # Verify asteroid belt data
+        asteroid_belt = response.data[0]
+        self.assertEqual(asteroid_belt['orbit'], self.asteroid_belt.orbit)
+        self.assertEqual(asteroid_belt['mineral_production'], '50.00')
+        self.assertEqual(asteroid_belt['organic_production'], '60.00')
+        self.assertEqual(asteroid_belt['radioactive_production'], '70.00')
+        self.assertEqual(asteroid_belt['exotic_production'], '80.00')
+
+    def test_get_empire_asteroid_belts_empty(self):
+        """Test getting asteroid belts for an empire with no asteroid belts"""
+        # Create a new empire with no asteroid belts
+        empty_empire = Empire.objects.create(
+            name="Empty Empire",
+            player=self.player,
+            race=self.race
+        )
+        
+        url = reverse('empire-asteroid-belts', args=[empty_empire.id])
+        response = self.client.get(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
+
+    def test_get_nonexistent_empire_resources(self):
+        """Test getting resources for a nonexistent empire"""
+        # Test planets endpoint
+        url = reverse('empire-planets', args=[999])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        
+        # Test asteroid belts endpoint
+        url = reverse('empire-asteroid-belts', args=[999])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def tearDown(self):
         """Clean up test data"""
         Empire.objects.all().delete()

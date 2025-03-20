@@ -3,7 +3,7 @@
 This module provides ViewSets for managing game entities through the REST API:
 - PlayerViewSet: Manages player instances
 - RaceViewSet: Manages race instances
-- EmpireViewSet: Manages empire instances
+- EmpireViewSet: Manages empire instances and related resources
 - GameViewSet: Manages game instances and game-specific actions
 
 These views handle HTTP requests and coordinate with models and serializers
@@ -23,7 +23,7 @@ from .serializers import (
     GameSerializer,
     StartGameSerializer
 )
-from celestial.serializers import SystemSerializer
+from celestial.serializers import SystemSerializer, PlanetSerializer, AsteroidBeltSerializer
 from .start import start_game, GalaxySize
 from .turn import process
 
@@ -69,9 +69,53 @@ class EmpireViewSet(viewsets.ModelViewSet):
     * Retrieve a specific empire
     * Update empire details
     * Delete an empire
+    
+    Additional endpoints:
+    * GET /api/empires/{id}/planets/ - List all planets belonging to the empire
+    * GET /api/empires/{id}/asteroid-belts/ - List all asteroid belts belonging to the empire
     """
     queryset = Empire.objects.all()
     serializer_class = EmpireSerializer
+
+    @extend_schema(
+        description='Get all planets belonging to this empire',
+        responses={200: PlanetSerializer(many=True)}
+    )
+    @action(detail=True, methods=['get'])
+    def planets(self, request, pk=None):
+        """Get all planets belonging to this empire.
+        
+        Args:
+            request: The HTTP request
+            pk: The empire ID
+            
+        Returns:
+            Response: List of planets belonging to the empire
+        """
+        empire = self.get_object()
+        planets = empire.planets
+        serializer = PlanetSerializer(planets, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        description='Get all asteroid belts belonging to this empire',
+        responses={200: AsteroidBeltSerializer(many=True)}
+    )
+    @action(detail=True, methods=['get'])
+    def asteroid_belts(self, request, pk=None):
+        """Get all asteroid belts belonging to this empire.
+        
+        Args:
+            request: The HTTP request
+            pk: The empire ID
+            
+        Returns:
+            Response: List of asteroid belts belonging to the empire
+        """
+        empire = self.get_object()
+        asteroid_belts = empire.asteroid_belts
+        serializer = AsteroidBeltSerializer(asteroid_belts, many=True)
+        return Response(serializer.data)
 
 
 @extend_schema(tags=['games'])
