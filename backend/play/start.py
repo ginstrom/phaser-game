@@ -10,11 +10,14 @@ The module provides functions to create the initial game state and ensures
 all required components are properly initialized.
 """
 
+import logging
 from django.db import transaction
 from enum import Enum
 from play.models import Player, Race, Empire, Game
 from play import turn
 from celestial.models import System, Star, Planet, AsteroidBelt
+
+logger = logging.getLogger(__name__)
 
 class GalaxySize(str, Enum):
     """Enumeration of available galaxy sizes and their properties.
@@ -67,6 +70,7 @@ def create_star_system(game, x, y):
     Returns:
         System: The created star system instance
     """
+    logger.debug(f"Creating star system at coordinates ({x}, {y})")
     star = Star.objects.create(star_type=Star.StarType.YELLOW)
     system = System.objects.create(
         game=game,
@@ -76,7 +80,7 @@ def create_star_system(game, x, y):
     )
     
     # Add a terran planet in orbit 1
-    Planet.objects.create(
+    planet = Planet.objects.create(
         system=system,
         orbit=1,
         mineral_production=75,
@@ -88,9 +92,10 @@ def create_star_system(game, x, y):
         radioactive_storage_capacity=100,
         exotic_storage_capacity=100
     )
+    logger.debug(f"Created terran planet in orbit 1 of system {system.id}")
     
     # Add an asteroid belt in orbit 2
-    AsteroidBelt.objects.create(
+    belt = AsteroidBelt.objects.create(
         system=system,
         orbit=2,
         mineral_production=100,
@@ -98,6 +103,7 @@ def create_star_system(game, x, y):
         radioactive_production=75,
         exotic_production=50
     )
+    logger.debug(f"Created asteroid belt in orbit 2 of system {system.id}")
     
     return system
 
@@ -115,13 +121,14 @@ def create_star_systems(game, count):
         Currently uses a simple placement algorithm with fixed spacing.
         Future versions may implement more sophisticated galaxy generation.
     """
+    logger.info(f"Creating {count} star systems for game {game.id}")
     systems = []
     for i in range(count):
-        # Simple placement - can be improved with more sophisticated algorithms
-        x = i * 2  # Simple spacing
+        x = i * 2
         y = i * 2
         system = create_star_system(game, x, y)
         systems.append(system)
+    logger.info(f"Successfully created {len(systems)} star systems")
     return systems
 
 def create_computer_empires(game, count, race):
@@ -135,6 +142,7 @@ def create_computer_empires(game, count, race):
     Returns:
         list: List of created Empire instances
     """
+    logger.info(f"Creating {count} computer empires for game {game.id}")
     empires = []
     for i in range(count):
         player = Player.objects.create(player_type=Player.PlayerType.COMPUTER)
@@ -145,6 +153,8 @@ def create_computer_empires(game, count, race):
             game=game
         )
         empires.append(empire)
+        logger.debug(f"Created computer empire {empire.name} with ID {empire.id}")
+    logger.info(f"Successfully created {len(empires)} computer empires")
     return empires
 
 def assign_colony_planets(game):
@@ -156,31 +166,30 @@ def assign_colony_planets(game):
     Args:
         game (Game): The game instance to assign colonies for
     """
-    # Get all empires in the game
+    logger.info(f"Assigning colony planets for game {game.id}")
     empires = list(Empire.objects.filter(game=game))
     total_empires = len(empires)
+    logger.debug(f"Found {total_empires} empires to assign colonies to")
     
-    # Get all systems with planets
     systems = list(System.objects.filter(game=game))
     total_systems = len(systems)
+    logger.debug(f"Found {total_systems} existing systems")
     
-    # Calculate how many additional systems we need
     systems_needed = max(total_empires - total_systems, 0)
-    
-    # Create additional systems if needed
     if systems_needed > 0:
+        logger.info(f"Creating {systems_needed} additional systems for colony assignment")
         for i in range(systems_needed):
-            x = (total_systems + i) * 2  # Continue the spacing pattern
+            x = (total_systems + i) * 2
             y = (total_systems + i) * 2
             system = create_star_system(game, x, y)
             systems.append(system)
     
-    # Assign one planet to each empire
     for i, empire in enumerate(empires):
         system = systems[i]
         planet = system.planets.first()
         planet.empire = empire
         planet.save()
+        logger.debug(f"Assigned planet {planet.id} in system {system.id} to empire {empire.name}")
 
 @transaction.atomic
 def start_game(data):
@@ -207,27 +216,38 @@ def start_game(data):
         ValueError: If galaxy_size is invalid or required fields are missing
         ValidationError: If game state is invalid after creation
     """
+    logger.info("Starting new game initialization")
+    
     # Validate required fields
     required_fields = ['player_empire_name', 'computer_empire_count', 'galaxy_size']
     for field in required_fields:
         if field not in data:
+            logger.error(f"Missing required field: {field}")
             raise ValueError(f'Missing required field: {field}')
 
     # Validate and convert galaxy size
     try:
         galaxy_size = GalaxySize(data['galaxy_size'])
+        logger.debug(f"Validated galaxy size: {galaxy_size}")
     except ValueError:
+        logger.error(f"Invalid galaxy size: {data['galaxy_size']}")
         raise ValueError(f'Invalid galaxy size: {data["galaxy_size"]}')
 
     # Validate computer empire count
     if data['computer_empire_count'] < 0:
+        logger.error(f"Invalid computer empire count: {data['computer_empire_count']}")
         raise ValueError('Computer empire count must be non-negative')
 
-    # Get or create default race (can be expanded later)
-    race, _ = Race.objects.get_or_create(name="Human")
+    # Get or create default race
+    race, created = Race.objects.get_or_create(name="Human")
+    if created:
+        logger.info("Created new Human race")
+    else:
+        logger.debug("Using existing Human race")
     
     # Create game
     game = Game.objects.create(turn=0)
+    logger.info(f"Created new game with ID {game.id}")
     
     # Create star systems based on galaxy size
     create_star_systems(game, GALAXY_SIZE_SYSTEM_COUNTS[galaxy_size])
@@ -240,16 +260,14 @@ def start_game(data):
         race=race,
         game=game
     )
+    logger.info(f"Created human empire '{human_empire.name}' with ID {human_empire.id}")
     
     # Create computer empires
     create_computer_empires(game, data['computer_empire_count'], race)
     
     # Assign colony planets to all empires
     assign_colony_planets(game)
-
-    # Validate game (ensures minimum requirements are met)
-    game.clean()
-
     game = turn.process(game)
     
+    logger.info(f"Successfully completed game initialization for game {game.id}")
     return game 

@@ -9,10 +9,13 @@ This module handles the end-of-turn processing for games, including:
 The module provides a single public function `process()` that handles all turn processing logic.
 """
 
+import logging
 from .models import Game, Empire
 from celestial.models import Planet, AsteroidBelt
 from decimal import Decimal
 from django.db.models import Sum
+
+logger = logging.getLogger(__name__)
 
 def calculate_resource_production(empire: Empire) -> tuple[Decimal, Decimal, Decimal, Decimal]:
     """Calculate total resource production for an empire from all its planets and asteroid belts.
@@ -23,6 +26,8 @@ def calculate_resource_production(empire: Empire) -> tuple[Decimal, Decimal, Dec
     Returns:
         tuple[Decimal, Decimal, Decimal, Decimal]: Total production of (mineral, organic, radioactive, exotic)
     """
+    logger.debug(f"Calculating resource production for empire {empire.name} (ID: {empire.id})")
+    
     # Sum production from planets
     planet_prod = empire.planets.aggregate(
         mineral_prod=Sum('mineral_production'),
@@ -45,6 +50,10 @@ def calculate_resource_production(empire: Empire) -> tuple[Decimal, Decimal, Dec
     radioactive_prod = (planet_prod['radioactive_prod'] or Decimal('0')) + (belt_prod['radioactive_prod'] or Decimal('0'))
     exotic_prod = (planet_prod['exotic_prod'] or Decimal('0')) + (belt_prod['exotic_prod'] or Decimal('0'))
     
+    logger.debug(f"Resource production for empire {empire.name}: "
+                f"Mineral={mineral_prod}, Organic={organic_prod}, "
+                f"Radioactive={radioactive_prod}, Exotic={exotic_prod}")
+    
     return mineral_prod, organic_prod, radioactive_prod, exotic_prod
 
 def update_empire_resources(empire: Empire) -> None:
@@ -53,8 +62,16 @@ def update_empire_resources(empire: Empire) -> None:
     Args:
         empire (Empire): The empire to update resources for
     """
+    logger.debug(f"Updating resources for empire {empire.name} (ID: {empire.id})")
+    
     # Get total production
     mineral_prod, organic_prod, radioactive_prod, exotic_prod = calculate_resource_production(empire)
+    
+    # Store old values for logging
+    old_mineral = empire.mineral_storage
+    old_organic = empire.organic_storage
+    old_radioactive = empire.radioactive_storage
+    old_exotic = empire.exotic_storage
     
     # Update storage values, capped at capacity
     empire.mineral_storage = min(empire.mineral_storage + mineral_prod, empire.mineral_capacity)
@@ -64,6 +81,12 @@ def update_empire_resources(empire: Empire) -> None:
     
     # Save changes
     empire.save()
+    
+    logger.debug(f"Resource storage updated for empire {empire.name}: "
+                f"Mineral: {old_mineral} -> {empire.mineral_storage}, "
+                f"Organic: {old_organic} -> {empire.organic_storage}, "
+                f"Radioactive: {old_radioactive} -> {empire.radioactive_storage}, "
+                f"Exotic: {old_exotic} -> {empire.exotic_storage}")
 
 def process(game: Game) -> Game:
     """Process the end of turn for a game.
@@ -80,12 +103,19 @@ def process(game: Game) -> Game:
     Returns:
         Game: The updated game instance with the turn counter advanced
     """
+    logger.info(f"Processing end of turn {game.turn} for game {game.id}")
+    
     # Process resources for each empire
-    for empire in game.empires.all():
+    empires = game.empires.all()
+    logger.info(f"Processing resources for {len(empires)} empires")
+    
+    for empire in empires:
         update_empire_resources(empire)
     
     # Advance turn counter
+    old_turn = game.turn
     game.turn += 1
     game.save()
     
+    logger.info(f"Turn processing complete. Game {game.id} advanced from turn {old_turn} to {game.turn}")
     return game 
