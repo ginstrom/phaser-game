@@ -4,6 +4,9 @@ from play.models import Player, Race, Empire, Game
 from celestial.models import Planet, AsteroidBelt, System, Star
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
+from django.utils import timezone
+from datetime import timedelta
+import time
 
 
 class PlayerModelTests(TestCase):
@@ -166,6 +169,7 @@ class EmpireModelTests(TestCase):
 
 class GameModelTests(TestCase):
     def setUp(self):
+        """Set up test data"""
         # Create a game
         self.game = Game.objects.create(turn=0)
         
@@ -214,8 +218,40 @@ class GameModelTests(TestCase):
         self.assertEqual(self.game.systems.count(), 2)
         self.assertEqual(str(self.game), f"Game {self.game.id} (Turn 0)")
         
+        # Test timestamp fields are set
+        self.assertIsNotNone(self.game.created)
+        self.assertIsNotNone(self.game.modified)
+        self.assertTrue(timezone.is_aware(self.game.created))  # Check timezone awareness
+        self.assertTrue(timezone.is_aware(self.game.modified))
+        
         # Validate should pass with 2 empires and 2 systems
         self.game.clean()
+
+    def test_game_timestamps(self):
+        """Test that timestamps are properly set and updated"""
+        # Get initial timestamps
+        created = self.game.created
+        modified = self.game.modified
+        
+        # Wait a small amount to ensure timestamps will be different
+        time.sleep(0.1)
+        
+        # Update the game
+        self.game.turn += 1
+        self.game.save()
+        
+        # Refresh from database
+        self.game.refresh_from_db()
+        
+        # Created should not change
+        self.assertEqual(self.game.created, created)
+        
+        # Modified should be updated
+        self.assertGreater(self.game.modified, modified)
+        
+        # Both should be timezone aware
+        self.assertTrue(timezone.is_aware(self.game.created))
+        self.assertTrue(timezone.is_aware(self.game.modified))
 
     def test_game_minimum_empires(self):
         """Test that a game requires at least 2 empires"""
@@ -265,6 +301,21 @@ class GameModelTests(TestCase):
         # Verify original game fails validation
         with self.assertRaises(ValidationError):
             self.game.clean()
+
+    def test_bulk_game_creation_timestamps(self):
+        """Test that timestamps are properly set when creating multiple games"""
+        # Create multiple games
+        games = [
+            Game(turn=i) for i in range(3)
+        ]
+        created_games = Game.objects.bulk_create(games)
+        
+        # Verify all games have timestamps
+        for game in Game.objects.filter(id__in=[g.id for g in created_games]):
+            self.assertIsNotNone(game.created)
+            self.assertIsNotNone(game.modified)
+            self.assertTrue(timezone.is_aware(game.created))
+            self.assertTrue(timezone.is_aware(game.modified))
 
     def tearDown(self):
         """Clean up test data"""

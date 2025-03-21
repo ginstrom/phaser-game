@@ -164,10 +164,20 @@ class Game(models.Model):
     
     Attributes:
         turn (int): Current turn number of the game
+        created (datetime): When the game was created
+        modified (datetime): When the game was last modified
     """
     turn = models.PositiveIntegerField(
         default=0,
         help_text="Current turn number of the game"
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+        help_text="When the game was created"
+    )
+    modified = models.DateTimeField(
+        auto_now=True,
+        help_text="When the game was last modified"
     )
 
     def clean(self):

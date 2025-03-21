@@ -166,8 +166,8 @@ class GameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game
-        fields = ['id', 'turn', 'empires', 'systems']
-        read_only_fields = ['id']
+        fields = ['id', 'turn', 'empires', 'systems', 'created', 'modified']
+        read_only_fields = ['id', 'created', 'modified']
 
     def validate(self, data):
         """Validate that game meets minimum requirements.

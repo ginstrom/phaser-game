@@ -94,12 +94,13 @@ class EmpireAdmin(admin.ModelAdmin):
 
 @admin.register(Game)
 class GameAdmin(admin.ModelAdmin):
-    list_display = ('id', 'turn')
+    list_display = ('id', 'turn', 'created', 'modified')
     search_fields = ('id',)
     inlines = [EmpireInline, SystemInline]
+    readonly_fields = ('created', 'modified')
     fieldsets = (
         ('Basic Information', {
-            'fields': ('turn',)
+            'fields': ('turn', 'created', 'modified')
         }),
     )
 
