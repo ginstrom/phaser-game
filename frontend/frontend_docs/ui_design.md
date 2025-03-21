@@ -18,9 +18,16 @@ Our UI design follows a dark sci-fi theme that emphasizes:
 
 ## For Button Components:
 
-- Implement the SciFiButton class I provided to standardize your buttons across the game and reduce duplication.
-- Use ButtonStyle enum to maintain consistent styles that match your UI design system.
-- Add more button variations as needed (IconButton, MenuButton, etc.) but keep them in the same component hierarchy.
+- Use the SciFiButton component for all interactive buttons in the game
+- Follow these button style guidelines:
+  - ButtonStyle.PRIMARY: Main actions (Start Game, End Turn)
+  - ButtonStyle.SECONDARY: Navigation actions (Empire, Galaxy view)
+  - ButtonStyle.DANGER: Destructive actions (Exit, Cancel)
+- Position guidelines:
+  - Main menu buttons: Centered vertically and horizontally
+  - Navigation buttons: Bottom of screen
+  - Action buttons: Bottom right corner
+  - Cancel/Exit buttons: Bottom left corner
 
 ## For Tables:
 
