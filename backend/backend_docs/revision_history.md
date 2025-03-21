@@ -196,3 +196,12 @@ Benefits:
 - Updated Empire model to use FixedPointField for resource storage
 - Added comprehensive tests for turn processing and resource calculations
 - Optimized resource calculations using Django's aggregation 
+
+## 2025-03-21: Add Timestamp Fields to Game Model
+- Added `created` and `modified` timestamp fields to Game model
+- All timestamps are stored in UTC
+- Added comprehensive tests for timestamp functionality
+- Reset migrations to clean state
+
+## Previous Changes
+// ... existing code ... 

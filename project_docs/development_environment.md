@@ -7,7 +7,11 @@ This document describes the development environment for the Space Conquest Game 
 ```
 phaser-game/
 ├── backend/           # Django backend application
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── backend_docs/  # Backend-specific documentation
+├── frontend/         # Pixi.js frontend application
+│   ├── package.json
+│   └── .cursorrules  # Frontend development rules
 ├── docker/           # Docker configuration files
 │   ├── Dockerfile
 │   ├── docker-compose.yml     # Main docker-compose configuration
@@ -85,6 +89,34 @@ make test
 make test-backend
 ```
 
+### Frontend Development
+
+The frontend is a web-based client built with:
+- Pixi.js for 2D game rendering
+- TypeScript for type safety
+- Webpack for bundling
+- Jest for testing
+
+#### Frontend Container
+
+The frontend container provides:
+- Node.js 20 environment
+- NPM for package management
+- Volume-mounted frontend directory for live code changes
+- Hot module reloading for development
+
+To start frontend development:
+
+1. Start the frontend development server:
+   ```bash
+   make frontend
+   ```
+
+2. For frontend development tasks:
+   ```bash
+   make frontend-shell
+   ```
+
 ## Docker Configuration
 
 ### Backend Dockerfile
@@ -111,6 +143,9 @@ The project uses two docker-compose files:
 
 ## Next Steps
 
+[x] Set up basic project structure
+[x] Configure Docker development environment
+[x] Set up Django backend
 [] Implement API for celestial app
 [] Create units app
 [] Implement API for units app
@@ -120,3 +155,7 @@ The project uses two docker-compose files:
 [] Implement API for research app
 [] Create API documentation
 [] Create skeleton pixi.js front-end
+[] Implement basic game rendering
+[] Add turn-based game logic
+[] Implement resource management
+[] Add combat system

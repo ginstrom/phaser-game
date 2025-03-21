@@ -1,7 +1,7 @@
 # Project Structure
 
 ## Overview
-The backend is a Django application organized into several apps, each handling specific functionality.
+The backend is a Django application organized into several apps, each handling specific functionality for the 4X space conquest game.
 
 ## Directory Structure
 ```
@@ -18,18 +18,34 @@ backend/
 ├── core/                 # Core functionality and shared components
 │   ├── __init__.py
 │   ├── fields.py         # Custom model fields
+│   ├── serializers.py    # Base serializer classes
+│   ├── views.py         # Base view classes
 │   └── tests/            # Core app tests
 │       ├── __init__.py
 │       └── test_fields.py
 ├── celestial/           # Celestial objects management
 │   ├── __init__.py
-│   ├── models.py        # Celestial models (Planet, etc.)
+│   ├── models.py        # Celestial models (Planet, Star, etc.)
+│   ├── serializers.py   # API serializers
+│   ├── views.py        # API views and viewsets
+│   ├── urls.py         # URL routing
 │   ├── migrations/      # Database migrations
 │   └── tests/          # Celestial app tests
 │       ├── __init__.py
+│       ├── test_api.py
 │       ├── test_config.py
 │       └── test_models.py
+├── empire/             # Empire and faction management
+│   ├── __init__.py
+│   ├── models.py       # Empire and faction models
+│   └── tests/          # Empire app tests
+├── units/              # Military and civilian units
+│   ├── __init__.py
+│   ├── models.py       # Unit models
+│   └── tests/          # Unit tests
 └── backend_docs/        # Backend documentation
+    ├── api.md          # API documentation
+    ├── models.md       # Model documentation
     ├── project_structure.md
     ├── revision_history.md
     └── current_task.md
@@ -38,8 +54,10 @@ backend/
 ## Key Components
 - Django 5.0.2 as the web framework
 - Django REST Framework for API development
-- PostgreSQL (planned) for the database
+- PostgreSQL for the database
 - Docker for containerization
+- JWT for authentication
+- Redis for caching (planned)
 
 ## Development Environment
 - Development server runs on port 8080
@@ -56,15 +74,46 @@ Located in `backend/core/`
 - Provides shared functionality across apps
 - Custom model fields:
   - `FixedPointField`: Precise decimal storage using integer scaling
+- Base classes:
+  - Base serializers for common patterns
+  - Base viewsets with shared functionality
+  - Common test utilities
 
 ### Celestial
 Located in `backend/celestial/`
-- Manages celestial entities like planets
+- Manages celestial entities in the game universe
 - Models:
-  - `Planet`: Represents planets with resource production and storage
+  - `Star`: Central star in a star system
+    - Determines system characteristics
+    - Affects resource generation
+  - `Planet`: Represents planets with resource production
     - Resource production fields (mineral, organic, radioactive, exotic)
     - Resource storage capacity fields
+    - Colony support capabilities
     - All resource values use FixedPointField for precise storage
-- Tests organized in dedicated test directory
-  - Configuration tests
-  - Model tests with comprehensive coverage 
+  - `AsteroidBelt`: Resource-rich regions
+    - Mining potential
+    - Strategic value
+- API endpoints:
+  - GET /api/celestial/stars/ - List star systems
+  - GET /api/celestial/planets/ - List planets
+  - GET /api/celestial/asteroid-belts/ - List asteroid belts
+
+### Empire (In Progress)
+Located in `backend/empire/`
+- Manages player empires and factions
+- Models:
+  - `Empire`: Player's civilization
+  - `Faction`: Sub-groups within empires
+- Planned features:
+  - Resource management
+  - Technology tree
+  - Diplomatic relations
+
+### Units (In Progress)
+Located in `backend/units/`
+- Military and civilian unit management
+- Planned models:
+  - `MilitaryUnit`: Combat units
+  - `CivilianUnit`: Non-combat units
+  - `Fleet`: Unit groupings 
