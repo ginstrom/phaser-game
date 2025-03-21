@@ -8,6 +8,60 @@ Our UI design follows a dark sci-fi theme that emphasizes:
 - Consistent visual hierarchy
 - Responsive feedback
 
+# Best Practices for UI in Phaser Games
+
+ - Component-Based Approach: Create reusable UI components like we did with buttons and tables.
+ - Clean Separation: Keep UI code separate from game logic. This makes it easier to update the UI without affecting gameplay.
+ - Consistent Styling: Create a style system that defines colors, fonts, and sizes. I see you already have this in your UI design documentation.
+ - Responsive Design: Make UI components that can adapt to different screen sizes:
+ - Responsive UI 
+
+## For Button Components:
+
+- Implement the SciFiButton class I provided to standardize your buttons across the game and reduce duplication.
+- Use ButtonStyle enum to maintain consistent styles that match your UI design system.
+- Add more button variations as needed (IconButton, MenuButton, etc.) but keep them in the same component hierarchy.
+
+## For Tables:
+
+- Use HTML tables for complex data when you need rich formatting, scrolling, and extensive data display.
+- Use pure Phaser tables for simpler displays or when performance is critical.
+- Consider the hybrid approach for the most flexibility, allowing you to mix HTML and Phaser elements.
+
+## General UI Structure:
+
+- Create a dedicated UI directory as I outlined to keep your components organized.
+- Implement the ResponsiveUI helper for better adapting to different screen sizes.
+- Follow the performance tips to ensure your UI remains smooth even with many elements.
+
+
+## UI Directory Structure
+
+frontend/
+├── src/
+│   ├── ui/               # UI component directory
+│   │   ├── buttons/      # Button components
+│   │   │   ├── SciFiButton.ts
+│   │   │   └── IconButton.ts
+│   │   ├── tables/       # Table components
+│   │   │   ├── HtmlTable.ts
+│   │   │   └── PhaserTable.ts
+│   │   ├── panels/       # Panel components
+│   │   │   ├── InfoPanel.ts
+│   │   │   └── DialogPanel.ts
+│   │   ├── forms/        # Form components
+│   │   │   ├── TextInput.ts
+│   │   │   └── RadioButton.ts
+│   │   └── common/       # Common UI utilities
+│   │       ├── Colors.ts
+│   │       ├── Styles.ts
+│   │       └── Animations.ts
+│   ├── scenes/           # Game scenes
+│   ├── entities/         # Game objects
+│   ├── config/           # Game configuration
+│   └── utils/            # Utility functions
+└── tests/                # Test files
+
 ## Color Palette
 
 ### Primary Colors

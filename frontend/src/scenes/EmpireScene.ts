@@ -1,5 +1,6 @@
 /// <reference path="../../node_modules/phaser/types/phaser.d.ts" />
 import Phaser from 'phaser';
+import { SciFiButton, ButtonStyle } from '../ui/buttons/SciFiButton';
 
 interface PlayerData {
     id: number;
@@ -75,49 +76,53 @@ export class EmpireScene extends Phaser.Scene {
         // Set black background
         this.cameras.main.setBackgroundColor('#000000');
 
+        // Calculate UI dimensions
+        const buttonWidth = 200;
+        const buttonHeight = 50;
+        const padding = 20;
+
         // Create container for tab content
         this.contentContainer = this.add.container(0, 100); // Move container down to avoid overlap with tabs
 
         // Create tab buttons with consistent styling
         const tabY = 50;
-        const tabHeight = 40;
         const tabWidth = 150;
         const tabSpacing = 10;
 
-        // Create background for tabs
-        const coloniesTabBg = this.add.rectangle(50, tabY, tabWidth, tabHeight, 0x444444)
-            .setOrigin(0, 0.5);
-        const resourcesTabBg = this.add.rectangle(50 + tabWidth + tabSpacing, tabY, tabWidth, tabHeight, 0x333333)
-            .setOrigin(0, 0.5);
-
-        const coloniesTab = this.add.text(50 + (tabWidth/2), tabY, 'Colonies', { 
-            fontSize: '24px',
-            color: '#ffffff',
-            padding: { x: 10, y: 5 }
-        })
-        .setOrigin(0.5)
-        .setInteractive();
-
-        const resourcesTab = this.add.text(50 + tabWidth + tabSpacing + (tabWidth/2), tabY, 'Resources', {
-            fontSize: '24px',
-            color: '#ffffff',
-            padding: { x: 10, y: 5 }
-        })
-        .setOrigin(0.5)
-        .setInteractive();
-
-        // Add hover effects
-        [coloniesTabBg, resourcesTabBg].forEach(tab => {
-            tab.setInteractive();
-            tab.on('pointerover', () => tab.setFillStyle(0x666666));
-            tab.on('pointerout', () => tab.setFillStyle(tab === coloniesTabBg ? 0x444444 : 0x333333));
+        // Create colonies tab button
+        new SciFiButton({
+            scene: this,
+            x: 50 + (tabWidth/2),
+            y: tabY,
+            text: 'Colonies',
+            width: tabWidth,
+            style: this.activeTab === 'colonies' ? ButtonStyle.PRIMARY : ButtonStyle.SECONDARY,
+            callback: () => this.switchTab('colonies')
         });
 
-        // Add click handlers
-        coloniesTab.on('pointerdown', () => this.switchTab('colonies'));
-        resourcesTab.on('pointerdown', () => this.switchTab('resources'));
-        coloniesTabBg.on('pointerdown', () => this.switchTab('colonies'));
-        resourcesTabBg.on('pointerdown', () => this.switchTab('resources'));
+        // Create resources tab button
+        new SciFiButton({
+            scene: this,
+            x: 50 + tabWidth + tabSpacing + (tabWidth/2),
+            y: tabY,
+            text: 'Resources',
+            width: tabWidth,
+            style: this.activeTab === 'resources' ? ButtonStyle.PRIMARY : ButtonStyle.SECONDARY,
+            callback: () => this.switchTab('resources')
+        });
+
+        // Create Galaxy button in bottom right
+        new SciFiButton({
+            scene: this,
+            x: this.cameras.main.width - buttonWidth/2 - padding,
+            y: this.cameras.main.height - buttonHeight/2 - padding,
+            text: 'Galaxy',
+            width: buttonWidth,
+            style: ButtonStyle.SECONDARY,
+            callback: () => {
+                this.scene.start('GalaxyScene', { ...this.gameData });
+            }
+        });
 
         // Load empire data and show initial tab
         await this.loadEmpireData();
@@ -178,7 +183,7 @@ export class EmpireScene extends Phaser.Scene {
             this.contentContainer.removeAll(true);
         }
         
-        // Update tab visuals
+        // Update tab visuals and show appropriate content
         if (tab === 'colonies') {
             this.showColoniesTab();
         } else {

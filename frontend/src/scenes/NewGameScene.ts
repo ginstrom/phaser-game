@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { SciFiButton, ButtonStyle } from '../ui/buttons/SciFiButton';
 
 export class NewGameScene extends Phaser.Scene {
     private formInputs!: {
@@ -150,80 +151,58 @@ export class NewGameScene extends Phaser.Scene {
             this.formInputs.galaxySize.setText(this.formInputs.selectedSize);
         });
 
-        // Buttons
-        const cancelButton = this.add.text(
-            this.cameras.main.centerX - 100,
-            500,
-            'Cancel',
-            {
-                fontFamily: 'monospace',
-                fontSize: '24px',
-                color: '#ff0000',
-                backgroundColor: '#333333',
-                padding: { x: 20, y: 10 }
+        // Create Cancel button
+        new SciFiButton({
+            scene: this,
+            x: this.cameras.main.centerX - 100,
+            y: 500,
+            text: 'Cancel',
+            style: ButtonStyle.DANGER,
+            callback: () => {
+                this.scene.start('StartupScene');
             }
-        ).setInteractive();
-
-        const startButton = this.add.text(
-            this.cameras.main.centerX + 100,
-            500,
-            'Start',
-            {
-                fontFamily: 'monospace',
-                fontSize: '24px',
-                color: '#00ff00',
-                backgroundColor: '#333333',
-                padding: { x: 20, y: 10 }
-            }
-        ).setInteractive();
-
-        // Button hover effects
-        [cancelButton, startButton].forEach(button => {
-            button.on('pointerover', () => {
-                button.setBackgroundColor('#444444');
-            });
-            button.on('pointerout', () => {
-                button.setBackgroundColor('#333333');
-            });
         });
 
-        // Button click handlers
-        cancelButton.on('pointerdown', () => {
-            this.scene.start('StartupScene');
-        });
+        // Create Start button
+        new SciFiButton({
+            scene: this,
+            x: this.cameras.main.centerX + 100,
+            y: 500,
+            text: 'Start',
+            style: ButtonStyle.PRIMARY,
+            callback: async () => {
+                try {
+                    const gameData = {
+                        player_empire_name: this.formInputs.empireName.text,
+                        computer_empire_count: parseInt(this.formInputs.computerCount.text),
+                        galaxy_size: this.formInputs.selectedSize
+                    };
 
-        startButton.on('pointerdown', async () => {
-            try {
-                const gameData = {
-                    player_empire_name: this.formInputs.empireName.text,
-                    computer_empire_count: parseInt(this.formInputs.computerCount.text),
-                    galaxy_size: this.formInputs.selectedSize
-                };
+                    console.log('Sending game data:', gameData);
 
-                console.log('Sending game data:', gameData);
+                    const response = await fetch('/api/games/start/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(gameData)
+                    });
 
-                const response = await fetch('/api/games/start/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(gameData)
-                });
+                    console.log('Response status:', response.status);
 
-                console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error('API error:', errorData);
+                        throw new Error(errorData.detail || 'Failed to start game');
+                    }
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error('API error:', errorData);
-                    throw new Error(errorData.detail || 'Failed to start game');
+                    const data = await response.json();
+                    console.log('Game created:', data);
+                    this.scene.start('GalaxyScene', data);
+                } catch (error) {
+                    console.error('Error starting game:', error);
+                    this.showError(error instanceof Error ? error.message : 'Failed to start game');
                 }
-
-                const data = await response.json();
-                console.log('Game created:', data);
-                this.scene.start('GalaxyScene', data);
-            } catch (error) {
-                console.error('Error starting game:', error);
-                this.showError(error instanceof Error ? error.message : 'Failed to start game');
             }
         });
 

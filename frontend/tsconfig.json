@@ -9,7 +9,8 @@
         "outDir": "./dist",
         "sourceMap": true,
         "typeRoots": ["./node_modules/@types", "./node_modules/phaser/types"],
-        "types": ["phaser"]
+        "types": ["phaser"],
+        "lib": ["ES2016", "DOM"]
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "**/*.spec.ts"]

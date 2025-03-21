@@ -1,5 +1,6 @@
 /// <reference path="../../node_modules/phaser/types/phaser.d.ts" />
 import Phaser from 'phaser';
+import { SciFiButton, ButtonStyle } from '../ui/buttons/SciFiButton';
 
 interface GameData {
     id: number;
@@ -106,89 +107,38 @@ export class GalaxyScene extends Phaser.Scene {
         const endTurnButtonX = this.cameras.main.width - buttonWidth - padding;
         const buttonY = this.cameras.main.height - buttonHeight - padding;
         
-        const endTurnButton = this.add.rectangle(
-            endTurnButtonX + buttonWidth/2,
-            buttonY + buttonHeight/2,
-            buttonWidth,
-            buttonHeight,
-            0x444444
-        );
-        
-        const endTurnButtonText = this.add.text(
-            endTurnButton.x,
-            endTurnButton.y,
-            'End Turn',
-            {
-                fontFamily: 'monospace',
-                fontSize: '24px',
-                color: '#ffffff',
-                align: 'center'
-            }
-        );
-        endTurnButtonText.setOrigin(0.5);
-
-        // Add Empire button in bottom right, before Exit button
-        const empireButton = this.add.rectangle(
-            endTurnButtonX - buttonWidth - padding + buttonWidth/2,
-            buttonY + buttonHeight/2,
-            buttonWidth,
-            buttonHeight,
-            0x444444
-        );
-        
-        const empireButtonText = this.add.text(
-            empireButton.x,
-            empireButton.y,
-            'Empire',
-            {
-                fontFamily: 'monospace',
-                fontSize: '24px',
-                color: '#ffffff',
-                align: 'center'
-            }
-        );
-        empireButtonText.setOrigin(0.5);
-
-        // Add Exit button in bottom left
-        const exitButton = this.add.rectangle(
-            padding + buttonWidth/2,
-            buttonY + buttonHeight/2,
-            buttonWidth,
-            buttonHeight,
-            0x444444
-        );
-        
-        const exitButtonText = this.add.text(
-            exitButton.x,
-            exitButton.y,
-            'Exit',
-            {
-                fontFamily: 'monospace',
-                fontSize: '24px',
-                color: '#ffffff',
-                align: 'center'
-            }
-        );
-        exitButtonText.setOrigin(0.5);
-
-        // Make buttons interactive
-        [endTurnButton, empireButton, exitButton].forEach(button => {
-            button.setInteractive();
-            button.on('pointerover', () => {
-                button.setFillStyle(0x666666);
-            });
-            button.on('pointerout', () => {
-                button.setFillStyle(0x444444);
-            });
+        // Create End Turn button
+        new SciFiButton({
+            scene: this,
+            x: endTurnButtonX + buttonWidth/2,
+            y: buttonY + buttonHeight/2,
+            text: 'End Turn',
+            style: ButtonStyle.PRIMARY,
+            callback: () => this.endTurn()
         });
 
-        // Button click handlers
-        endTurnButton.on('pointerdown', () => this.endTurn());
-        empireButton.on('pointerdown', () => {
-            this.scene.start('EmpireScene', { gameData: this.gameData });
+        // Create Empire button
+        new SciFiButton({
+            scene: this,
+            x: endTurnButtonX - buttonWidth - padding + buttonWidth/2,
+            y: buttonY + buttonHeight/2,
+            text: 'Empire',
+            style: ButtonStyle.SECONDARY,
+            callback: () => {
+                this.scene.start('EmpireScene', { gameData: this.gameData });
+            }
         });
-        exitButton.on('pointerdown', () => {
-            this.scene.start('StartupScene');
+
+        // Create Exit button
+        new SciFiButton({
+            scene: this,
+            x: padding + buttonWidth/2,
+            y: buttonY + buttonHeight/2,
+            text: 'Exit',
+            style: ButtonStyle.DANGER,
+            callback: () => {
+                this.scene.start('StartupScene');
+            }
         });
     }
 
