@@ -14,6 +14,7 @@ This is mentioned in your current_task.md and seems critical:
 The frontend needs significant work:
 - ✅ Implement basic galaxy map view to show systems and empires
 - ✅ Create UI components for turn management
+- ⏳ Build a component-based UI system for front end
 - ⏳ Build a system view to interact with planets and asteroid belts
 - ⏳ Add resource display and empire management UI
 - ⏳ Connect all frontend components to the backend API

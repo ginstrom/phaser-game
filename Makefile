@@ -1,4 +1,4 @@
-.PHONY: help backend-shell backend test frontend frontend-shell test-frontend run
+.PHONY: help backend-shell backend test frontend frontend-shell test-frontend run purge-db
 
 # Default target
 .DEFAULT_GOAL := help
@@ -36,4 +36,9 @@ test-backend: ## Run backend tests
 	docker compose -f docker/docker-compose.dev.yml run --rm backend-test
 
 test-frontend: ## Run frontend tests
-	docker compose -f docker/docker-compose.dev.yml run --rm frontend-test 
+	docker compose -f docker/docker-compose.dev.yml run --rm frontend-test
+
+purge-db: ## Purge all data from the development database
+	@echo "WARNING: This will delete all data from the development database."
+	@echo "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+	docker compose -f docker/docker-compose.yml run --rm backend-shell python manage.py flush --no-input 
