@@ -2,8 +2,63 @@
 
 ## Scene Structure
 
+### Startup Scene
+The main menu scene that serves as the entry point to the game.
+
+#### Layout
+- **Title**: "SPACE CONQUEST"
+  - Position: Centered, y=30% of screen height
+  - Style: 48px monospace, green (#00ff00) with glow effect
+- **Menu Items**: Vertically stacked, centered
+  - "NEW GAME": y=50% of screen height
+  - "LOAD GAME": y=60% of screen height
+  - Style: 32px monospace, blue (#4444ff)
+  - Interactive hover effects (scale and color)
+
+### New Game Scene
+Form interface for creating a new game.
+
+#### Layout
+- **Title**: "New Game"
+  - Position: Centered, y=50px
+- **Form Fields**: Left-aligned at x=centerX-200
+  - Empire Name: y=150px
+  - Computer Count: y=250px
+  - Galaxy Size: y=350px
+- **Buttons**: Centered horizontally, y=500px
+  - Cancel: x=centerX-100
+  - Start: x=centerX+100
+
+### Load Game Scene
+Displays saved games in a table format.
+
+#### Layout
+- **Title**: "Load Game"
+  - Position: Centered, y=50px
+  - Style: 36px monospace, green (#00ff00)
+- **Games Table**: Centered
+  - Starts at y=150px
+  - Columns: ID, Created, Modified, Actions
+- **Back Button**: Bottom left (x=100, y=height-50)
+
+### Galaxy Scene
+Displays the game galaxy with a grid of star systems.
+
+#### Layout
+- **Top Bar**: Height=60px
+  - Turn Counter: Top right, 20px padding
+- **Galaxy Grid**: 
+  - Padding: 50px from edges
+  - Grid Size: 50x50
+  - Adjusts for top/bottom bars
+- **Bottom Bar**: Height=90px (50px + 2*20px padding)
+  - Exit: Bottom left
+  - Empire: Second from right
+  - End Turn: Bottom right
+  - 20px padding from edges
+
 ### Empire Scene
-The Empire scene provides management of colonies and resources through a tabbed interface.
+Management interface for empire resources and colonies.
 
 #### Layout
 - **Top Navigation**: Tabs positioned at y=50
@@ -14,7 +69,6 @@ The Empire scene provides management of colonies and resources through a tabbed 
   - Galaxy button (bottom-right, 20px padding)
 
 #### Colonies Tab
-Displays a table of all colonies (planets and asteroid belts) with the following columns:
 ```
 | Column      | Width | Content                                    |
 |------------|-------|-------------------------------------------|
@@ -35,7 +89,6 @@ Table Properties:
 - Header Text Color: #00FF00
 
 #### Resources Tab
-Displays empire-wide resource management in a table format:
 ```
 | Column   | Width | Content                |
 |----------|-------|------------------------|
@@ -56,23 +109,6 @@ Table Properties:
 - Same styling as Colonies table
 - Centered in view
 - Starts at y=150
-
-### Common UI Elements
-
-#### SciFiButton
-Standard button component used across scenes:
-- Primary Style: Used for active tabs
-- Secondary Style: Used for inactive tabs and navigation
-- Text: Monospace font, centered
-- Interactive hover effects
-
-#### PhaserTable
-Reusable table component with features:
-- Sortable columns
-- Customizable cell formatting
-- Consistent styling across tables
-- Header/content separation
-- Scrollable content area
 
 ## Layout Guidelines
 
