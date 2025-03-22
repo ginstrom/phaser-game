@@ -110,8 +110,8 @@ export class PhaserTable extends Phaser.GameObjects.Container {
                 const line = this.scene.add.line(
                     xPos - column.width / 2, 
                     0,
-                    0, -this.config.headerHeight! / 2,
-                    0, this.config.headerHeight! / 2,
+                    0, 0,  // Start at y=0 instead of negative
+                    0, this.config.headerHeight!,
                     0x444444
                 );
                 container.add(line);
@@ -130,6 +130,10 @@ export class PhaserTable extends Phaser.GameObjects.Container {
                 }
             );
             headerText.setOrigin(0.5);
+
+            // Set fixed width to ensure center alignment
+            headerText.setFixedSize(column.width - 20, 0);
+            
             container.add(headerText);
             
             // Move to next column position
@@ -191,28 +195,35 @@ export class PhaserTable extends Phaser.GameObjects.Container {
         let xPos = -this.totalWidth / 2 + this.config.columns[0].width / 2;
         this.config.columns.forEach(column => {
             const value = rowData[column.key];
-            const displayValue = column.formatter ? column.formatter(value) : String(value);
             
-            // Add cell text
-            const cellText = this.scene.add.text(
-                xPos, 
-                this.config.cellHeight / 2, 
-                displayValue, 
-                { 
-                    fontFamily: 'monospace', 
-                    fontSize: '14px', 
-                    color: this.config.textColor,
-                    align: 'center'
+            if (value instanceof Phaser.GameObjects.Container) {
+                // If the value is a container, add it directly
+                value.setPosition(xPos, this.config.cellHeight / 2);
+                rowContainer.add(value);
+            } else {
+                // For text values, create a text object
+                const displayValue = column.formatter ? column.formatter(value) : String(value);
+                
+                const cellText = this.scene.add.text(
+                    xPos, 
+                    this.config.cellHeight / 2, 
+                    displayValue, 
+                    { 
+                        fontFamily: 'monospace', 
+                        fontSize: '14px', 
+                        color: this.config.textColor,
+                        align: 'center'
+                    }
+                );
+                cellText.setOrigin(0.5);
+                
+                // Truncate text if too long
+                if (cellText.width > column.width - 20) {
+                    cellText.setText(displayValue.substring(0, 10) + '...');
                 }
-            );
-            cellText.setOrigin(0.5);
-            
-            // Truncate text if too long
-            if (cellText.width > column.width - 20) {
-                cellText.setText(displayValue.substring(0, 10) + '...');
+                
+                rowContainer.add(cellText);
             }
-            
-            rowContainer.add(cellText);
             
             // Move to next column position
             xPos += column.width;
@@ -319,8 +330,10 @@ export class PhaserTable extends Phaser.GameObjects.Container {
     }
 
     public destroy(fromScene?: boolean): void {
-        // Clean up event listeners
-        this.scene.input.off('wheel');
+        // Clean up event listeners if scene exists and is active
+        if (this.scene && this.scene.sys.isActive() && this.scene.input) {
+            this.scene.input.off('wheel');
+        }
         
         // Clean up mask
         if (this.maskGraphics) {

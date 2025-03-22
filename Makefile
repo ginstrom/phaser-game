@@ -1,4 +1,4 @@
-.PHONY: help backend-shell backend test frontend frontend-shell test-frontend run purge-db
+.PHONY: help backend-shell backend test frontend frontend-shell test-frontend run purge-db build build-dev
 
 # Default target
 .DEFAULT_GOAL := help
@@ -8,6 +8,12 @@ help: ## Display this help message
 	@echo ""
 	@echo "Available targets:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+
+build: ## Rebuild all production containers
+	docker compose -f docker/docker-compose.yml build --no-cache
+
+build-dev: ## Rebuild all development containers
+	docker compose -f docker/docker-compose.dev.yml build --no-cache
 
 backend-shell: ## Open an interactive shell in the backend container or run a command if arguments provided
 	docker compose -f docker/docker-compose.yml run --rm backend-shell $(filter-out $@,$(MAKECMDGOALS))

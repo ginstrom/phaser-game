@@ -29,8 +29,7 @@ export class StartupScene extends Phaser.Scene {
                 stroke: '#003300',
                 strokeThickness: 6
             }
-        );
-        title.setOrigin(0.5);
+        ).setOrigin(0.5);
 
         // Add glowing effect to title
         this.tweens.add({
@@ -42,49 +41,60 @@ export class StartupScene extends Phaser.Scene {
             repeat: -1
         });
 
-        // Create menu item with sci-fi style
-        const newGameText = this.add.text(
-            this.cameras.main.centerX,
-            this.cameras.main.height * 0.6,
-            'NEW GAME',
-            {
-                fontFamily: 'monospace',
-                fontSize: '32px',
-                color: '#4444ff',
-                align: 'center',
-                backgroundColor: '#000000',
-                padding: { x: 20, y: 10 }
-            }
-        );
-        newGameText.setOrigin(0.5);
-        newGameText.setInteractive({ useHandCursor: true });
+        // Create menu items
+        const createMenuItem = (text: string, y: number, callback: () => void) => {
+            const menuItem = this.add.text(
+                this.cameras.main.centerX,
+                y,
+                text,
+                {
+                    fontFamily: 'monospace',
+                    fontSize: '32px',
+                    color: '#4444ff',
+                    align: 'center',
+                    backgroundColor: '#000000',
+                    padding: { x: 20, y: 10 }
+                }
+            ).setOrigin(0.5);
 
-        // Add hover effects
-        newGameText.on('pointerover', () => {
-            newGameText.setStyle({ color: '#8888ff' });
-            this.tweens.add({
-                targets: newGameText,
-                scaleX: 1.1,
-                scaleY: 1.1,
-                duration: 100
+            menuItem.setInteractive({ useHandCursor: true });
+
+            // Add hover effects
+            menuItem.on('pointerover', () => {
+                menuItem.setStyle({ color: '#8888ff' });
+                this.tweens.add({
+                    targets: menuItem,
+                    scaleX: 1.1,
+                    scaleY: 1.1,
+                    duration: 100
+                });
             });
-        });
 
-        newGameText.on('pointerout', () => {
-            newGameText.setStyle({ color: '#4444ff' });
-            this.tweens.add({
-                targets: newGameText,
-                scaleX: 1,
-                scaleY: 1,
-                duration: 100
+            menuItem.on('pointerout', () => {
+                menuItem.setStyle({ color: '#4444ff' });
+                this.tweens.add({
+                    targets: menuItem,
+                    scaleX: 1,
+                    scaleY: 1,
+                    duration: 100
+                });
             });
-        });
 
-        newGameText.on('pointerdown', () => {
+            menuItem.on('pointerdown', callback);
+
+            this.menuItems.push(menuItem);
+            return menuItem;
+        };
+
+        // Create New Game menu item
+        createMenuItem('NEW GAME', this.cameras.main.height * 0.5, () => {
             this.scene.start('NewGameScene');
         });
 
-        this.menuItems.push(newGameText);
+        // Create Load Game menu item
+        createMenuItem('LOAD GAME', this.cameras.main.height * 0.6, () => {
+            this.scene.start('LoadGameScene');
+        });
 
         // Debug info
         console.log('StartupScene created');
