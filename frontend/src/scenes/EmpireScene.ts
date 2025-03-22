@@ -1,6 +1,7 @@
 /// <reference path="../../node_modules/phaser/types/phaser.d.ts" />
 import Phaser from 'phaser';
 import { SciFiButton, ButtonStyle } from '../ui/buttons/SciFiButton';
+import { PhaserTable, PhaserTableColumn } from '../ui/tables/PhaserTable';
 
 interface PlayerData {
     id: number;
@@ -192,132 +193,116 @@ export class EmpireScene extends Phaser.Scene {
     }
 
     private showColoniesTab() {
-        const startY = 20; // Adjusted since container is moved down
-        const rowHeight = 40;
-        const colWidths = [80, 100, 120, 120, 120, 120];
-        
-        // Headers
-        const headers = ['Orbit', 'Type', 'Minerals', 'Organic', 'Radioactive', 'Exotic'];
-        headers.forEach((header, i) => {
-            const x = 50 + (i > 0 ? colWidths.slice(0, i).reduce((a, b) => a + b, 0) : 0);
-            this.contentContainer?.add(
-                this.add.text(x, startY, header, {
-                    fontSize: '20px',
-                    color: '#00ff00',
-                    fontFamily: 'monospace'
-                })
-            );
+        const columns: PhaserTableColumn[] = [
+            { header: 'Orbit', key: 'orbit', width: 80 },
+            { header: 'Type', key: 'type', width: 100 },
+            { header: 'Minerals', key: 'mineral', width: 120 },
+            { header: 'Organic', key: 'organic', width: 120 },
+            { header: 'Radioactive', key: 'radioactive', width: 120 },
+            { header: 'Exotic', key: 'exotic', width: 120 }
+        ];
+
+        // Transform colonies data to match table format
+        const tableData = this.colonies.map(colony => ({
+            orbit: colony.orbit,
+            type: colony.type,
+            mineral: colony.type === 'planet' 
+                ? `${colony.mineral_production}\n(${colony.mineral_storage_capacity})`
+                : colony.mineral_production,
+            organic: colony.type === 'planet'
+                ? `${colony.organic_production}\n(${colony.organic_storage_capacity})`
+                : colony.organic_production,
+            radioactive: colony.type === 'planet'
+                ? `${colony.radioactive_production}\n(${colony.radioactive_storage_capacity})`
+                : colony.radioactive_production,
+            exotic: colony.type === 'planet'
+                ? `${colony.exotic_production}\n(${colony.exotic_storage_capacity})`
+                : colony.exotic_production
+        }));
+
+        // Create and add the table
+        const table = new PhaserTable({
+            scene: this,
+            x: this.cameras.main.width / 2,
+            y: 150,
+            columns,
+            data: tableData,
+            cellHeight: 40,
+            headerHeight: 48,
+            backgroundColor: 0x111111,
+            headerBackgroundColor: 0x222222,
+            textColor: '#FFFFFF',
+            headerTextColor: '#00FF00'
         });
 
-        // Data rows
-        this.colonies.forEach((colony, index) => {
-            const y = startY + rowHeight + (index * rowHeight);
-            let xPos = 50;
-
-            // Orbit
-            this.contentContainer?.add(
-                this.add.text(xPos, y, colony.orbit.toString(), {
-                    fontSize: '18px',
-                    color: '#ffffff',
-                    fontFamily: 'monospace'
-                })
-            );
-            xPos += colWidths[0];
-
-            // Type
-            this.contentContainer?.add(
-                this.add.text(xPos, y, colony.type, {
-                    fontSize: '18px',
-                    color: '#ffffff',
-                    fontFamily: 'monospace'
-                })
-            );
-            xPos += colWidths[1];
-
-            // Production values
-            const productions = [
-                { value: colony.mineral_production, capacity: colony.type === 'planet' ? colony.mineral_storage_capacity : undefined },
-                { value: colony.organic_production, capacity: colony.type === 'planet' ? colony.organic_storage_capacity : undefined },
-                { value: colony.radioactive_production, capacity: colony.type === 'planet' ? colony.radioactive_storage_capacity : undefined },
-                { value: colony.exotic_production, capacity: colony.type === 'planet' ? colony.exotic_storage_capacity : undefined }
-            ];
-
-            productions.forEach((prod, i) => {
-                const text = prod.capacity 
-                    ? `${prod.value}\n(${prod.capacity})`
-                    : prod.value;
-                
-                this.contentContainer?.add(
-                    this.add.text(xPos, y, text, {
-                        fontSize: '16px',
-                        color: '#ffffff',
-                        fontFamily: 'monospace',
-                        align: 'center'
-                    })
-                );
-                xPos += colWidths[i + 2];
-            });
-        });
+        this.contentContainer?.add(table);
     }
 
     private showResourcesTab() {
-        const startY = 120;
-        const rowHeight = 30;
-        
-        // Current Storage
-        this.contentContainer?.add(
-            this.add.text(50, startY, 'Current Storage', {
-                fontSize: '24px',
-                color: '#00ff00',
-                fontFamily: 'monospace'
-            })
-        );
-
-        const resources = [
-            { name: 'Minerals', current: this.empireData.mineral_storage, capacity: this.empireData.resource_capacities.mineral_capacity },
-            { name: 'Organic', current: this.empireData.organic_storage, capacity: this.empireData.resource_capacities.organic_capacity },
-            { name: 'Radioactive', current: this.empireData.radioactive_storage, capacity: this.empireData.resource_capacities.radioactive_capacity },
-            { name: 'Exotic', current: this.empireData.exotic_storage, capacity: this.empireData.resource_capacities.exotic_capacity }
+        const columns: PhaserTableColumn[] = [
+            { header: 'Resource', key: 'name', width: 150 },
+            { header: 'Storage', key: 'storage', width: 200 },
+            { header: 'Capacity', key: 'capacity', width: 200 }
         ];
 
-        resources.forEach((resource, index) => {
-            const y = startY + 40 + (index * rowHeight);
-            
-            // Resource name
-            this.contentContainer?.add(
-                this.add.text(50, y, resource.name, {
-                    fontSize: '18px',
-                    color: '#ffffff',
-                    fontFamily: 'monospace'
-                })
-            );
+        const tableData = [
+            { 
+                name: 'Minerals',
+                storage: this.empireData.mineral_storage.toString(),
+                capacity: this.empireData.resource_capacities.mineral_capacity.toString()
+            },
+            {
+                name: 'Organic',
+                storage: this.empireData.organic_storage.toString(),
+                capacity: this.empireData.resource_capacities.organic_capacity.toString()
+            },
+            {
+                name: 'Radioactive',
+                storage: this.empireData.radioactive_storage.toString(),
+                capacity: this.empireData.resource_capacities.radioactive_capacity.toString()
+            },
+            {
+                name: 'Exotic',
+                storage: this.empireData.exotic_storage.toString(),
+                capacity: this.empireData.resource_capacities.exotic_capacity.toString()
+            }
+        ];
 
-            // Current / Capacity
-            this.contentContainer?.add(
-                this.add.text(200, y, `${resource.current} / ${resource.capacity}`, {
-                    fontSize: '18px',
-                    color: '#ffffff',
-                    fontFamily: 'monospace'
-                })
-            );
+        // Create and add the table
+        const table = new PhaserTable({
+            scene: this,
+            x: this.cameras.main.width / 2,
+            y: 150,
+            columns,
+            data: tableData,
+            cellHeight: 40,
+            headerHeight: 48,
+            backgroundColor: 0x111111,
+            headerBackgroundColor: 0x222222,
+            textColor: '#FFFFFF',
+            headerTextColor: '#00FF00'
+        });
 
-            // Storage bar
+        // Add progress bars after table creation
+        tableData.forEach((row, index) => {
             const barWidth = 200;
             const barHeight = 20;
-            const percentage = resource.capacity > 0 ? (resource.current / resource.capacity) : 0;
-            
+            const barX = table.x - 100;  // Position between Storage and Capacity columns
+            const barY = table.y + (index * 40) + 40;  // Adjust based on header height and row height
+
             // Background bar
-            this.contentContainer?.add(
-                this.add.rectangle(400, y + 10, barWidth, barHeight, 0x333333)
-            );
-            
+            const bgBar = this.add.rectangle(barX, barY, barWidth, barHeight, 0x333333);
+            this.contentContainer?.add(bgBar);
+
             // Fill bar
-            if (percentage > 0) {
-                this.contentContainer?.add(
-                    this.add.rectangle(400, y + 10, barWidth * percentage, barHeight, 0x00ff00)
-                        .setOrigin(0, 0.5)
-                );
+            const progress = Number(row.storage) / Number(row.capacity);
+            if (progress > 0) {
+                const fillBar = this.add.rectangle(barX, barY, barWidth * progress, barHeight, 0x00ff00)
+                    .setOrigin(0, 0.5);
+                this.contentContainer?.add(fillBar);
             }
         });
+
+        this.contentContainer?.add(table);
     }
 } 
