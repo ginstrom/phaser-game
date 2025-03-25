@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "core",
     "celestial",
     "play",
+    "research",
 ]
 
 MIDDLEWARE = [
@@ -188,6 +189,11 @@ LOGGING = {
             'propagate': False,
         },
         'core': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'research': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
