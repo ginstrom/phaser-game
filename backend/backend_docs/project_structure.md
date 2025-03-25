@@ -39,6 +39,17 @@ backend/
 │   ├── __init__.py
 │   ├── models.py       # Empire and faction models
 │   └── tests/          # Empire app tests
+├── research/           # Technology and research system
+│   ├── __init__.py
+│   ├── models.py       # Technology and research models
+│   ├── serializers.py  # API serializers
+│   ├── views.py       # API views and viewsets
+│   ├── urls.py        # URL routing
+│   ├── migrations/     # Database migrations
+│   └── tests/         # Research app tests
+│       ├── __init__.py
+│       ├── test_api.py
+│       └── test_models.py
 ├── units/              # Military and civilian units
 │   ├── __init__.py
 │   ├── models.py       # Unit models
@@ -99,16 +110,38 @@ Located in `backend/celestial/`
   - GET /api/celestial/planets/ - List planets
   - GET /api/celestial/asteroid-belts/ - List asteroid belts
 
-### Empire (In Progress)
+### Empire
 Located in `backend/empire/`
 - Manages player empires and factions
 - Models:
   - `Empire`: Player's civilization
+    - Resource management
+    - Planet and asteroid belt ownership
+    - Technology research tracking
   - `Faction`: Sub-groups within empires
-- Planned features:
-  - Resource management
-  - Technology tree
-  - Diplomatic relations
+- Features:
+  - Resource storage and management
+  - Celestial body ownership
+  - Integration with technology system
+
+### Research
+Located in `backend/research/`
+- Manages technology and research system
+- Models:
+  - `Technology`: Available technologies
+    - Name and description
+    - Research cost
+    - Prerequisites
+    - Category (military, economic, scientific, diplomatic)
+  - `EmpireTechnology`: Empire's research progress
+    - Tracks research points
+    - Links technology to empire
+    - Enforces unique technology-empire pairs
+- Features:
+  - Technology tree with prerequisites
+  - Research progress tracking
+  - Category-based organization
+  - Precise decimal storage for costs and progress
 
 ### Units (In Progress)
 Located in `backend/units/`

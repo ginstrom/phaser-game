@@ -257,6 +257,116 @@ human_race.delete()
 
 The Race model enforces unique names through a database constraint. This ensures that no two races can have the same name. The model provides a string representation that returns the race name for easy identification in admin interfaces and debugging. 
 
+## Technology
+
+The Technology model represents a technology that can be researched by empires.
+
+### Fields
+
+- `id` (AutoField): Primary key
+- `name` (CharField): Unique name of the technology
+  - max_length: 100
+  - unique: True
+- `description` (TextField): Detailed description of the technology
+- `cost` (FixedPointField): Research points required to complete the technology
+  - Default: 1000
+  - Uses FixedPointField for precise decimal storage
+- `prerequisites` (ManyToManyField): Technologies that must be researched first
+  - Self-referential relationship
+  - Optional (blank=True)
+- `category` (CharField): Type of technology
+  - Choices: military, economic, scientific, diplomatic
+  - max_length: 20
+
+### Usage Example
+
+```python
+from research.models import Technology
+
+# Create a basic technology
+basic_tech = Technology.objects.create(
+    name="Basic Technology",
+    description="A basic technology",
+    cost=1000,
+    category="military"
+)
+
+# Create an advanced technology with prerequisites
+advanced_tech = Technology.objects.create(
+    name="Advanced Technology",
+    description="An advanced technology",
+    cost=2000,
+    category="military"
+)
+advanced_tech.prerequisites.add(basic_tech)
+
+# Get all technologies in a category
+military_techs = Technology.objects.filter(category="military")
+
+# Get prerequisites for a technology
+prerequisites = advanced_tech.prerequisites.all()
+```
+
+### Implementation Details
+- Uses FixedPointField for precise decimal storage of costs
+- Implements string representation for admin interface and debugging
+- Includes app_label meta for proper app organization
+- Enforces unique technology names
+- Validates category choices
+
+## EmpireTechnology
+
+The EmpireTechnology model tracks an empire's progress in researching a technology.
+
+### Fields
+
+- `id` (AutoField): Primary key
+- `technology` (ForeignKey): Reference to the Technology being researched
+  - on_delete: CASCADE
+- `empire` (ForeignKey): Reference to the Empire researching the technology
+  - on_delete: CASCADE
+- `research_points` (FixedPointField): Current progress in research points
+  - Default: 0
+  - Uses FixedPointField for precise decimal storage
+
+### Properties
+
+- `is_complete` (bool): Whether the technology has been fully researched
+  - Returns True if research_points >= technology.cost
+
+### Constraints
+
+- Unique constraint on (technology, empire) pair
+  - An empire cannot research the same technology twice
+
+### Usage Example
+
+```python
+from research.models import EmpireTechnology
+
+# Create a research project
+research = EmpireTechnology.objects.create(
+    technology=basic_tech,
+    empire=empire,
+    research_points=500
+)
+
+# Check research progress
+progress = research.research_points
+is_complete = research.is_complete
+
+# Add research points
+research.research_points += 100
+research.save()
+```
+
+### Implementation Details
+- Uses FixedPointField for precise decimal storage of research points
+- Implements string representation for admin interface and debugging
+- Includes app_label meta for proper app organization
+- Enforces unique technology-empire pairs
+- Provides is_complete property for easy progress checking
+
 ## Empire
 
 The Empire model represents a player's empire in the game, including its race, controlled planets and asteroid belts, and resource storage.

@@ -1,5 +1,4 @@
 from django.db import models
-from play.models import Empire
 
 # Create your models here.
 
