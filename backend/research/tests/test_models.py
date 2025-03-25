@@ -11,12 +11,14 @@ class TechnologyModelTests(TestCase):
         self.tech1 = Technology.objects.create(
             name="Mining I",
             description="Basic mining technology",
-            category=Technology.Category.RESOURCES
+            category=Technology.Category.RESOURCES,
+            cost=100
         )
         self.tech2 = Technology.objects.create(
             name="Advanced Mining",
             description="Advanced mining technology",
-            category=Technology.Category.RESOURCES
+            category=Technology.Category.RESOURCES,
+            cost=200
         )
 
     def test_technology_creation(self):
@@ -24,10 +26,12 @@ class TechnologyModelTests(TestCase):
         tech = Technology.objects.create(
             name="Laser Weapons",
             description="Basic laser weapon technology",
-            category=Technology.Category.MILITARY
+            category=Technology.Category.MILITARY,
+            cost=150
         )
         self.assertEqual(tech.name, "Laser Weapons")
         self.assertEqual(tech.category, Technology.Category.MILITARY)
+        self.assertEqual(tech.cost, 150)
 
     def test_technology_str_representation(self):
         """Test the string representation of Technology."""
@@ -48,9 +52,19 @@ class TechnologyModelTests(TestCase):
             tech = Technology(
                 name="Invalid Tech",
                 description="Test",
-                category="INVALID"
+                category="INVALID",
+                cost=100
             )
             tech.full_clean()
+
+    def test_default_cost(self):
+        """Test that cost defaults to 100 if not specified."""
+        tech = Technology.objects.create(
+            name="Test Tech",
+            description="Test technology",
+            category=Technology.Category.SCIENCE
+        )
+        self.assertEqual(tech.cost, 100)
 
     def tearDown(self):
         """Clean up test data."""

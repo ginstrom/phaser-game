@@ -28,6 +28,10 @@ class Technology(models.Model):
         choices=Category.choices,
         help_text="The category this technology belongs to"
     )
+    cost = models.IntegerField(
+        help_text="Research cost in research points",
+        default=100
+    )
     prerequisites = models.ManyToManyField(
         'self',
         symmetrical=False,
