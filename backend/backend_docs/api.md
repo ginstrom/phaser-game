@@ -665,3 +665,201 @@ Start a new game with specified parameters.
     }
 ]
 ```
+
+## Research API
+
+### Technology Resource
+
+Base URL: `/api/technologies/`
+
+### List Technologies
+- **Method**: GET
+- **URL**: `/api/technologies/`
+- **Response**: List of technology objects
+```json
+[
+    {
+        "id": 1,
+        "name": "Advanced Mining",
+        "description": "Improves mineral extraction efficiency",
+        "cost": "100.00",
+        "category": "production",
+        "prerequisites": [2, 3]
+    }
+]
+```
+
+### Create Technology
+- **Method**: POST
+- **URL**: `/api/technologies/`
+- **Body**: Technology object
+```json
+{
+    "name": "Advanced Mining",
+    "description": "Improves mineral extraction efficiency",
+    "cost": "100.00",
+    "category": "production"
+}
+```
+- **Response**: Created technology object with ID
+
+### Retrieve Technology
+- **Method**: GET
+- **URL**: `/api/technologies/{id}/`
+- **Response**: Single technology object
+
+### Update Technology
+- **Method**: PATCH/PUT
+- **URL**: `/api/technologies/{id}/`
+- **Body**: Partial (PATCH) or complete (PUT) technology object
+```json
+{
+    "cost": "150.00",
+    "description": "Updated description"
+}
+```
+- **Response**: Updated technology object
+
+### Delete Technology
+- **Method**: DELETE
+- **URL**: `/api/technologies/{id}/`
+- **Response**: 204 No Content
+
+### Add Prerequisite
+- **Method**: POST
+- **URL**: `/api/technologies/{id}/add_prerequisite/`
+- **Description**: Add a prerequisite technology that must be researched before this technology
+- **Body**:
+```json
+{
+    "prerequisite_id": 1
+}
+```
+- **Response**: Updated technology object with new prerequisite
+- **Error Responses**:
+  - 400 Bad Request: Missing prerequisite_id
+  - 404 Not Found: Prerequisite technology not found
+
+### Remove Prerequisite
+- **Method**: POST
+- **URL**: `/api/technologies/{id}/remove_prerequisite/`
+- **Description**: Remove a prerequisite technology
+- **Body**:
+```json
+{
+    "prerequisite_id": 1
+}
+```
+- **Response**: Updated technology object
+- **Error Responses**:
+  - 400 Bad Request: Missing prerequisite_id
+  - 404 Not Found: Prerequisite technology not found
+
+### Field Specifications
+
+| Field | Type | Description | Allowed Values |
+|-------|------|-------------|----------------|
+| name | string | Name of the technology | Any string |
+| description | string | Detailed description | Any string |
+| cost | decimal | Research points needed | Positive decimal |
+| category | string | Technology category | production, military, science |
+| prerequisites | array | IDs of required technologies | Array of technology IDs |
+
+## Empire Technology Resource
+
+Base URL: `/api/empire-technologies/`
+
+### List Empire Technologies
+- **Method**: GET
+- **URL**: `/api/empire-technologies/`
+- **Response**: List of empire technology objects
+```json
+[
+    {
+        "id": 1,
+        "empire": 1,
+        "technology": 1,
+        "research_points": "50.00",
+        "is_complete": false
+    }
+]
+```
+
+### Create Empire Technology
+- **Method**: POST
+- **URL**: `/api/empire-technologies/`
+- **Body**: Empire Technology object
+```json
+{
+    "empire": 1,
+    "technology": 1
+}
+```
+- **Response**: Created empire technology object
+- **Error Responses**:
+  - 400 Bad Request: Duplicate empire-technology combination
+  - 404 Not Found: Empire or technology not found
+
+### Retrieve Empire Technology
+- **Method**: GET
+- **URL**: `/api/empire-technologies/{id}/`
+- **Response**: Single empire technology object
+
+### Update Empire Technology
+- **Method**: PATCH/PUT
+- **URL**: `/api/empire-technologies/{id}/`
+- **Body**: Partial (PATCH) or complete (PUT) empire technology object
+- **Response**: Updated empire technology object
+
+### Delete Empire Technology
+- **Method**: DELETE
+- **URL**: `/api/empire-technologies/{id}/`
+- **Response**: 204 No Content
+
+### Add Research Points
+- **Method**: POST
+- **URL**: `/api/empire-technologies/{id}/add_research_points/`
+- **Description**: Add research points to progress the technology research
+- **Body**:
+```json
+{
+    "points": "25.50"
+}
+```
+- **Response**: Updated empire technology object
+- **Error Responses**:
+  - 400 Bad Request: Invalid points value
+  - 400 Bad Request: Research already complete
+
+### Prerequisites Status
+- **Method**: GET
+- **URL**: `/api/empire-technologies/{id}/prerequisites_status/`
+- **Description**: Get the research status of all prerequisites for this technology
+- **Response**:
+```json
+[
+    {
+        "technology_id": 1,
+        "name": "Basic Mining",
+        "is_complete": true,
+        "research_points": "100.00",
+        "cost": "100.00"
+    },
+    {
+        "technology_id": 2,
+        "name": "Resource Management",
+        "is_complete": false,
+        "research_points": "50.00",
+        "cost": "150.00"
+    }
+]
+```
+
+### Field Specifications
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| empire | integer | ID of the empire | Required |
+| technology | integer | ID of the technology | Required |
+| research_points | decimal | Current research progress | 0.00 |
+| is_complete | boolean | Whether research is complete | false |
