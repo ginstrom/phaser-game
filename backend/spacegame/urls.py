@@ -27,6 +27,7 @@ urlpatterns = [
     # API endpoints
     path("api/", include("celestial.urls")),
     path("api/", include("play.urls")),
+    path("api/", include("research.urls")),
     # API Schema documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
