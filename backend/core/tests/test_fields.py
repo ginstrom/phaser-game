@@ -1,6 +1,5 @@
 from decimal import Decimal
 from django.test import TestCase
-from django.db import models
 from core.fields import FixedPointField
 from celestial.models import Planet
 
