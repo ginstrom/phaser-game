@@ -1,6 +1,8 @@
 # cursor-specific
 .cursorrules
 
+# mac specific files
+.DS_Store
 # Logs
 logs
 *.log
