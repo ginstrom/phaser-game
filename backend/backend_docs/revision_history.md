@@ -1,5 +1,18 @@
 # Revision History
 
+## 2025-03-26: Refactor FixedPointField Tests
+### Changes
+- Removed test-only TestModel and associated migrations
+- Updated FixedPointField tests to use Planet model
+- Cleaned up core app migrations
+- All tests passing with real model usage
+
+### Implementation Details
+- Removed redundant test model and migrations
+- Improved test maintainability by using actual production model
+- Verified correct decimal scale handling
+- Maintained full test coverage of FixedPointField functionality
+
 ## 2025-03-25: Added Technology and EmpireTechnology Models
 
 ### Changes

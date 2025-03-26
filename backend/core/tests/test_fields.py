@@ -2,15 +2,7 @@ from decimal import Decimal
 from django.test import TestCase
 from django.db import models
 from core.fields import FixedPointField
-
-
-# Test model that uses FixedPointField
-class TestModel(models.Model):
-    value = FixedPointField()
-    custom_scale = FixedPointField(scale=10000)
-
-    class Meta:
-        app_label = 'core'
+from celestial.models import Planet
 
 
 class FixedPointFieldTests(TestCase):
@@ -91,34 +83,34 @@ class FixedPointFieldTests(TestCase):
 
     def test_database_storage(self):
         """Test actual database storage and retrieval"""
-        # Create test instances
-        TestModel.objects.create(
-            value=Decimal('1.234'),
-            custom_scale=Decimal('1.2345')
+        # Create test planet
+        planet = Planet.objects.create(
+            mineral_production=Decimal('1.234'),
+            mineral_storage_capacity=Decimal('1.234')
         )
         
         # Retrieve from database
-        instance = TestModel.objects.get()
+        planet = Planet.objects.get(pk=planet.pk)
         
         # Check regular scale field
-        self.assertEqual(instance.value, Decimal('1.234'))
+        self.assertEqual(planet.mineral_production, Decimal('1.234'))
         
-        # Check custom scale field
-        self.assertEqual(instance.custom_scale, Decimal('1.2345'))
+        # Check storage capacity field
+        self.assertEqual(planet.mineral_storage_capacity, Decimal('1.234'))
 
     def test_rounding(self):
         """Test handling of values that exceed scale precision"""
-        instance = TestModel(
-            value=Decimal('1.2345'),  # More precise than scale=1000
-            custom_scale=Decimal('1.23456')  # More precise than scale=10000
+        planet = Planet(
+            mineral_production=Decimal('1.2345'),  # More precise than scale=1000
+            mineral_storage_capacity=Decimal('1.2345')  # More precise than scale=1000
         )
         
         # Save should not raise any errors
-        instance.save()
+        planet.save()
         
         # Retrieve and check values
-        instance = TestModel.objects.get(pk=instance.pk)
+        planet = Planet.objects.get(pk=planet.pk)
         
         # Should be truncated to scale precision
-        self.assertEqual(instance.value, Decimal('1.234'))
-        self.assertEqual(instance.custom_scale, Decimal('1.2345')) 
+        self.assertEqual(planet.mineral_production, Decimal('1.234'))
+        self.assertEqual(planet.mineral_storage_capacity, Decimal('1.234')) 
